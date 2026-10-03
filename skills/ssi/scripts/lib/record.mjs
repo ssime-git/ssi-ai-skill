@@ -13,6 +13,8 @@ export function applyRecord(state, args, headSha) {
     // analysis; implement, review, visual and land failing go back to implement.
     const from = phase <= 2 ? 0 : phase >= 5 ? 4 : phase - 1;
     for (const n of PHASES.slice(from)) delete state.evidence[n];
+    // New work must follow this failure: the next implement step waits for a commit after it.
+    if (phase >= 5) state.work_sha = headSha;
     return state;
   }
   state.attempts[name] = 0;
@@ -26,7 +28,10 @@ export function applyRecord(state, args, headSha) {
     if (!gaps) state.evidence.analyze = entry;
     return state;
   }
-  if (phase === 4) state.plan = { touches: touches ?? [], publicApi: !!publicApi };
+  if (phase === 4) {
+    state.plan = { touches: touches ?? [], publicApi: !!publicApi };
+    state.work_sha = headSha;
+  }
   state.evidence[name] = entry;
   return state;
 }

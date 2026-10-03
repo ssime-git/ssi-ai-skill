@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rmSync, writeFileSync } from 'node:fs';
+import { rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { makeRepo, commit, git } from '../helpers/repo.mjs';
 import { makeGhStub } from '../helpers/gh.mjs';
@@ -88,6 +88,54 @@ test('heal: a force-push is a reality stop, adopted only after an answer', () =>
   assert.equal(ssi('next').json.stop.code, 'STOP_REALITY');
   ssi('answer', 'A. adopt');
   assert.equal(ssi('next').json.stop, null);
+});
+
+test('a reproduction commit made during phase 3 skips neither the plan nor the implementation', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  ssi('start', 'Fix crash');
+  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  commit(dir, 'test/repro.test.js', 'failing\n', 'repro');
+  ssi('record', '--phase', '1', '--result', 'pass', '--gaps', '0', '--kind', 'bug');
+  ssi('record', '--phase', '2', '--result', 'pass');
+  ssi('record', '--phase', '3', '--result', 'pass', '--evidence', 'test/repro.test.js');
+  assert.equal(ssi('next').json.action.kind, 'open-issue');
+  ssi('issue', 'create', '--title', 'Crash', '--body', 'b');
+  assert.equal(ssi('next').json.name, 'plan');
+  ssi('record', '--phase', '4', '--result', 'pass', '--touches', 'src/x.js');
+  assert.equal(ssi('next').json.action.kind, 'implement');
+  commit(dir, 'src/x.js', 'fix\n', 'fix');
+  assert.equal(ssi('next').json.action.kind, 'open-draft-pr');
+});
+
+test('after a failed review the run asks for a fix, not for the same tests again', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  bugRunUntilReview(dir, gh, ssi);
+  ssi('record', '--phase', '6', '--result', 'fail');
+  assert.equal(ssi('next').json.action.kind, 'implement');
+  commit(dir, 'src/login.js', 'better\n', 'address review');
+  assert.equal(ssi('next').json.action.kind, 'verify-implementation');
+});
+
+test('switching to another branch never writes this run into that branch\'s PR', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  bugRunUntilReview(dir, gh, ssi);
+  const before = gh.s.comments.map((c) => c.body);
+  git(dir, 'checkout', '-q', 'main');
+  git(dir, 'checkout', '-q', '-b', 'other');
+  commit(dir, 'src/o.js', 'o\n', 'other work');
+  gh.openPr(2, 'other');
+  const calls = gh.s.calls.length;
+  const out = ssi('next').json;
+  assert.equal(out.stop.code, 'STOP_REALITY');
+  assert.deepEqual(gh.s.comments.map((c) => c.body), before);
+  assert.equal(gh.s.calls.slice(calls).some((c) => c.includes('-f')), false);
+  assert.equal(JSON.parse(readFileSync(join(dir, '.ssi/state.json'), 'utf8')).pr, 1);
 });
 
 test('a closed PR is adopted with an answer and does not come back as a stop', () => {

@@ -50,6 +50,24 @@ test('applyRecord: a failure removes that evidence and everything built on it', 
   assert.deepEqual(Object.keys(s.evidence), []);
 });
 
+test('applyRecord: the plan and any later failure mark where new work must start', () => {
+  const s = newState('g');
+  applyRecord(s, { phase: 4, result: 'pass', touches: [] }, 'sha-plan');
+  assert.equal(s.work_sha, 'sha-plan');
+  applyRecord(s, { phase: 6, result: 'fail' }, 'sha-fail');
+  assert.equal(s.work_sha, 'sha-fail');
+});
+
+test('actionFor: after a failed check the next step is a fix, not the same tests again', () => {
+  const st = { ...newState('g'), attempts: { review: 1 } };
+  const f = { base: 'main', workCommits: 0, pr: { number: 1, headSha: 'L' }, headSha: 'L', onBase: false };
+  const a = actionFor({ name: 'implement', state: st, facts: f, config: DEFAULTS });
+  assert.equal(a.kind, 'implement');
+  assert.match(a.headline, /Fix what the last check found/);
+  const committed = actionFor({ name: 'implement', state: st, facts: { ...f, workCommits: 1 }, config: DEFAULTS });
+  assert.equal(committed.kind, 'verify-implementation');
+});
+
 test('applyRecord: failing confirm goes back to analyze; bad input is a clear error', () => {
   const s = newState('g');
   applyRecord(s, { phase: 1, result: 'pass', gaps: 0 }, 'a');
@@ -71,11 +89,11 @@ test('say: progress bar, styles and ETA', () => {
 
 test('actionFor: phase 5 changes with the repo, mark-ready needs the config', () => {
   const st = { ...newState('g'), pr: null };
-  const f = (o) => ({ commitsSinceStart: 0, pr: null, base: 'main', ...o });
+  const f = (o) => ({ workCommits: 0, pr: null, base: 'main', ...o });
   assert.equal(actionFor({ name: 'implement', state: st, facts: f({}), config: DEFAULTS }).kind, 'implement');
-  const open = actionFor({ name: 'implement', state: st, facts: f({ commitsSinceStart: 1 }), config: DEFAULTS });
+  const open = actionFor({ name: 'implement', state: st, facts: f({ workCommits: 1 }), config: DEFAULTS });
   assert.deepEqual([open.kind, open.requires], ['open-draft-pr', ['push', 'draft-pr']]);
-  assert.equal(actionFor({ name: 'implement', state: st, facts: f({ commitsSinceStart: 1, pr: { number: 1 } }), config: DEFAULTS }).kind, 'verify-implementation');
+  assert.equal(actionFor({ name: 'implement', state: st, facts: f({ workCommits: 1, pr: { number: 1 } }), config: DEFAULTS }).kind, 'verify-implementation');
   const ready = merge(DEFAULTS, { mandate: { ready: true } });
   assert.equal(actionFor({ name: 'done', state: st, facts: f({ pr: { number: 1, isDraft: true } }), config: ready }).kind, 'mark-ready');
   assert.equal(actionFor({ name: 'done', state: st, facts: f({ pr: { number: 1, isDraft: true } }), config: DEFAULTS }).kind, 'done');
@@ -83,7 +101,7 @@ test('actionFor: phase 5 changes with the repo, mark-ready needs the config', ()
 
 test('actionFor: never push the base branch, push fixes before review, land and done', () => {
   const st = { ...newState('g'), pr: null };
-  const f = (o) => ({ commitsSinceStart: 1, pr: null, base: 'main', onBase: false, headSha: 'L', ...o });
+  const f = (o) => ({ workCommits: 1, pr: null, base: 'main', onBase: false, headSha: 'L', ...o });
   const onBase = actionFor({ name: 'implement', state: st, facts: f({ onBase: true }), config: DEFAULTS });
   assert.equal(onBase.kind, 'create-branch');
   assert.match(onBase.instructions, /Never push the base branch/);
@@ -128,7 +146,7 @@ test('computeNext: a queued issue that fails for good is dropped, not retried fo
 
 test('actionFor: without an open PR a finished-looking run opens one instead of saying done', () => {
   const st = newState('g');
-  const f = { base: 'main', commitsSinceStart: 1, pr: null, onBase: false, headSha: 'L' };
+  const f = { base: 'main', workCommits: 1, pr: null, onBase: false, headSha: 'L' };
   for (const name of ['review', 'visual', 'land', 'done']) {
     const a = actionFor({ name, state: st, facts: f, config: DEFAULTS });
     assert.deepEqual([a.kind, a.requires], ['open-draft-pr', ['push', 'draft-pr']], name);
@@ -212,7 +230,7 @@ test('computeNext: queued issue is created when the network is back', () => {
 
 test('actionFor review: read-only Codex, no forced model unless configured, fallback spelled out', () => {
   const st = newState('g');
-  const f = { base: 'main', commitsSinceStart: 1, pr: { number: 1, headSha: 'L' }, headSha: 'L', onBase: false };
+  const f = { base: 'main', workCommits: 1, pr: { number: 1, headSha: 'L' }, headSha: 'L', onBase: false };
   const plain = actionFor({ name: 'review', state: st, facts: f, config: DEFAULTS }).instructions;
   assert.match(plain, /codex exec review --base main/);
   assert.match(plain, /sandbox_mode="read-only"/);

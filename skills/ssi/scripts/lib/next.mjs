@@ -40,8 +40,15 @@ export function computeNext({ cwd, config, run, gh }) {
     const action = { kind: 'start', headline: 'Start a run', instructions: 'Run: ssi start "<what the user asked for>", then ssi next.', refs: [], requires: [] };
     return { phase: 0, name: 'start', done: false, action, stop: null, say: say({ phase: 0, name: 'start', next: action.headline, style: config.ui.style, needsUser: false, done: false }), warnings };
   }
+  // A PR found on a branch this run does not live on is someone else's: never adopt it,
+  // never write to it. The branch mismatch itself raises STOP_REALITY.
+  if (state.branch && facts.branch && facts.branch !== state.branch) {
+    facts.pr = null;
+    remote = null;
+  }
   if (facts.pr) state.pr = facts.pr.number;
   facts.commitsSinceStart = facts.commitsSince(state.start_sha ?? null);
+  facts.workCommits = facts.commitsSince(state.work_sha ?? state.start_sha ?? null);
   if (!state.branch && facts.branch && !facts.onBase) state.branch = facts.branch;
   if (!offline) {
     for (const p of [...state.pending]) {

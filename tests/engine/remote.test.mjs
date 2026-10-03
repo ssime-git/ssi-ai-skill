@@ -12,6 +12,13 @@ test('the block roundtrips and survives quotes, newlines and angle brackets', ()
   assert.equal(block.match(/-->/g).length, 3);
 });
 
+test('the block keeps the skipped-issue decision and where new work must start', () => {
+  const s = { ...newState('g'), issue_skipped: 'Issues are disabled', work_sha: 'abc1234' };
+  const back = parseBlock(renderBlock(s, 'h'));
+  assert.equal(back.issue_skipped, 'Issues are disabled');
+  assert.equal(back.work_sha, 'abc1234');
+});
+
 test('parseBlock returns null for text without a block', () => {
   assert.equal(parseBlock('just a human comment'), null);
   assert.equal(parseBlock(undefined), null);

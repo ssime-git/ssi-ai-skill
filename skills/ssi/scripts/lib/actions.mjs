@@ -75,14 +75,23 @@ export function actionFor({ name, state, facts, config }) {
           requires: [],
         };
       }
-      if (facts.commitsSinceStart === 0) {
-        return {
-          kind: 'implement',
-          headline: 'Write the failing test first, then the code',
-          instructions: `If you are on ${facts.base ?? 'the base branch'}, create the branch ssi/<short-name>. Write the failing test, make it pass, commit in small steps. Then run: ssi next.`,
-          refs: ref('implement'),
-          requires: [],
-        };
+      if (facts.workCommits === 0) {
+        const retry = ['review', 'visual', 'land'].some((n) => (state.attempts?.[n] ?? 0) > 0);
+        return retry
+          ? {
+              kind: 'implement',
+              headline: 'Fix what the last check found',
+              instructions: 'Read what the review, the visual check or CI reported. Fix it, add or adjust a test for it, and commit. Then run: ssi next.',
+              refs: ref('implement'),
+              requires: [],
+            }
+          : {
+              kind: 'implement',
+              headline: 'Write the failing test first, then the code',
+              instructions: `Write the failing test, make it pass, commit in small steps (on a branch ssi/<short-name>, never on ${facts.base ?? 'the base branch'}). Then run: ssi next.`,
+              refs: ref('implement'),
+              requires: [],
+            };
       }
       if (!facts.pr) {
         return {
