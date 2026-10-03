@@ -38,7 +38,6 @@ export function computeNext({ cwd, config, run, gh }) {
     const action = { kind: 'start', headline: 'Start a run', instructions: 'Run: ssi start "<what the user asked for>", then ssi next.', refs: [], requires: [] };
     return { phase: 0, name: 'start', done: false, action, stop: null, say: say({ phase: 0, name: 'start', next: action.headline, style: config.ui.style, needsUser: false, done: false }), warnings };
   }
-  if (remote) for (const [k, v] of Object.entries(remote.state.evidence ?? {})) state.evidence[k] ??= v;
   if (facts.pr) state.pr = facts.pr.number;
   if (!state.branch && facts.branch && !facts.onBase) state.branch = facts.branch;
   if (!offline) {
