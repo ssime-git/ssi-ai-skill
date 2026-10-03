@@ -21,8 +21,9 @@ for (const m of skill.matchAll(/\]\(([^)#]+)\)/g)) {
   check(`link exists: ${m[1]}`, existsSync(join(root, 'skills/ssi', m[1])));
 }
 const notice = read('skills/ssi/NOTICE.md');
+check('SKILL.md does not reach outside its folder', !/\.\.\/\.\.\//.test(skill));
 check('NOTICE has at least four MIT licences', (notice.match(/^MIT License$/gm) ?? []).length >= 4);
-for (const f of ['scripts/ssi.mjs', 'scripts/lib/next.mjs', 'mods/ssi-cockpit/hooks/register.tsx']) check(`${f} exists`, existsSync(join(root, f)));
+for (const f of ['skills/ssi/scripts/ssi.mjs', 'skills/ssi/scripts/lib/next.mjs', 'mods/ssi-cockpit/hooks/register.tsx']) check(`${f} exists`, existsSync(join(root, f)));
 
 if (failures.length) {
   console.error(failures.map((f) => `FAIL ${f}`).join('\n'));

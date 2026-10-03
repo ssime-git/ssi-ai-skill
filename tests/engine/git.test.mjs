@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { makeRepo, commit, git } from '../helpers/repo.mjs';
-import { makeRunner, gitFacts, resolveBase } from '../../scripts/lib/git.mjs';
+import { makeRunner, gitFacts, resolveBase } from '../../skills/ssi/scripts/lib/git.mjs';
 
 const facts = (dir) => gitFacts(makeRunner(dir));
 
@@ -66,6 +66,18 @@ test('changedSince lists files and gives null for an unknown sha', () => {
   assert.equal(f.changedSince('deadbeef'), null);
   assert.equal(f.branchExists('ssi/x'), true);
   assert.equal(f.branchExists('nope'), false);
+});
+
+test('commitsSince counts from the start sha; an unknown start counts nothing', () => {
+  const dir = makeRepo();
+  const start = git(dir, 'rev-parse', 'HEAD');
+  commit(dir, 'a.js', '1\n', 'a');
+  commit(dir, 'b.js', '2\n', 'b');
+  const f = facts(dir);
+  assert.equal(f.commitsSince(start), 2);
+  assert.equal(f.commitsSince(null), 0);
+  assert.equal(f.commitsSince('EMPTY'), 3);
+  assert.equal(f.commitsSince('deadbeef'), 0);
 });
 
 test('a detached HEAD does not throw', () => {

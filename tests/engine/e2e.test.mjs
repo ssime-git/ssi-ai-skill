@@ -4,8 +4,8 @@ import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { makeRepo, commit, git } from '../helpers/repo.mjs';
 import { makeGhStub } from '../helpers/gh.mjs';
-import { makeRunner } from '../../scripts/lib/git.mjs';
-import { main } from '../../scripts/lib/cli.mjs';
+import { makeRunner } from '../../skills/ssi/scripts/lib/git.mjs';
+import { main } from '../../skills/ssi/scripts/lib/cli.mjs';
 
 function cli(dir, gh) {
   return (...argv) => {
@@ -102,6 +102,23 @@ test('a review that fails twice stops, and the answer gives it more rounds', () 
   assert.equal(ssi('next').json.stop.code, 'STOP_REVIEW');
   ssi('answer', 'A. try again');
   assert.equal(ssi('next').json.stop, null);
+});
+
+test('starting on a branch that already has commits never skips analysis or jumps to a PR', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  git(dir, 'checkout', '-q', '-b', 'old-feature');
+  commit(dir, 'src/one.js', '1\n', 'one');
+  commit(dir, 'src/two.js', '2\n', 'two');
+  ssi('start', 'Something new');
+  assert.equal(ssi('next').json.name, 'analyze');
+  ssi('record', '--phase', '1', '--result', 'pass', '--gaps', '0', '--kind', 'feature');
+  ssi('record', '--phase', '2', '--result', 'pass');
+  ssi('record', '--phase', '4', '--result', 'pass', '--touches', 'src/x.js');
+  assert.equal(ssi('next').json.action.kind, 'implement');
+  commit(dir, 'src/three.js', '3\n', 'three');
+  assert.equal(ssi('next').json.action.kind, 'open-draft-pr');
 });
 
 test('the mandate comes from the repo config and blocks a step with a stop', () => {

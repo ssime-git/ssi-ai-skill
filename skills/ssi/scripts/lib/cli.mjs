@@ -56,6 +56,7 @@ export function main(argv, { cwd, gh, run, write }) {
         const { state: old } = readState(cwd);
         if (old && !flags.force && !old.evidence?.land) throw new Error(`A run is already active: "${old.goal}". Use --force to replace it.`);
         const s = newState(goal);
+        s.start_sha = gitFacts(run).headSha ?? 'EMPTY';
         writeState(cwd, s);
         out({ ok: true, run_id: s.run_id });
         return 0;

@@ -13,6 +13,7 @@ export function newState(goal) {
     kind: null,
     branch: null,
     head_sha: null,
+    start_sha: null,
     issue: null,
     pr: null,
     phase: 1,

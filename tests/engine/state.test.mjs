@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { newState, readState, writeState, PHASES } from '../../scripts/lib/state.mjs';
+import { newState, readState, writeState, PHASES } from '../../skills/ssi/scripts/lib/state.mjs';
 
 const tmp = () => mkdtempSync(join(tmpdir(), 'ssi-state-'));
 

@@ -4,8 +4,8 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { makeRepo, git } from '../helpers/repo.mjs';
-import { makeRunner } from '../../scripts/lib/git.mjs';
-import { rawUrl, planPurge, uploadAsset, purgeAssets } from '../../scripts/lib/assets.mjs';
+import { makeRunner } from '../../skills/ssi/scripts/lib/git.mjs';
+import { rawUrl, planPurge, uploadAsset, purgeAssets } from '../../skills/ssi/scripts/lib/assets.mjs';
 
 const gif = (name = 'demo.gif') => {
   const p = join(mkdtempSync(join(tmpdir(), 'ssi-gif-')), name);

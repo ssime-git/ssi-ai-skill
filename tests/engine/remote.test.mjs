@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newState } from '../../scripts/lib/state.mjs';
-import { renderBlock, parseBlock, mergeComment, stateHash } from '../../scripts/lib/remote.mjs';
-import { makeGh, findPr, readRemoteState, upsertStateComment, createIssue, closedPrNumbers } from '../../scripts/lib/github.mjs';
+import { newState } from '../../skills/ssi/scripts/lib/state.mjs';
+import { renderBlock, parseBlock, mergeComment, stateHash } from '../../skills/ssi/scripts/lib/remote.mjs';
+import { makeGh, findPr, readRemoteState, upsertStateComment, createIssue, closedPrNumbers } from '../../skills/ssi/scripts/lib/github.mjs';
 import { makeGhStub } from '../helpers/gh.mjs';
 
 test('the block roundtrips and survives quotes, newlines and angle brackets', () => {

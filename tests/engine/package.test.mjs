@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
-import { PHASES } from '../../scripts/lib/state.mjs';
+import { PHASES } from '../../skills/ssi/scripts/lib/state.mjs';
 
 const read = (p) => readFileSync(p, 'utf8');
 
@@ -25,6 +25,12 @@ test('NOTICE keeps every upstream licence, including i-have-adhd', () => {
   const n = read('skills/ssi/NOTICE.md');
   assert.ok((n.match(/^MIT License$/gm) ?? []).length >= 4);
   assert.match(n, /ayghri\/i-have-adhd/);
+});
+
+test('the skill folder is self-contained and the repo is a plugin', () => {
+  assert.ok(existsSync('skills/ssi/scripts/ssi.mjs'));
+  assert.doesNotMatch(read('skills/ssi/SKILL.md'), /\.\.\/\.\.\//);
+  assert.equal(JSON.parse(read('.claude-plugin/plugin.json')).name, 'ssi');
 });
 
 test('the design spec and plan ship with the package', () => {

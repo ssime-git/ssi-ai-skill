@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newState } from '../../scripts/lib/state.mjs';
-import { DEFAULTS } from '../../scripts/lib/config.mjs';
-import { detectPhase } from '../../scripts/lib/detect.mjs';
+import { newState } from '../../skills/ssi/scripts/lib/state.mjs';
+import { DEFAULTS } from '../../skills/ssi/scripts/lib/config.mjs';
+import { detectPhase } from '../../skills/ssi/scripts/lib/detect.mjs';
 
 const facts = (o = {}) => ({ branch: 'main', onBase: true, headSha: 'H2', commitsAhead: 0, pr: null, uiChanged: false, changedSince: () => [], ...o });
 const ev = (sha, extra = {}) => ({ path: 'p', at: 't', sha, ...extra });
@@ -32,6 +32,11 @@ test('the issue is not required when the mandate does not allow issues', () => {
   const config = { ...DEFAULTS, mandate: { allow: ['push', 'draft-pr', 'comment'], ready: false } };
   const state = st({ kind: 'bug', evidence: { analyze: ev(), confirm: ev(), reproduce: ev() } });
   assert.equal(run(state, facts(), config).phase, 4);
+});
+
+test('a queued issue satisfies the reproduce gate while offline', () => {
+  const state = st({ kind: 'bug', evidence: { analyze: ev(), confirm: ev(), reproduce: ev() }, pending: [{ op: 'issue', title: 't', body: 'b' }] });
+  assert.equal(run(state).phase, 4);
 });
 
 const full = { analyze: ev(), confirm: ev(), plan: ev(), implement: ev('H2'), review: ev('H2'), land: ev('H2') };
@@ -73,11 +78,11 @@ test('an unknown sha makes evidence stale', () => {
   assert.equal(run(state, f).phase, 5);
 });
 
-test('floors: commits or a PR mean at least phase 5, an ssi branch at least phase 4', () => {
-  const a = run(st(), facts({ branch: 'ssi/x', onBase: false, commitsAhead: 2 }));
+test('floor: commits made since the run started mean at least phase 5; old work never skips analysis', () => {
+  const a = run(st(), facts({ branch: 'ssi/x', onBase: false, commitsSinceStart: 2 }));
   assert.equal(a.phase, 5);
   assert.match(a.warnings[0], /resumed at phase 5/);
-  assert.equal(run(st(), facts({ branch: 'ssi/x', onBase: false })).phase, 4);
+  assert.equal(run(st(), facts({ branch: 'ssi/x', onBase: false, commitsAhead: 5 })).phase, 1);
   assert.equal(run(st(), facts({ branch: 'feature-y', onBase: false })).phase, 1);
-  assert.equal(run(st(), facts({ pr: { number: 3, state: 'OPEN', isDraft: true } })).phase, 5);
+  assert.equal(run(st(), facts({ pr: { number: 3, state: 'OPEN', isDraft: true } })).phase, 1);
 });

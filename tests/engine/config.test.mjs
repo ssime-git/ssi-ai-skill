@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { loadConfig, opAllowed, DEFAULTS } from '../../scripts/lib/config.mjs';
+import { loadConfig, opAllowed, DEFAULTS } from '../../skills/ssi/scripts/lib/config.mjs';
 
 const tmp = () => mkdtempSync(join(tmpdir(), 'ssi-cfg-'));
 const put = (dir, file, content) => {

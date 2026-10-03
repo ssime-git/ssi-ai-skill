@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newState } from '../../scripts/lib/state.mjs';
-import { DEFAULTS } from '../../scripts/lib/config.mjs';
-import { globToRegExp, evaluateStops, mandateStop, applyAnswer } from '../../scripts/lib/stops.mjs';
+import { newState } from '../../skills/ssi/scripts/lib/state.mjs';
+import { DEFAULTS } from '../../skills/ssi/scripts/lib/config.mjs';
+import { globToRegExp, evaluateStops, mandateStop, applyAnswer } from '../../skills/ssi/scripts/lib/stops.mjs';
 
 const facts = (o = {}) => ({ branch: 'ssi/x', headSha: 'H', diff: { lines: 10, files: 1 }, pr: null, branchExists: () => true, isAncestor: () => true, ...o });
 const base = (o = {}) => ({ ...newState('g'), kind: 'bug', branch: 'ssi/x', head_sha: 'H', ...o });

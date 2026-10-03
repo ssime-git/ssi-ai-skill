@@ -44,7 +44,7 @@ export function actionFor({ name, state, facts, config }) {
         requires: [],
       };
     case 'implement':
-      if (facts.commitsAhead === 0) {
+      if (facts.commitsSinceStart === 0) {
         return {
           kind: 'implement',
           headline: 'Write the failing test first, then the code',

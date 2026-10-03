@@ -7,7 +7,7 @@ description: "Single-entry engineering loop. Use when the user asks to fix a bug
 
 One entry point. You do the work, the engine decides what comes next. Never decide the phase, a threshold or a stop yourself.
 
-`ssi` below means `node <this skill's folder>/../../scripts/ssi.mjs`, run from the repository root. It prints JSON.
+`ssi` below means `node <skill folder>/scripts/ssi.mjs`, where `<skill folder>` is the "Base directory for this skill" shown when this skill loads. Run it from the repository you are working in. It prints JSON.
 
 ## The loop
 

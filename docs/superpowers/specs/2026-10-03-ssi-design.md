@@ -86,7 +86,7 @@ Plan rules: search for code, helpers and patterns to reuse first; propose the sm
 - **Remote**: hidden block `<!-- ssi:state … -->` in a PR comment, rewritten on each transition. Enables resume on another machine.
 - **Truth order**: git, then PR/Issue, then local file. The file never overrides facts.
 
-Phase detection from facts: no branch → 1; branch without commits → 4; commits without PR → 5 (open draft); draft PR → ≥5; review marker → 7; GIF link in PR → 8.
+Phase detection: evidence decides the phase. The only floor is commits made *since the run started* (`start_sha`, recorded by `ssi start`): they imply at least phase 5. Pre-existing commits, an existing PR or an `ssi/` branch name never skip analysis. Review and visual evidence is restored from the PR state block.
 
 Heal cases (each covered by an engine test):
 - state file missing, or `head_sha` differs → rebuilt from facts, with a warning line;
@@ -150,11 +150,12 @@ Cockpit mod (`ssi-cockpit`, optional, Claude Code only; reads `.ssi/state.json`,
 ## 8. Repository layout (v1)
 
 ```
-skills/ssi/SKILL.md            thin: loop + communication contract
+skills/ssi/SKILL.md            thin: loop + communication contract (folder is self-contained)
+.claude-plugin/plugin.json     makes the repo installable as a plugin
 skills/ssi/references/         one short file per phase, loaded on demand
 skills/ssi/NOTICE.md           upstream MIT notices (+ i-have-adhd)
-scripts/ssi.mjs                engine CLI: next, config, purge
-scripts/lib/                   phase detection, thresholds, state, remote ops
+skills/ssi/scripts/ssi.mjs     engine CLI: start, next, record, answer, config, allow, issue, upload, purge
+skills/ssi/scripts/lib/        phase detection, thresholds, state, remote ops
 mods/ssi-cockpit/              optional Claude Code mod
 tests/engine/                  deterministic engine tests
 ```

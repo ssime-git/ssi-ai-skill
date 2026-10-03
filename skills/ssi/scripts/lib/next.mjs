@@ -39,6 +39,7 @@ export function computeNext({ cwd, config, run, gh }) {
     return { phase: 0, name: 'start', done: false, action, stop: null, say: say({ phase: 0, name: 'start', next: action.headline, style: config.ui.style, needsUser: false, done: false }), warnings };
   }
   if (facts.pr) state.pr = facts.pr.number;
+  facts.commitsSinceStart = facts.commitsSince(state.start_sha ?? null);
   if (!state.branch && facts.branch && !facts.onBase) state.branch = facts.branch;
   if (!offline) {
     for (const p of [...state.pending]) {

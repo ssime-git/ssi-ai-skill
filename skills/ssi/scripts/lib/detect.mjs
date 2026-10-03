@@ -16,7 +16,7 @@ const touches = (file, surface) => surface.some((s) => file === s || file.starts
 function check(name, state, facts, config) {
   const e = state.evidence[name];
   if (!e) return { ok: false };
-  if (name === 'reproduce' && !state.issue && opAllowed('issue', config)) return { ok: false };
+  if (name === 'reproduce' && !state.issue && opAllowed('issue', config) && !state.pending?.some((p) => p.op === 'issue')) return { ok: false };
   if (SHA_BOUND.has(name) && e.sha !== facts.headSha) {
     const changed = facts.changedSince(e.sha);
     const hit = changed === null || (e.surface?.length ? changed.some((f) => touches(f, e.surface)) : changed.length > 0);
@@ -39,9 +39,7 @@ export function detectPhase({ state, facts, config }) {
       break;
     }
   }
-  let floor = 1;
-  if (facts.commitsAhead > 0 || facts.pr) floor = 5;
-  else if (/^ssi\//.test(facts.branch ?? '') && !facts.onBase) floor = 4;
+  const floor = (facts.commitsSinceStart ?? 0) > 0 ? 5 : 1;
   const warnings = [];
   if (phase <= PHASES.length && floor > phase) {
     warnings.push(`My notes were behind the repo, so I resumed at phase ${floor} from what git and the PR show.`);

@@ -51,6 +51,10 @@ export function gitFacts(run) {
     dirty: (attempt(run, ['status', '--porcelain']) ?? '') !== '',
     branchExists: (name) => attempt(run, ['rev-parse', '--verify', '--quiet', `refs/heads/${name}`]) !== null,
     isAncestor: (sha) => attempt(run, ['merge-base', '--is-ancestor', sha, 'HEAD']) !== null,
+    commitsSince: (sha) => {
+      if (sha === null || sha === undefined) return 0;
+      return Number(attempt(run, ['rev-list', '--count', sha === 'EMPTY' ? 'HEAD' : `${sha}..HEAD`]) ?? 0);
+    },
     changedSince: (sha) => {
       const out = attempt(run, ['diff', '--name-only', sha, 'HEAD']);
       return out === null ? null : out.split('\n').filter(Boolean);

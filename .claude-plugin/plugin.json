@@ -1,0 +1,6 @@
+{
+  "name": "ssi",
+  "version": "0.1.0",
+  "description": "Single-entry engineering loop that takes a request to a reviewed draft PR",
+  "author": { "name": "sebastien sime" }
+}

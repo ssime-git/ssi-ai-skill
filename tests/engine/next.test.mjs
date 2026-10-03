@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { makeRepo, commit, git } from '../helpers/repo.mjs';
 import { makeGhStub } from '../helpers/gh.mjs';
-import { makeRunner } from '../../scripts/lib/git.mjs';
-import { DEFAULTS, merge } from '../../scripts/lib/config.mjs';
-import { newState, readState, writeState } from '../../scripts/lib/state.mjs';
-import { applyRecord } from '../../scripts/lib/record.mjs';
-import { bar, say } from '../../scripts/lib/say.mjs';
-import { actionFor } from '../../scripts/lib/actions.mjs';
-import { computeNext } from '../../scripts/lib/next.mjs';
+import { makeRunner } from '../../skills/ssi/scripts/lib/git.mjs';
+import { DEFAULTS, merge } from '../../skills/ssi/scripts/lib/config.mjs';
+import { newState, readState, writeState } from '../../skills/ssi/scripts/lib/state.mjs';
+import { applyRecord } from '../../skills/ssi/scripts/lib/record.mjs';
+import { bar, say } from '../../skills/ssi/scripts/lib/say.mjs';
+import { actionFor } from '../../skills/ssi/scripts/lib/actions.mjs';
+import { computeNext } from '../../skills/ssi/scripts/lib/next.mjs';
 
 const next = (dir, gh, config = DEFAULTS) => computeNext({ cwd: dir, config, run: makeRunner(dir), gh });
 
@@ -60,11 +60,11 @@ test('say: progress bar, styles and ETA', () => {
 
 test('actionFor: phase 5 changes with the repo, mark-ready needs the config', () => {
   const st = { ...newState('g'), pr: null };
-  const f = (o) => ({ commitsAhead: 0, pr: null, base: 'main', ...o });
+  const f = (o) => ({ commitsSinceStart: 0, pr: null, base: 'main', ...o });
   assert.equal(actionFor({ name: 'implement', state: st, facts: f({}), config: DEFAULTS }).kind, 'implement');
-  const open = actionFor({ name: 'implement', state: st, facts: f({ commitsAhead: 1 }), config: DEFAULTS });
+  const open = actionFor({ name: 'implement', state: st, facts: f({ commitsSinceStart: 1 }), config: DEFAULTS });
   assert.deepEqual([open.kind, open.requires], ['open-draft-pr', ['push', 'draft-pr']]);
-  assert.equal(actionFor({ name: 'implement', state: st, facts: f({ commitsAhead: 1, pr: { number: 1 } }), config: DEFAULTS }).kind, 'verify-implementation');
+  assert.equal(actionFor({ name: 'implement', state: st, facts: f({ commitsSinceStart: 1, pr: { number: 1 } }), config: DEFAULTS }).kind, 'verify-implementation');
   const ready = merge(DEFAULTS, { mandate: { ready: true } });
   assert.equal(actionFor({ name: 'done', state: st, facts: f({ pr: { number: 1, isDraft: true } }), config: ready }).kind, 'mark-ready');
   assert.equal(actionFor({ name: 'done', state: st, facts: f({ pr: { number: 1, isDraft: true } }), config: DEFAULTS }).kind, 'done');
@@ -87,7 +87,7 @@ test('computeNext: a started run begins at analyze and persists', () => {
 test('computeNext: the PR state comment is written once and not rewritten without change', () => {
   const dir = makeRepo();
   const gh = makeGhStub();
-  writeState(dir, { ...newState('fix it'), kind: 'feature' });
+  writeState(dir, { ...newState('fix it'), start_sha: git(dir, 'rev-parse', 'HEAD'), kind: 'feature' });
   git(dir, 'checkout', '-q', '-b', 'ssi/x');
   commit(dir, 'src/a.js', '1\n', 'a');
   gh.openPr(1, 'ssi/x');
@@ -112,7 +112,7 @@ test('computeNext: gh failing warns and keeps working', () => {
 
 test('computeNext: a step the mandate forbids becomes a stop', () => {
   const dir = makeRepo();
-  writeState(dir, { ...newState('fix it'), kind: 'feature', evidence: { analyze: { path: 'a' }, confirm: { path: 'c' }, plan: { path: 'p' } } });
+  writeState(dir, { ...newState('fix it'), start_sha: git(dir, 'rev-parse', 'HEAD'), kind: 'feature', evidence: { analyze: { path: 'a' }, confirm: { path: 'c' }, plan: { path: 'p' } } });
   git(dir, 'checkout', '-q', '-b', 'ssi/x');
   commit(dir, 'src/a.js', '1\n', 'a');
   const config = merge(DEFAULTS, { mandate: { allow: ['issue', 'comment'] } });
