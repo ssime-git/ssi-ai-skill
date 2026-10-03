@@ -9,6 +9,7 @@ const ETA = [3, 4, 8, 5, 15, 8, 6, 10]
 
 const tick = atom({ plugin: 'ssi-cockpit', key: 'tick' } as const, 0)
 const lastPhase = atom({ plugin: 'ssi-cockpit', key: 'lastPhase' } as const, 0)
+const lastStop = atom({ plugin: 'ssi-cockpit', key: 'lastStop' } as const, '')
 
 async function load($: any): Promise<Snapshot | null> {
   try {
@@ -32,9 +33,17 @@ async function refresh($: any) {
   const p = Math.min(snap.phase, 8)
   $.ui.status(snap.stop ? 'ssi: stopped' : snap.phase > 8 ? 'ssi: done' : `ssi ${p}/8 ${NAMES[p - 1]}`)
   const before = await read($, lastPhase)
+  const stopBefore = await read($, lastStop)
+  const stopNow = snap.stop ?? ''
+  if (stopNow !== stopBefore) {
+    await update($, lastStop, () => stopNow)
+    if (stopNow) $.ui.toast('I stopped and need you.')
+  }
   if (before !== snap.phase) {
     await update($, lastPhase, () => snap.phase)
-    if (before !== 0) $.ui.toast(snap.stop ? 'I stopped and need you.' : snap.phase > 8 ? '✓ Done. The PR is ready for you.' : `✓ Phase done. Now: ${NAMES[p - 1]}`)
+    if (before !== 0 && !stopNow) {
+      $.ui.toast(snap.phase > 8 ? '✓ Done. The PR is ready for you.' : snap.phase < before ? `↩ Back to ${NAMES[p - 1]}: something needs a fix.` : `✓ Phase done. Now: ${NAMES[p - 1]}`)
+    }
   }
 }
 

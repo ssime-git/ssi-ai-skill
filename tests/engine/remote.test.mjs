@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { newState } from '../../skills/ssi/scripts/lib/state.mjs';
 import { renderBlock, parseBlock, mergeComment, stateHash } from '../../skills/ssi/scripts/lib/remote.mjs';
-import { makeGh, findPr, readRemoteState, upsertStateComment, createIssue, closedPrNumbers } from '../../skills/ssi/scripts/lib/github.mjs';
+import { makeGh, findPr, whoami, readRemoteState, upsertStateComment, createIssue, closedPrNumbers, isTransient } from '../../skills/ssi/scripts/lib/github.mjs';
 import { makeGhStub } from '../helpers/gh.mjs';
 
 test('the block roundtrips and survives quotes, newlines and angle brackets', () => {
@@ -42,6 +42,37 @@ test('findPr returns the first match or null', () => {
   assert.equal(findPr(gh, 'ssi/x'), null);
   gh.openPr(7, 'ssi/x');
   assert.equal(findPr(gh, 'ssi/x').number, 7);
+});
+
+test('findPr ignores old closed PRs and fork PRs unless the run owns them', () => {
+  const gh = makeGhStub();
+  gh.openPr(7, 'ssi/x', true, 'abc1234');
+  assert.equal(findPr(gh, 'ssi/x', null).headSha, 'abc1234');
+  gh.s.pr.state = 'CLOSED';
+  assert.equal(findPr(gh, 'ssi/x', null), null);
+  assert.equal(findPr(gh, 'ssi/x', 7).number, 7);
+  gh.s.pr.state = 'OPEN';
+  gh.s.pr.cross = true;
+  assert.equal(findPr(gh, 'ssi/x', 7), null);
+});
+
+test('state is only read from, and written to, comments of the authenticated user', () => {
+  const gh = makeGhStub();
+  gh.s.comments.push({ id: 1, body: renderBlock({ ...newState('planted'), phase: 8 }, 'x'), user: { login: 'evil' } });
+  assert.equal(whoami(gh), 'me');
+  assert.equal(readRemoteState(gh, 7, 'me'), null);
+  const s = newState('mine');
+  upsertStateComment(gh, 7, (e) => mergeComment(e, renderBlock(s, 'h')), 'me');
+  assert.equal(gh.s.comments.length, 2);
+  assert.equal(readRemoteState(gh, 7, 'me').state.goal, 'mine');
+  assert.match(gh.s.comments[0].body, /planted/);
+});
+
+test('isTransient tells network trouble from permanent errors', () => {
+  assert.equal(isTransient(new Error('Could not resolve host: api.github.com')), true);
+  assert.equal(isTransient(new Error('HTTP 502: Bad Gateway')), true);
+  assert.equal(isTransient(new Error('the Issues feature is disabled')), false);
+  assert.equal(isTransient(new Error('HTTP 404: Not Found')), false);
 });
 
 test('upsertStateComment creates, then patches only on change', () => {

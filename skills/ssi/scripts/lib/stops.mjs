@@ -41,6 +41,27 @@ export function mandateStop(op) {
   );
 }
 
+// Protected code is judged from the plan AND from the real diff, so the model's own
+// declaration is never the only gate. Each file is approved once, by name.
+function protectedStop(state, facts, config) {
+  const globs = config.protectedPaths.map(globToRegExp);
+  const files = [...new Set([...(state.plan?.touches ?? []), ...(facts.changedFiles ?? [])])].filter((f) => globs.some((g) => g.test(f)));
+  const approved = new Set(state.approvals.protectedFiles ?? []);
+  const fresh = files.filter((f) => !approved.has(f));
+  const publicApi = !!state.plan?.publicApi && !state.approvals.publicApi;
+  if (!fresh.length && !publicApi) return null;
+  const s = stop(
+    'STOP_PROTECTED',
+    fresh.length ? `The change touches protected code: ${fresh.join(', ')}.` : 'The plan changes a public interface.',
+    'Do you approve this change?',
+    ['A. Yes, go ahead', 'B. No, stop here'],
+    'B',
+  );
+  s.files = fresh;
+  s.publicApi = publicApi;
+  return s;
+}
+
 export function evaluateStops({ state, facts, config, phase }) {
   if (state.stop && !state.stop.answer) return state.stop;
   const t = config.thresholds;
@@ -53,13 +74,19 @@ export function evaluateStops({ state, facts, config, phase }) {
   if (!state.evidence.reproduce && tries('reproduce') >= t.reproAttempts) {
     return stop('STOP_NO_REPRO', `I could not reproduce the bug after ${t.reproAttempts} tries.`, 'How should I continue?', ['A. Try again with a new idea (add it)', 'B. Stop and look together'], 'B');
   }
-  const globs = config.protectedPaths.map(globToRegExp);
-  const hit = (state.plan?.touches ?? []).filter((f) => globs.some((g) => g.test(f)));
-  if (state.evidence.plan && !state.approvals.protected && (hit.length || state.plan.publicApi)) {
-    return stop('STOP_PROTECTED', hit.length ? `The plan touches protected code: ${hit.join(', ')}.` : 'The plan changes a public interface.', 'Do you approve this change?', ['A. Yes, go ahead', 'B. No, stop here'], 'B');
+  if (state.evidence.plan || phase >= 5) {
+    const p = protectedStop(state, facts, config);
+    if (p) return p;
   }
-  if (phase >= 5 && phase <= 8 && !state.approvals.bigDiff && (facts.diff.lines > t.diff.lines || facts.diff.files > t.diff.files)) {
-    return stop('STOP_BIG_DIFF', `The change is big: ${facts.diff.lines} lines in ${facts.diff.files} files (limits ${t.diff.lines} / ${t.diff.files}).`, 'Keep going with a big change?', ['A. Yes, keep going', 'B. No, stop and split it'], 'B');
+  if (phase >= 5 && phase <= 8) {
+    const ap = state.approvals.bigDiff;
+    const maxLines = t.diff.lines + (ap?.lines ?? 0);
+    const maxFiles = t.diff.files + (ap?.files ?? 0);
+    if (facts.diff.lines > maxLines || facts.diff.files > maxFiles) {
+      const s = stop('STOP_BIG_DIFF', `The change is big: ${facts.diff.lines} lines in ${facts.diff.files} files (limits ${maxLines} / ${maxFiles}).`, 'Keep going with a big change?', ['A. Yes, keep going', 'B. No, stop and split it'], 'B');
+      s.size = { lines: facts.diff.lines, files: facts.diff.files };
+      return s;
+    }
   }
   if (!state.evidence.review && tries('review') >= t.reviewRounds) {
     return stop('STOP_REVIEW', `The review still found blockers after ${t.reviewRounds} rounds.`, 'How should I continue?', ['A. Try again (add guidance)', 'B. Stop and look together'], 'B');
@@ -73,19 +100,31 @@ export function evaluateStops({ state, facts, config, phase }) {
   return null;
 }
 
+// An answer must start with an option letter. Anything else is refused, so a "No, do not
+// touch auth" can never be read as an approval. B clears the stop and keeps a note; the
+// condition is re-checked on the next call, so fixing the cause lets the run continue.
 export function applyAnswer(state, facts, text) {
   const s = state.stop;
   if (!s) throw new Error('There is no open question.');
-  if (/^\s*b\b/i.test(text)) {
-    s.note = text;
+  const m = /^\s*([ab])\b/i.exec(text ?? '');
+  if (!m) throw new Error('Answer with the letter of an option (A or B), then your words.');
+  const now = new Date().toISOString();
+  if (m[1].toUpperCase() === 'B') {
+    state.declined = { code: s.code, note: text, at: now };
+    state.stop = null;
     return state;
   }
   switch (s.code) {
-    case 'STOP_PROTECTED': state.approvals.protected = true; break;
-    case 'STOP_BIG_DIFF': state.approvals.bigDiff = true; break;
+    case 'STOP_PROTECTED':
+      state.approvals.protectedFiles = [...new Set([...(state.approvals.protectedFiles ?? []), ...(s.files ?? [])])];
+      if (s.publicApi) state.approvals.publicApi = true;
+      break;
+    case 'STOP_BIG_DIFF':
+      state.approvals.bigDiff = s.size ?? { lines: facts.diff.lines, files: facts.diff.files };
+      break;
     case 'STOP_UNCLEAR':
       state.analysis.blockingGaps = 0;
-      state.evidence.analyze = { path: null, at: new Date().toISOString(), note: text };
+      state.evidence.analyze = { path: null, at: now, note: text };
       break;
     case 'STOP_NO_REPRO': state.attempts.reproduce = 0; break;
     case 'STOP_REVIEW': state.attempts.review = 0; break;

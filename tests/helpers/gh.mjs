@@ -1,4 +1,4 @@
-const pub = ({ number, state, isDraft, url }) => ({ number, state, isDraft, url });
+const pub = ({ number, state, isDraft, url, sha, cross }) => ({ number, state, isDraft, url, headRefOid: sha, isCrossRepository: !!cross });
 
 export function makeGhStub() {
   const s = { pr: null, comments: [], issues: [], offline: false, calls: [] };
@@ -6,6 +6,7 @@ export function makeGhStub() {
     s.calls.push(args);
     if (s.offline) throw new Error('network down');
     const [a, b] = args;
+    if (a === 'api' && b === 'user') return JSON.stringify({ login: 'me' });
     if (a === 'pr' && b === 'list') {
       if (args.includes('closed')) return '[]';
       const head = args[args.indexOf('--head') + 1];
@@ -19,7 +20,7 @@ export function makeGhStub() {
         return '{}';
       }
       if (body) {
-        const c = { id: s.comments.length + 1, body };
+        const c = { id: s.comments.length + 1, body, user: { login: 'me' } };
         s.comments.push(c);
         return JSON.stringify(c);
       }
@@ -34,8 +35,8 @@ export function makeGhStub() {
     throw new Error(`unexpected gh ${args.join(' ')}`);
   };
   gh.s = s;
-  gh.openPr = (number, head, isDraft = true) => {
-    s.pr = { number, head, state: 'OPEN', isDraft, url: `https://github.com/o/r/pull/${number}` };
+  gh.openPr = (number, head, isDraft = true, sha = undefined) => {
+    s.pr = { number, head, state: 'OPEN', isDraft, sha, url: `https://github.com/o/r/pull/${number}` };
   };
   return gh;
 }

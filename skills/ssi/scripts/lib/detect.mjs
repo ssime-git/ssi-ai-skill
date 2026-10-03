@@ -16,7 +16,7 @@ const touches = (file, surface) => surface.some((s) => file === s || file.starts
 function check(name, state, facts, config) {
   const e = state.evidence[name];
   if (!e) return { ok: false };
-  if (name === 'reproduce' && !state.issue && opAllowed('issue', config) && !state.pending?.some((p) => p.op === 'issue')) return { ok: false };
+  if (name === 'reproduce' && !state.issue && opAllowed('issue', config) && !state.issue_skipped && !state.pending?.some((p) => p.op === 'issue')) return { ok: false };
   if (SHA_BOUND.has(name) && e.sha !== facts.headSha) {
     const changed = facts.changedSince(e.sha);
     const hit = changed === null || (e.surface?.length ? changed.some((f) => touches(f, e.surface)) : changed.length > 0);

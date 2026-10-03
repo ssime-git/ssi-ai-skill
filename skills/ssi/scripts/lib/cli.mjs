@@ -5,7 +5,7 @@ import { gitFacts, makeRunner } from './git.mjs';
 import { computeNext } from './next.mjs';
 import { applyRecord } from './record.mjs';
 import { applyAnswer } from './stops.mjs';
-import { createIssue, closedPrNumbers } from './github.mjs';
+import { createIssue, closedPrNumbers, isTransient } from './github.mjs';
 import { uploadAsset, purgeAssets } from './assets.mjs';
 
 const USAGE = 'Usage: ssi <start|next|record|answer|config|allow|issue|upload|purge> [options]\n';
@@ -67,6 +67,7 @@ export function main(argv, { cwd, gh, run, write }) {
       case 'record': {
         const state = needState();
         const phase = Number(flags.phase);
+        const here = gitFacts(run);
         applyRecord(state, {
           phase,
           result: flags.result,
@@ -77,9 +78,10 @@ export function main(argv, { cwd, gh, run, write }) {
           gaps: flags.gaps === undefined ? undefined : Number(flags.gaps),
           touches: csv(flags.touches),
           publicApi: truthy(flags['public-api']),
-        }, gitFacts(run).headSha);
+        }, here.headSha);
         writeState(cwd, state);
-        out({ ok: true, recorded: PHASES[phase - 1], attempts: state.attempts });
+        const dirty = phase >= 5 && flags.result === 'pass' && here.dirty;
+        out({ ok: true, recorded: PHASES[phase - 1], attempts: state.attempts, ...(dirty ? { warning: 'You have uncommitted changes. This proof covers the committed code only.' } : {}) });
         return 0;
       }
       case 'answer': {
@@ -90,9 +92,16 @@ export function main(argv, { cwd, gh, run, write }) {
         return 0;
       }
       case 'issue': {
-        if (sub !== 'create') throw new Error('Usage: ssi issue create --title T [--body B]');
-        if (!opAllowed('issue', config)) throw new Error('The config does not allow creating issues.');
         const state = needState();
+        if (sub === 'skip') {
+          state.issue_skipped = typeof flags.because === 'string' ? flags.because : 'skipped';
+          writeState(cwd, state);
+          out({ ok: true, skipped: state.issue_skipped });
+          return 0;
+        }
+        if (sub !== 'create') throw new Error('Usage: ssi issue create --title T [--body B] | ssi issue skip --because R');
+        if (!opAllowed('issue', config)) throw new Error('The config does not allow creating issues.');
+        if (typeof flags.title !== 'string' || !flags.title.trim()) throw new Error('--title is required.');
         const body = typeof flags.body === 'string' ? flags.body : '';
         try {
           const r = createIssue(gh, { title: flags.title, body, key: `ssi:${state.run_id}:issue` });
@@ -100,6 +109,7 @@ export function main(argv, { cwd, gh, run, write }) {
           writeState(cwd, state);
           out({ ok: true, issue: r.number, created: r.created });
         } catch (e) {
+          if (!isTransient(e)) throw e;
           state.pending.push({ op: 'issue', title: flags.title, body });
           writeState(cwd, state);
           out({ ok: true, queued: true, because: e.message });

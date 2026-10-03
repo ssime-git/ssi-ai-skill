@@ -21,11 +21,28 @@ export function newState(goal) {
     attempts: {},
     analysis: { blockingGaps: 0 },
     plan: { touches: [], publicApi: false },
-    approvals: { protected: false, bigDiff: false },
+    approvals: { protectedFiles: [], publicApi: false, bigDiff: null },
     stop: null,
     pending: [],
     synced: null,
     updated_at: new Date().toISOString(),
+  };
+}
+
+export function normalize(state) {
+  const base = newState(state.goal ?? '');
+  const approvals = { ...base.approvals, ...(state.approvals ?? {}) };
+  if (!Array.isArray(approvals.protectedFiles)) approvals.protectedFiles = [];
+  if (typeof approvals.bigDiff !== 'object') approvals.bigDiff = null;
+  return {
+    ...base,
+    ...state,
+    evidence: state.evidence ?? {},
+    attempts: state.attempts ?? {},
+    analysis: { ...base.analysis, ...state.analysis },
+    plan: { ...base.plan, ...state.plan },
+    approvals,
+    pending: state.pending ?? [],
   };
 }
 
@@ -38,7 +55,7 @@ export function readState(cwd) {
     throw e;
   }
   try {
-    return { state: JSON.parse(text) };
+    return { state: normalize(JSON.parse(text)) };
   } catch {
     return { state: null, warning: 'My local notes were unreadable, so I am rebuilding them from git and the PR.' };
   }

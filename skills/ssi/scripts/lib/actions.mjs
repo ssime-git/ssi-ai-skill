@@ -1,6 +1,17 @@
 const ref = (n) => [`references/${n}.md`];
 
+const AFTER_PUSH = new Set(['review', 'visual', 'land', 'done']);
+
 export function actionFor({ name, state, facts, config }) {
+  if (AFTER_PUSH.has(name) && facts.pr?.headSha && facts.pr.headSha !== facts.headSha) {
+    return {
+      kind: 'push-changes',
+      headline: 'Push your latest commits to the PR',
+      instructions: 'The PR is behind your local branch. Run: git push. Then run: ssi next.',
+      refs: ref('implement'),
+      requires: ['push'],
+    };
+  }
   switch (name) {
     case 'analyze':
       return {
@@ -44,6 +55,15 @@ export function actionFor({ name, state, facts, config }) {
         requires: [],
       };
     case 'implement':
+      if (facts.onBase) {
+        return {
+          kind: 'create-branch',
+          headline: 'Create a working branch first',
+          instructions: `You are on ${facts.base ?? 'the base branch'}. Run: git switch -c ssi/<short-name> (any commits you made come with you). Never push the base branch. Then run: ssi next.`,
+          refs: ref('implement'),
+          requires: [],
+        };
+      }
       if (facts.commitsSinceStart === 0) {
         return {
           kind: 'implement',

@@ -22,12 +22,15 @@ function ok(run, args) {
   }
 }
 
+// The assets branch is only ever written by this tool and every operation is idempotent,
+// so the remote copy wins: fetch it first and reset the local branch onto it.
 function withTree({ run, makeRun, branch }, fn) {
   const dir = mkdtempSync(join(tmpdir(), 'ssi-assets-'));
-  if (ok(run, ['rev-parse', '--verify', '--quiet', `refs/heads/${branch}`])) {
-    run('git', ['worktree', 'add', '--force', dir, branch]);
-  } else if (ok(run, ['rev-parse', '--verify', '--quiet', `refs/remotes/origin/${branch}`])) {
+  ok(run, ['fetch', '-q', 'origin', `${branch}:refs/remotes/origin/${branch}`]);
+  if (ok(run, ['rev-parse', '--verify', '--quiet', `refs/remotes/origin/${branch}`])) {
     run('git', ['worktree', 'add', '-B', branch, dir, `origin/${branch}`]);
+  } else if (ok(run, ['rev-parse', '--verify', '--quiet', `refs/heads/${branch}`])) {
+    run('git', ['worktree', 'add', '--force', dir, branch]);
   } else {
     run('git', ['worktree', 'add', '--detach', dir]);
     const w = makeRun(dir);
@@ -42,8 +45,10 @@ function withTree({ run, makeRun, branch }, fn) {
 }
 
 function commitAll(w, message) {
+  if (ok(w, ['diff', '--cached', '--quiet'])) return false;
   const identity = ok(w, ['config', 'user.email']) ? [] : ['-c', 'user.name=ssi', '-c', 'user.email=ssi@users.noreply.github.com'];
   w('git', [...identity, '-c', 'commit.gpgsign=false', 'commit', '-q', '-m', message]);
+  return true;
 }
 
 export function uploadAsset({ run, makeRun = makeRunner, branch, pr, file, push }) {

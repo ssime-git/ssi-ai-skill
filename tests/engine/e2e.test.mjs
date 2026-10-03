@@ -147,3 +147,55 @@ test('errors are clear JSON, never a crash', () => {
   assert.match(ssi('answer', 'A').json.error, /no open question/);
   assert.equal(ssi('bogus').code, 2);
 });
+
+test('a fix committed after a failed review is pushed before the next review', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  bugRunUntilReview(dir, gh, ssi);
+  gh.s.pr.sha = git(dir, 'rev-parse', 'HEAD');
+  ssi('record', '--phase', '6', '--result', 'fail');
+  commit(dir, 'src/login.js', 'better\n', 'address review');
+  ssi('record', '--phase', '5', '--result', 'pass', '--evidence', 't.txt', '--surface', 'src');
+  const out = ssi('next').json;
+  assert.equal(out.action.kind, 'push-changes');
+  gh.s.pr.sha = git(dir, 'rev-parse', 'HEAD');
+  assert.equal(ssi('next').json.action.kind, 'review');
+});
+
+test('a reply that is not A or B is refused and the question stays open', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  ssi('start', 'Touch auth');
+  ssi('record', '--phase', '1', '--result', 'pass', '--gaps', '0', '--kind', 'feature');
+  ssi('record', '--phase', '2', '--result', 'pass');
+  ssi('record', '--phase', '4', '--result', 'pass', '--touches', 'src/auth/login.js');
+  assert.equal(ssi('next').json.stop.code, 'STOP_PROTECTED');
+  assert.match(ssi('answer', 'No, do not touch auth').json.error, /letter of an option/);
+  assert.equal(ssi('next').json.stop.code, 'STOP_PROTECTED');
+  ssi('answer', 'A. approved by the user');
+  assert.equal(ssi('next').json.stop, null);
+});
+
+test('issue skip lets a bug go on when issues are impossible; a bad title is an error, not a queue', () => {
+  const dir = makeRepo();
+  const ssi = cli(dir, makeGhStub());
+  ssi('start', 'Bug');
+  ssi('record', '--phase', '1', '--result', 'pass', '--gaps', '0', '--kind', 'bug');
+  ssi('record', '--phase', '2', '--result', 'pass');
+  ssi('record', '--phase', '3', '--result', 'pass', '--evidence', 'r.js');
+  assert.match(ssi('issue', 'create').json.error, /--title is required/);
+  assert.equal(ssi('next').json.action.kind, 'open-issue');
+  ssi('issue', 'skip', '--because', 'Issues are disabled');
+  assert.equal(ssi('next').json.name, 'plan');
+});
+
+test('recording a pass with uncommitted changes warns', () => {
+  const dir = makeRepo();
+  const ssi = cli(dir, makeGhStub());
+  ssi('start', 'x');
+  writeFileSync(join(dir, 'loose.js'), 'x\n');
+  const r = ssi('record', '--phase', '5', '--result', 'pass', '--evidence', 't');
+  assert.match(r.json.warning, /uncommitted/);
+});

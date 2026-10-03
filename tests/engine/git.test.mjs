@@ -80,6 +80,13 @@ test('commitsSince counts from the start sha; an unknown start counts nothing', 
   assert.equal(f.commitsSince('deadbeef'), 0);
 });
 
+test('a sha that is not hex is never passed to git', () => {
+  const f = facts(makeRepo());
+  assert.equal(f.changedSince('--output=/tmp/ssi-pwn'), null);
+  assert.equal(f.isAncestor('--all'), false);
+  assert.equal(f.commitsSince('--all'), 0);
+});
+
 test('a detached HEAD does not throw', () => {
   const dir = makeRepo();
   git(dir, 'checkout', '-q', '--detach');

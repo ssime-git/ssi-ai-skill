@@ -6,25 +6,32 @@ const json = (s) => JSON.parse(s || 'null');
 export const makeGh = (cwd) => (args) =>
   execFileSync('gh', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
 
-export function findPr(gh, branch) {
-  const rows = json(gh(['pr', 'list', '--head', branch, '--state', 'all', '--json', 'number,state,isDraft,url', '--limit', '1']));
-  return rows?.[0] ?? null;
+export function findPr(gh, branch, known = null) {
+  const rows = json(gh(['pr', 'list', '--head', branch, '--state', 'all', '--json', 'number,state,isDraft,url,headRefOid,isCrossRepository', '--limit', '10'])) ?? [];
+  const mine = rows.filter((r) => !r.isCrossRepository);
+  const row = mine.find((r) => r.state === 'OPEN') ?? mine.find((r) => r.number === known);
+  return row ? { number: row.number, state: row.state, isDraft: row.isDraft, url: row.url, headSha: row.headRefOid ?? null } : null;
 }
+
+export const whoami = (gh) => json(gh(['api', 'user']))?.login ?? null;
+
+export const isTransient = (e) => /could not resolve|timed out|timeout|network|econn|enotfound|eai_again|connection|http 5\d\d/i.test(String(e?.message ?? e));
 
 export function listComments(gh, n) {
   return json(gh(['api', `repos/{owner}/{repo}/issues/${n}/comments`, '--paginate'])) ?? [];
 }
 
-export function readRemoteState(gh, n) {
+export function readRemoteState(gh, n, login = null) {
   for (const c of listComments(gh, n)) {
+    if (login && c.user?.login !== login) continue;
     const state = parseBlock(c.body);
     if (state) return { commentId: c.id, body: c.body, state };
   }
   return null;
 }
 
-export function upsertStateComment(gh, n, mergeFn) {
-  const found = readRemoteState(gh, n);
+export function upsertStateComment(gh, n, mergeFn, login = null) {
+  const found = readRemoteState(gh, n, login);
   const body = mergeFn(found?.body ?? null);
   if (found) {
     if (found.body === body) return { commentId: found.commentId, changed: false };

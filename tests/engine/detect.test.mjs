@@ -34,6 +34,11 @@ test('the issue is not required when the mandate does not allow issues', () => {
   assert.equal(run(state, facts(), config).phase, 4);
 });
 
+test('a skipped issue satisfies the reproduce gate', () => {
+  const state = st({ kind: 'bug', evidence: { analyze: ev(), confirm: ev(), reproduce: ev() }, issue_skipped: 'Issues are disabled' });
+  assert.equal(run(state).phase, 4);
+});
+
 test('a queued issue satisfies the reproduce gate while offline', () => {
   const state = st({ kind: 'bug', evidence: { analyze: ev(), confirm: ev(), reproduce: ev() }, pending: [{ op: 'issue', title: 't', body: 'b' }] });
   assert.equal(run(state).phase, 4);

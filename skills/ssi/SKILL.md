@@ -7,13 +7,13 @@ description: "Single-entry engineering loop. Use when the user asks to fix a bug
 
 One entry point. You do the work, the engine decides what comes next. Never decide the phase, a threshold or a stop yourself.
 
-`ssi` below means `node <skill folder>/scripts/ssi.mjs`, where `<skill folder>` is the "Base directory for this skill" shown when this skill loads. Run it from the repository you are working in. It prints JSON.
+`ssi` below means `node "<skill folder>/scripts/ssi.mjs"` (keep the quotes: the path may contain spaces), where `<skill folder>` is the "Base directory for this skill" shown when this skill loads. Run it from the repository you are working in. It prints JSON.
 
 ## The loop
 
 1. New request: `ssi start "<the user's request, in their words>"`. Resuming: skip this.
 2. Run `ssi next`. Read `action`, `stop`, `say` and `warnings`.
-3. If `stop` is set: tell the user, ask its `question` with its `options` and your recommended default, then `ssi answer "<their reply>"` and go to step 2.
+3. If `stop` is set: tell the user, ask its `question` with its `options` and your recommended default, then run `ssi answer "<letter> <their words>"`, for example `ssi answer "A. approved"`. The reply must start with the option letter; never pass free text on its own. Go to step 2.
 4. Otherwise do `action.instructions`. Read the file in `action.refs` first if you have not read it this run.
 5. Report the result with the `ssi record …` command the action gave you, then go to step 2.
 6. Stop when `done` is true. Give the user the PR link and what was verified.

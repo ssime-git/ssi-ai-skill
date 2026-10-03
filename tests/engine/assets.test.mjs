@@ -56,3 +56,33 @@ test('purge with no assets branch is a no-op', () => {
   const dir = makeRepo();
   assert.deepEqual(purgeAssets({ run: makeRunner(dir), branch: 'ssi-assets', closed: [1], push: false, dryRun: false }), { removed: [] });
 });
+
+const bare = () => {
+  const d = mkdtempSync(join(tmpdir(), 'ssi-origin-'));
+  git(d, 'init', '-q', '--bare', '-b', 'main');
+  return d;
+};
+
+test('upload is retryable: same file twice is fine, and a missed push is completed', () => {
+  const dir = makeRepo();
+  git(dir, 'remote', 'add', 'origin', bare());
+  const run = makeRunner(dir);
+  const f = gif();
+  uploadAsset({ run, branch: 'ssi-assets', pr: 3, file: f, push: false });
+  uploadAsset({ run, branch: 'ssi-assets', pr: 3, file: f, push: true });
+  assert.equal(git(dir, 'ls-remote', '--heads', 'origin', 'ssi-assets').split('\n').length, 1);
+  assert.deepEqual(tree(dir), ['pr-3/demo.gif']);
+});
+
+test('a stale local assets branch never blocks the push: the remote copy wins', () => {
+  const origin = bare();
+  const a = makeRepo();
+  git(a, 'remote', 'add', 'origin', origin);
+  uploadAsset({ run: makeRunner(a), branch: 'ssi-assets', pr: 1, file: gif('one.gif'), push: true });
+  const b = makeRepo();
+  git(b, 'remote', 'add', 'origin', origin);
+  uploadAsset({ run: makeRunner(b), branch: 'ssi-assets', pr: 2, file: gif('two.gif'), push: true });
+  uploadAsset({ run: makeRunner(a), branch: 'ssi-assets', pr: 3, file: gif('three.gif'), push: true });
+  const remote = git(a, 'ls-tree', '-r', '--name-only', 'origin/ssi-assets').split('\n').sort();
+  assert.deepEqual(remote, ['pr-1/one.gif', 'pr-2/two.gif', 'pr-3/three.gif']);
+});

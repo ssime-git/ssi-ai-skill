@@ -5,6 +5,9 @@ export const makeRunner = (cwd) => (cmd, args) =>
 
 const UI = /\.(tsx|jsx|vue|svelte|css|scss|sass|less|html)$|(^|\/)(components|pages|routes|views|styles)\//;
 
+const SHA = /^[0-9a-f]{7,64}$/i;
+const isSha = (v) => typeof v === 'string' && SHA.test(v);
+
 function attempt(run, args) {
   try {
     return run('git', args);
@@ -50,12 +53,13 @@ export function gitFacts(run) {
     uiChanged: changedFiles.some((f) => UI.test(f)),
     dirty: (attempt(run, ['status', '--porcelain']) ?? '') !== '',
     branchExists: (name) => attempt(run, ['rev-parse', '--verify', '--quiet', `refs/heads/${name}`]) !== null,
-    isAncestor: (sha) => attempt(run, ['merge-base', '--is-ancestor', sha, 'HEAD']) !== null,
+    isAncestor: (sha) => isSha(sha) && attempt(run, ['merge-base', '--is-ancestor', sha, 'HEAD']) !== null,
     commitsSince: (sha) => {
-      if (sha === null || sha === undefined) return 0;
+      if (sha !== 'EMPTY' && !isSha(sha)) return 0;
       return Number(attempt(run, ['rev-list', '--count', sha === 'EMPTY' ? 'HEAD' : `${sha}..HEAD`]) ?? 0);
     },
     changedSince: (sha) => {
+      if (!isSha(sha)) return null;
       const out = attempt(run, ['diff', '--name-only', sha, 'HEAD']);
       return out === null ? null : out.split('\n').filter(Boolean);
     },

@@ -1,6 +1,6 @@
-import { readState, writeState, newState } from './state.mjs';
+import { readState, writeState, normalize } from './state.mjs';
 import { gitFacts } from './git.mjs';
-import { findPr, readRemoteState, upsertStateComment, createIssue } from './github.mjs';
+import { findPr, whoami, readRemoteState, upsertStateComment, createIssue, isTransient } from './github.mjs';
 import { renderBlock, mergeComment, stateHash } from './remote.mjs';
 import { detectPhase } from './detect.mjs';
 import { evaluateStops, mandateStop } from './stops.mjs';
@@ -14,8 +14,10 @@ export function computeNext({ cwd, config, run, gh }) {
   if (read.warning) warnings.push(read.warning);
   const facts = gitFacts(run);
   let offline = false;
+  let login = null;
   try {
-    facts.pr = facts.branch && !facts.onBase ? findPr(gh, facts.branch) : null;
+    facts.pr = facts.branch && !facts.onBase ? findPr(gh, facts.branch, read.state?.pr ?? null) : null;
+    if (facts.pr) login = whoami(gh);
   } catch {
     facts.pr = null;
     offline = true;
@@ -25,13 +27,13 @@ export function computeNext({ cwd, config, run, gh }) {
   let remote = null;
   if (facts.pr && !offline) {
     try {
-      remote = readRemoteState(gh, facts.pr.number);
+      remote = readRemoteState(gh, facts.pr.number, login);
     } catch {
       offline = true;
     }
   }
   if (!state && remote) {
-    state = { ...newState(remote.state.goal), ...remote.state, pending: [], synced: null };
+    state = normalize({ ...remote.state, pending: [], synced: null });
     warnings.push('My local notes were missing, so I restored them from the PR.');
   }
   if (!state) {
@@ -44,11 +46,20 @@ export function computeNext({ cwd, config, run, gh }) {
   if (!offline) {
     for (const p of [...state.pending]) {
       if (p.op !== 'issue') continue;
+      const drop = (why) => {
+        state.pending = state.pending.filter((q) => q !== p);
+        warnings.push(`Dropped a queued Issue: ${why}`);
+      };
+      if (!opAllowed('issue', config)) {
+        drop('the config no longer allows issues.');
+        continue;
+      }
       try {
         state.issue = createIssue(gh, { title: p.title, body: p.body, key: `ssi:${state.run_id}:issue` }).number;
         state.pending = state.pending.filter((q) => q !== p);
-      } catch {
-        offline = true;
+      } catch (e) {
+        if (isTransient(e)) offline = true;
+        else drop(String(e.message).split('\n')[0]);
       }
     }
   }
@@ -77,7 +88,7 @@ export function computeNext({ cwd, config, run, gh }) {
     if (hash !== state.synced) {
       try {
         const header = `**SSI progress** ${bar(det.phase)} ${Math.min(det.phase, 8)}/8`;
-        upsertStateComment(gh, facts.pr.number, (existing) => mergeComment(existing, renderBlock(state, header)));
+        upsertStateComment(gh, facts.pr.number, (existing) => mergeComment(existing, renderBlock(state, header)), login);
         state.synced = hash;
       } catch {
         warnings.push('I could not update the PR progress comment. I will retry next time.');

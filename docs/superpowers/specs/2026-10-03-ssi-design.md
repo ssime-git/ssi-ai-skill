@@ -92,7 +92,7 @@ Heal cases (each covered by an engine test):
 - state file missing, or `head_sha` differs → rebuilt from facts, with a warning line;
 - evidence from an old SHA on a changed surface → stale, replayed;
 - branch deleted, force-push, PR closed → `STOP_REALITY`, never silently recreated;
-- state comment edited by a human → re-read before every write and merged, never overwritten;
+- state comment edited by a human → re-read before every write; text outside the `ssi:begin`/`ssi:end` markers is kept, and only the block between them is replaced (a deleted block is appended again);
 - network down → local work continues, remote ops queued in `pending`, replayed when back.
 
 Idempotency: every remote effect carries key `ssi:<run_id>:<op>`; the engine searches for the key before creating (no duplicate Issue, PR, comment, asset).

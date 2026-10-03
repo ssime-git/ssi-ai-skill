@@ -4,7 +4,7 @@ Goal: a second pair of eyes that did not write the code.
 
 Order of reviewers (settings can change it):
 
-1. **Codex CLI**: `codex exec review --base <base branch>`. Verified for the installed version; run it from the repository root.
+1. **Codex CLI**: `codex exec review --base <base branch>`, from the repository root. The command exists in codex-cli 0.154, but it fails when the configured model is not allowed for the account (seen: "model is not supported when using Codex with a ChatGPT account"). If Codex is installed but fails for any reason (model, login, network), treat it as missing and say why. Do not guess another model name.
 2. A **sub-agent on a different model**.
 3. A **fresh-context sub-agent** of the same model. Tell the user this review is not independent.
 
