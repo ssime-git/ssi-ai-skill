@@ -35,7 +35,7 @@ export function gitFacts(run) {
   const changedFiles = [];
   if (base && !onBase) {
     commitsAhead = Number(attempt(run, ['rev-list', '--count', `${base}..HEAD`]) ?? 0);
-    const numstat = attempt(run, ['diff', '--numstat', `${base}...HEAD`]) ?? '';
+    const numstat = attempt(run, ['diff', '--numstat', '--no-renames', `${base}...HEAD`]) ?? '';
     for (const row of numstat.split('\n').filter(Boolean)) {
       const [added, deleted, ...name] = row.split('\t');
       lines += (Number(added) || 0) + (Number(deleted) || 0);

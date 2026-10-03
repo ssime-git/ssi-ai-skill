@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { makeRepo, commit, git } from '../helpers/repo.mjs';
 import { makeRunner, gitFacts, resolveBase } from '../../skills/ssi/scripts/lib/git.mjs';
 
@@ -31,6 +33,19 @@ test('counts commits, changed lines, files and UI surface', () => {
   assert.equal(f.diff.lines, 4);
   assert.equal(f.uiChanged, true);
   assert.deepEqual(f.changedFiles.sort(), ['src/a.js', 'src/components/B.tsx']);
+});
+
+test('a file renamed into a protected folder is reported by its real paths', () => {
+  const dir = makeRepo();
+  commit(dir, 'src/ordinary/login.js', 'line one\nline two\nline three\nline four\n', 'seed');
+  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  mkdirSync(join(dir, 'src/auth'), { recursive: true });
+  git(dir, 'mv', 'src/ordinary/login.js', 'src/auth/login.js');
+  git(dir, 'commit', '-q', '-am', 'move');
+  const f = facts(dir);
+  assert.ok(f.changedFiles.includes('src/auth/login.js'), f.changedFiles.join(','));
+  assert.ok(f.changedFiles.includes('src/ordinary/login.js'));
+  assert.ok(f.changedFiles.every((p) => !p.includes('=>')));
 });
 
 test('a non-UI change does not flag the UI', () => {

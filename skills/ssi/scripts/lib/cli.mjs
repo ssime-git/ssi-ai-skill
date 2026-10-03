@@ -5,7 +5,7 @@ import { gitFacts, makeRunner } from './git.mjs';
 import { computeNext } from './next.mjs';
 import { applyRecord } from './record.mjs';
 import { applyAnswer } from './stops.mjs';
-import { createIssue, closedPrNumbers, isTransient } from './github.mjs';
+import { createIssue, closedPrNumbers, isTransient, findPr } from './github.mjs';
 import { uploadAsset, purgeAssets } from './assets.mjs';
 
 const USAGE = 'Usage: ssi <start|next|record|answer|config|allow|issue|upload|purge> [options]\n';
@@ -86,7 +86,13 @@ export function main(argv, { cwd, gh, run, write }) {
       }
       case 'answer': {
         const state = needState();
-        applyAnswer(state, gitFacts(run), pos.slice(1).join(' '));
+        const here = gitFacts(run);
+        try {
+          here.pr = state.branch ? findPr(gh, state.branch, state.pr) : null;
+        } catch {
+          here.pr = null;
+        }
+        applyAnswer(state, here, pos.slice(1).join(' '));
         writeState(cwd, state);
         out({ ok: true, stop: state.stop });
         return 0;

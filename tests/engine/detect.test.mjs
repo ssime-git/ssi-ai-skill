@@ -39,6 +39,16 @@ test('a skipped issue satisfies the reproduce gate', () => {
   assert.equal(run(state).phase, 4);
 });
 
+test('recovery moves on: once the implementation is recorded the run reaches review, it does not clamp to 5 forever', () => {
+  const f = facts({ branch: 'ssi/x', onBase: false, commitsSinceStart: 2, headSha: 'H2' });
+  assert.equal(run(st(), f).phase, 5);
+  const after = st({ evidence: { implement: ev('H2') } });
+  const r = run(after, f);
+  assert.deepEqual([r.phase, r.name], [6, 'review']);
+  const done = st({ evidence: { implement: ev('H2'), review: ev('H2'), land: ev('H2') } });
+  assert.equal(run(done, f).phase, 9);
+});
+
 test('a queued issue satisfies the reproduce gate while offline', () => {
   const state = st({ kind: 'bug', evidence: { analyze: ev(), confirm: ev(), reproduce: ev() }, pending: [{ op: 'issue', title: 't', body: 'b' }] });
   assert.equal(run(state).phase, 4);

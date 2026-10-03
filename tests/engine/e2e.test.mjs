@@ -90,6 +90,17 @@ test('heal: a force-push is a reality stop, adopted only after an answer', () =>
   assert.equal(ssi('next').json.stop, null);
 });
 
+test('a closed PR is adopted with an answer and does not come back as a stop', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  bugRunUntilReview(dir, gh, ssi);
+  gh.s.pr.state = 'CLOSED';
+  assert.match(ssi('next').json.stop.because, /closed/);
+  ssi('answer', 'A. adopt');
+  assert.equal(ssi('next').json.stop, null);
+});
+
 test('a review that fails twice stops, and the answer gives it more rounds', () => {
   const dir = makeRepo();
   const gh = makeGhStub();
