@@ -80,6 +80,8 @@ test('actionFor: never push the base branch, push fixes before review, land and 
   for (const name of ['review', 'visual', 'land', 'done']) {
     assert.equal(actionFor({ name, state: st, facts: behind, config: DEFAULTS }).kind, 'push-changes', name);
   }
+  const lagging = f({ pr: { number: 1, headSha: 'R', isDraft: true }, remoteSha: 'L' });
+  assert.equal(actionFor({ name: 'review', state: st, facts: lagging, config: DEFAULTS }).kind, 'review');
   const synced = f({ pr: { number: 1, headSha: 'L', isDraft: true } });
   assert.equal(actionFor({ name: 'review', state: st, facts: synced, config: DEFAULTS }).kind, 'review');
 });

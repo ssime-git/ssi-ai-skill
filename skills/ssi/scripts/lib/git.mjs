@@ -52,6 +52,7 @@ export function gitFacts(run) {
     diff: { lines, files: changedFiles.length },
     uiChanged: changedFiles.some((f) => UI.test(f)),
     dirty: (attempt(run, ['status', '--porcelain']) ?? '') !== '',
+    remoteSha: branch && branch !== 'HEAD' ? attempt(run, ['rev-parse', '--verify', '--quiet', `refs/remotes/origin/${branch}`]) : null,
     branchExists: (name) => attempt(run, ['rev-parse', '--verify', '--quiet', `refs/heads/${name}`]) !== null,
     isAncestor: (sha) => isSha(sha) && attempt(run, ['merge-base', '--is-ancestor', sha, 'HEAD']) !== null,
     commitsSince: (sha) => {

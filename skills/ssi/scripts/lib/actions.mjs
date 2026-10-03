@@ -3,7 +3,9 @@ const ref = (n) => [`references/${n}.md`];
 const AFTER_PUSH = new Set(['review', 'visual', 'land', 'done']);
 
 export function actionFor({ name, state, facts, config }) {
-  if (AFTER_PUSH.has(name) && facts.pr?.headSha && facts.pr.headSha !== facts.headSha) {
+  // GitHub reports the new PR head a few seconds after a push; our own remote-tracking ref is immediate.
+  const pushed = facts.remoteSha && facts.remoteSha === facts.headSha;
+  if (AFTER_PUSH.has(name) && facts.pr?.headSha && facts.pr.headSha !== facts.headSha && !pushed) {
     return {
       kind: 'push-changes',
       headline: 'Push your latest commits to the PR',

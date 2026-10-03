@@ -80,6 +80,14 @@ test('commitsSince counts from the start sha; an unknown start counts nothing', 
   assert.equal(f.commitsSince('deadbeef'), 0);
 });
 
+test('remoteSha follows the remote-tracking ref of the current branch', () => {
+  const dir = makeRepo();
+  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  assert.equal(facts(dir).remoteSha, null);
+  git(dir, 'update-ref', 'refs/remotes/origin/ssi/x', 'HEAD');
+  assert.equal(facts(dir).remoteSha, git(dir, 'rev-parse', 'HEAD'));
+});
+
 test('a sha that is not hex is never passed to git', () => {
   const f = facts(makeRepo());
   assert.equal(f.changedSince('--output=/tmp/ssi-pwn'), null);
