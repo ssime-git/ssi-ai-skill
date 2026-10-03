@@ -89,14 +89,19 @@ export function actionFor({ name, state, facts, config }) {
         refs: ref('implement'),
         requires: [],
       };
-    case 'review':
+    case 'review': {
+      const r = config.review;
+      const codex = [`codex exec review --base ${facts.base ?? 'main'}`, '-c \'sandbox_mode="read-only"\'', '-c \'approval_policy="never"\''];
+      if (r.codexModel) codex.push(`-c 'model="${r.codexModel}"'`);
+      if (r.codexEffort) codex.push(`-c 'model_reasoning_effort="${r.codexEffort}"'`);
       return {
         kind: 'review',
         headline: 'Get an independent review',
-        instructions: `Review with an independent reviewer, in this order: ${config.review.reviewers.join(', ')}${config.review.parallel ? ' (run them in parallel and merge the findings)' : ''}. For Codex run: codex exec review --base ${facts.base ?? 'main'}. If Codex is missing, use a sub-agent on another model, else a fresh-context sub-agent. Say which reviewer really ran and whether it was independent. Fix blockers. Then run: ssi record --phase 6 --result pass|fail --evidence <report file> --note "<reviewer>; independent: yes|no".`,
+        instructions: `Review with an independent reviewer, in this order: ${r.reviewers.join(', ')}${r.parallel ? ' (run them in parallel and merge the findings)' : ''}. For Codex check it first (codex --version, codex login status), then run it in the background: ${codex.join(' ')}. If Codex is missing, not logged in, or fails for any reason (an unsupported model counts), treat it as missing and say why; then use a sub-agent on another model, else a fresh-context sub-agent. Say which reviewer really ran and whether it was independent. Fix blockers. Then run: ssi record --phase 6 --result pass|fail --evidence <report file> --note "<reviewer>; independent: yes|no".`,
         refs: ref('review'),
         requires: [],
       };
+    }
     case 'visual':
       return {
         kind: 'capture-visual',

@@ -10,7 +10,7 @@ export const DEFAULTS = Object.freeze({
     visualRetries: 2,
     ciRetries: 2,
   },
-  review: { reviewers: ['codex', 'subagent'], parallel: false },
+  review: { reviewers: ['codex', 'subagent'], parallel: false, codexModel: '', codexEffort: '' },
   ci: { watch: true, reviewComments: false },
   visual: { enabled: 'auto', tool: 'playwright' },
   assets: { branch: 'ssi-assets', purge: true },
@@ -54,6 +54,10 @@ function checkValues(over) {
     if (v !== undefined && !allowed.includes(v)) {
       throw new Error(`Config key ${p} must be one of: ${allowed.join(', ')}`);
     }
+  }
+  for (const p of ['review.codexModel', 'review.codexEffort']) {
+    const v = at(over, p);
+    if (v !== undefined && v !== '' && !/^[\w.-]+$/.test(v)) throw new Error(`Config key ${p} may only contain letters, digits, dots, dashes and underscores`);
   }
   for (const op of at(over, 'mandate.allow') ?? []) {
     if (FORBIDDEN_OPS.includes(op)) throw new Error(`"${op}" can never be allowed by config`);

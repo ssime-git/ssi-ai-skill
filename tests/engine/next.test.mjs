@@ -173,3 +173,18 @@ test('computeNext: queued issue is created when the network is back', () => {
   assert.equal(readState(dir).state.issue, 1);
   assert.equal(readState(dir).state.pending.length, 0);
 });
+
+test('actionFor review: read-only Codex, no forced model unless configured, fallback spelled out', () => {
+  const st = newState('g');
+  const f = { base: 'main', commitsSinceStart: 1, pr: null, onBase: false };
+  const plain = actionFor({ name: 'review', state: st, facts: f, config: DEFAULTS }).instructions;
+  assert.match(plain, /codex exec review --base main/);
+  assert.match(plain, /sandbox_mode="read-only"/);
+  assert.match(plain, /approval_policy="never"/);
+  assert.doesNotMatch(plain, /model="/);
+  assert.match(plain, /treat it as missing/);
+  const tuned = merge(DEFAULTS, { review: { codexModel: 'gpt-5.5-terra', codexEffort: 'medium' } });
+  const withModel = actionFor({ name: 'review', state: st, facts: f, config: tuned }).instructions;
+  assert.match(withModel, /model="gpt-5\.5-terra"/);
+  assert.match(withModel, /model_reasoning_effort="medium"/);
+});

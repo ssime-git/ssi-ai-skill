@@ -110,3 +110,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## openai/codex-plugin-cc (inspiration only)
+
+Source: https://github.com/openai/codex-plugin-cc
+No files are copied. The Codex calling approach (installed `codex` binary, read-only sandbox, no approvals, model left to the user's config, background run) and the field names of the review report in `references/review.md` follow that project. It is licensed under Apache-2.0; consult its LICENSE for terms.

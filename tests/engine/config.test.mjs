@@ -61,3 +61,12 @@ test('opAllowed honours the mandate and the floor', () => {
   assert.equal(opAllowed('ready', { mandate: { allow: [], ready: true } }), true);
   assert.equal(opAllowed('merge', { mandate: { allow: ['merge'], ready: true } }), false);
 });
+
+test('the Codex model and effort are plain names, never shell text', () => {
+  const ok = tmp();
+  put(ok, 'ssi.config.json', { review: { codexModel: 'gpt-5.5-terra', codexEffort: 'medium' } });
+  assert.equal(loadConfig({ cwd: ok }).review.codexModel, 'gpt-5.5-terra');
+  const bad = tmp();
+  put(bad, 'ssi.config.json', { review: { codexModel: 'x"; rm -rf ~; "' } });
+  assert.throws(() => loadConfig({ cwd: bad }), /review\.codexModel may only contain/);
+});
