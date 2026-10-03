@@ -14,8 +14,8 @@ const gif = (name = 'demo.gif') => {
 };
 const tree = (dir) => git(dir, 'ls-tree', '-r', '--name-only', 'ssi-assets').split('\n').filter(Boolean).sort();
 
-test('rawUrl handles https and ssh remotes and rejects others', () => {
-  const want = 'https://raw.githubusercontent.com/o/r/ssi-assets/pr-7/demo.gif';
+test('the link works for private repos: github.com blob ?raw=true, never raw.githubusercontent', () => {
+  const want = 'https://github.com/o/r/blob/ssi-assets/pr-7/demo.gif?raw=true';
   assert.equal(rawUrl('https://github.com/o/r.git', 'ssi-assets', 'pr-7/demo.gif'), want);
   assert.equal(rawUrl('git@github.com:o/r.git', 'ssi-assets', 'pr-7/demo.gif'), want);
   assert.equal(rawUrl('/local/path', 'ssi-assets', 'x'), null);
@@ -30,7 +30,7 @@ test('upload creates the orphan branch without touching main, then reuses it', (
   git(dir, 'remote', 'add', 'origin', 'https://github.com/o/r.git');
   const run = makeRunner(dir);
   const a = uploadAsset({ run, branch: 'ssi-assets', pr: 7, file: gif(), push: false });
-  assert.equal(a.url, 'https://raw.githubusercontent.com/o/r/ssi-assets/pr-7/demo.gif');
+  assert.equal(a.url, 'https://github.com/o/r/blob/ssi-assets/pr-7/demo.gif?raw=true');
   assert.match(a.markdown, /^!\[demo\]\(https:/);
   assert.deepEqual(tree(dir), ['pr-7/demo.gif']);
   assert.deepEqual(git(dir, 'ls-tree', '-r', '--name-only', 'main').split('\n'), ['README.md']);

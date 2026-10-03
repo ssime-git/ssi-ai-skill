@@ -8,4 +8,6 @@ The engine skips this phase when the diff has no UI surface.
 4. Paste that Markdown into the PR body under "Proof".
 5. `ssi record --phase 7 --result pass|fail --evidence <gif path>`.
 
+The link uses `github.com/<owner>/<repo>/blob/ssi-assets/<path>?raw=true`, which renders for signed-in members even in private repositories. After pasting it, ask the user to confirm the GIF shows in the PR; if it does not, keep a plain link to the file instead and say so.
+
 `fail` means the screen is not right: fix it (back to phase 5). Never edit the GIF. If no browser is available, say so; do not claim visual proof.

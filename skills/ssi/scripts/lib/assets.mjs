@@ -5,7 +5,9 @@ import { makeRunner } from './git.mjs';
 
 export function rawUrl(remoteUrl, branch, path) {
   const m = /github\.com[:/]([^/]+)\/(.+?)(?:\.git)?$/.exec(remoteUrl.trim());
-  return m ? `https://raw.githubusercontent.com/${m[1]}/${m[2]}/${branch}/${path}` : null;
+  // github.com/.../blob/...?raw=true renders in PRs of private repos for signed-in members;
+  // raw.githubusercontent.com does not (it needs a token), so it is never used.
+  return m ? `https://github.com/${m[1]}/${m[2]}/blob/${branch}/${path}?raw=true` : null;
 }
 
 export function planPurge(closed, paths) {
