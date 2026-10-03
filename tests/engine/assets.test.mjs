@@ -86,3 +86,16 @@ test('a stale local assets branch never blocks the push: the remote copy wins', 
   const remote = git(a, 'ls-tree', '-r', '--name-only', 'origin/ssi-assets').split('\n').sort();
   assert.deepEqual(remote, ['pr-1/one.gif', 'pr-2/two.gif', 'pr-3/three.gif']);
 });
+
+test('purge looks at the remote tree, not a stale local assets branch', () => {
+  const origin = bare();
+  const a = makeRepo();
+  git(a, 'remote', 'add', 'origin', origin);
+  uploadAsset({ run: makeRunner(a), branch: 'ssi-assets', pr: 1, file: gif('one.gif'), push: true });
+  const b = makeRepo();
+  git(b, 'remote', 'add', 'origin', origin);
+  uploadAsset({ run: makeRunner(b), branch: 'ssi-assets', pr: 2, file: gif('two.gif'), push: true });
+  const out = purgeAssets({ run: makeRunner(a), branch: 'ssi-assets', closed: [2], push: true, dryRun: false });
+  assert.deepEqual(out.removed, ['pr-2/two.gif']);
+  assert.deepEqual(git(a, 'ls-tree', '-r', '--name-only', 'origin/ssi-assets').split('\n'), ['pr-1/one.gif']);
+});

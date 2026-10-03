@@ -117,9 +117,10 @@ test('answers reset budgets and re-anchor reality', () => {
   applyAnswer(u, facts(), 'A. Use Postgres');
   assert.equal(u.analysis.blockingGaps, 0);
   assert.ok(u.evidence.analyze);
-  const y = base({ branch: 'ssi/old', pr: 5, stop: { code: 'STOP_REALITY' } });
+  const y = base({ branch: 'ssi/old', pr: 5, evidence: { land: { path: 'l' }, visual: { path: 'v' }, review: { path: 'r' } }, stop: { code: 'STOP_REALITY' } });
   applyAnswer(y, facts({ branch: 'ssi/new', headSha: 'N', pr: { state: 'CLOSED' } }), 'A');
   assert.deepEqual([y.branch, y.head_sha, y.pr], ['ssi/new', 'N', null]);
+  assert.deepEqual(Object.keys(y.evidence), ['review']);
 });
 
 test('answering with no open question is an error', () => {

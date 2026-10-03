@@ -9,8 +9,10 @@ export function applyRecord(state, args, headSha) {
   state.attempts ??= {};
   if (result === 'fail') {
     state.attempts[name] = (state.attempts[name] ?? 0) + 1;
-    if (phase === 2) delete state.evidence.analyze;
-    if (phase >= 6) for (const n of ['implement', 'review', 'visual', 'land']) delete state.evidence[n];
+    // Failing a phase invalidates it and everything built on it. Confirm failing goes back to
+    // analysis; implement, review, visual and land failing go back to implement.
+    const from = phase <= 2 ? 0 : phase >= 5 ? 4 : phase - 1;
+    for (const n of PHASES.slice(from)) delete state.evidence[n];
     return state;
   }
   state.attempts[name] = 0;

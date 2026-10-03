@@ -133,7 +133,11 @@ export function applyAnswer(state, facts, text) {
     case 'STOP_REALITY':
       state.branch = facts.branch;
       state.head_sha = facts.headSha;
-      if (facts.pr?.state && facts.pr.state !== 'OPEN') state.pr = null;
+      if (facts.pr?.state && facts.pr.state !== 'OPEN') {
+        state.pr = null;
+        delete state.evidence.land;
+        delete state.evidence.visual;
+      }
       break;
     default: break;
   }

@@ -14,6 +14,15 @@ export function actionFor({ name, state, facts, config }) {
       requires: ['push'],
     };
   }
+  if (AFTER_PUSH.has(name) && !facts.pr) {
+    return {
+      kind: 'open-draft-pr',
+      headline: 'Push the branch and open a draft PR',
+      instructions: 'There is no open PR for this branch. Push it, then run: gh pr create --draft --title "<title>" --body "<summary; Closes #<issue> if there is one>". Then run: ssi next.',
+      refs: ref('implement'),
+      requires: ['push', 'draft-pr'],
+    };
+  }
   switch (name) {
     case 'analyze':
       return {

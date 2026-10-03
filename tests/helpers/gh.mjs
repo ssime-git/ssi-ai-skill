@@ -8,7 +8,7 @@ export function makeGhStub() {
     const [a, b] = args;
     if (a === 'api' && b === 'user') return JSON.stringify({ login: 'me' });
     if (a === 'pr' && b === 'list') {
-      if (args.includes('closed')) return '[]';
+      if (!args.includes('--head')) return JSON.stringify(s.pr ? [{ number: s.pr.number, state: s.pr.state }] : []);
       const head = args[args.indexOf('--head') + 1];
       return JSON.stringify(s.pr && s.pr.head === head ? [pub(s.pr)] : []);
     }
@@ -24,7 +24,7 @@ export function makeGhStub() {
         s.comments.push(c);
         return JSON.stringify(c);
       }
-      return JSON.stringify(s.comments);
+      return JSON.stringify(args.includes('--slurp') ? [s.comments] : s.comments);
     }
     if (a === 'issue' && b === 'list') return JSON.stringify(s.issues);
     if (a === 'issue' && b === 'create') {

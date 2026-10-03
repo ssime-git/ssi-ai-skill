@@ -28,9 +28,8 @@ function check(name, state, facts, config) {
 export function detectPhase({ state, facts, config }) {
   const skip = skipped(state, facts, config);
   const stale = [];
-  // Commits made since the run started mean the early phases are behind us. Notes that
-  // lack their evidence are recovered from the repo, not demanded again.
-  const floor = (facts.commitsSinceStart ?? 0) > 0 ? 5 : 1;
+  // Evidence alone decides the phase. Commits never skip a phase: a failing reproduction
+  // artifact is committed during phase 3, long before the plan or the implementation.
   const warnings = [];
   let phase = PHASES.length + 1;
   for (let i = 0; i < PHASES.length; i++) {
@@ -38,13 +37,10 @@ export function detectPhase({ state, facts, config }) {
     if (skip.has(name)) continue;
     const r = check(name, state, facts, config);
     if (r.stale) stale.push(name);
-    if (r.ok) continue;
-    if (i + 1 < floor) {
-      if (!warnings.length) warnings.push(`My notes were behind the repo, so I resumed at phase ${floor} from what git and the PR show.`);
-      continue;
+    if (!r.ok) {
+      phase = i + 1;
+      break;
     }
-    phase = i + 1;
-    break;
   }
   return { phase, name: PHASES[phase - 1] ?? 'done', stale, skipped: [...skip], warnings };
 }

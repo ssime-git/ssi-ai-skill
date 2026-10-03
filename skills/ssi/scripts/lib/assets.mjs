@@ -74,7 +74,8 @@ export function uploadAsset({ run, makeRun = makeRunner, branch, pr, file, push 
 
 export function purgeAssets({ run, makeRun = makeRunner, branch, closed, push, dryRun }) {
   let paths = null;
-  for (const ref of [branch, `origin/${branch}`]) {
+  ok(run, ['fetch', '-q', 'origin', `${branch}:refs/remotes/origin/${branch}`]);
+  for (const ref of [`origin/${branch}`, branch]) {
     try {
       paths = run('git', ['ls-tree', '-r', '--name-only', ref]).split('\n').filter(Boolean);
       break;

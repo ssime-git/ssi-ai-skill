@@ -86,7 +86,7 @@ Plan rules: search for code, helpers and patterns to reuse first; propose the sm
 - **Remote**: hidden block `<!-- ssi:state … -->` in a PR comment, rewritten on each transition. Enables resume on another machine.
 - **Truth order**: git, then PR/Issue, then local file. The file never overrides facts.
 
-Phase detection: evidence decides the phase. The only floor is commits made *since the run started* (`start_sha`, recorded by `ssi start`): they imply at least phase 5. Pre-existing commits, an existing PR or an `ssi/` branch name never skip analysis. Review and visual evidence is restored from the PR state block.
+Phase detection: recorded evidence alone decides the phase. Commits, an existing PR or an `ssi/` branch name never skip a phase (a failing reproduction artifact is committed during phase 3). `start_sha`, recorded by `ssi start`, only tells the implement step whether this run has committed anything. Review and visual evidence is restored from the PR state block.
 
 Heal cases (each covered by an engine test):
 - state file missing, or `head_sha` differs → rebuilt from facts, with a warning line;

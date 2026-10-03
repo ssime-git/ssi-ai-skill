@@ -85,7 +85,7 @@ export function computeNext({ cwd, config, run, gh }) {
 
   if (facts.pr && !offline && opAllowed('comment', config)) {
     const hash = stateHash(state);
-    if (hash !== state.synced) {
+    if (hash !== state.synced || !remote) {
       try {
         const header = `**SSI progress** ${bar(det.phase)} ${Math.min(det.phase, 8)}/8`;
         upsertStateComment(gh, facts.pr.number, (existing) => mergeComment(existing, renderBlock(state, header)), login);

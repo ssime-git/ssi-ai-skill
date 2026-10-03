@@ -39,6 +39,17 @@ test('applyRecord: failing review or CI sends the run back to implement', () => 
   assert.equal(s.attempts.review, 1);
 });
 
+test('applyRecord: a failure removes that evidence and everything built on it', () => {
+  const s = newState('g');
+  for (let n = 1; n <= 8; n++) applyRecord(s, { phase: n, result: 'pass' }, 'abc');
+  applyRecord(s, { phase: 5, result: 'fail' }, 'abc');
+  assert.deepEqual(Object.keys(s.evidence).sort(), ['analyze', 'confirm', 'plan', 'reproduce']);
+  applyRecord(s, { phase: 3, result: 'fail' }, 'abc');
+  assert.deepEqual(Object.keys(s.evidence).sort(), ['analyze', 'confirm']);
+  applyRecord(s, { phase: 1, result: 'fail' }, 'abc');
+  assert.deepEqual(Object.keys(s.evidence), []);
+});
+
 test('applyRecord: failing confirm goes back to analyze; bad input is a clear error', () => {
   const s = newState('g');
   applyRecord(s, { phase: 1, result: 'pass', gaps: 0 }, 'a');
@@ -115,6 +126,29 @@ test('computeNext: a queued issue that fails for good is dropped, not retried fo
   assert.match(out.warnings.join(' '), /Dropped a queued Issue/);
 });
 
+test('actionFor: without an open PR a finished-looking run opens one instead of saying done', () => {
+  const st = newState('g');
+  const f = { base: 'main', commitsSinceStart: 1, pr: null, onBase: false, headSha: 'L' };
+  for (const name of ['review', 'visual', 'land', 'done']) {
+    const a = actionFor({ name, state: st, facts: f, config: DEFAULTS });
+    assert.deepEqual([a.kind, a.requires], ['open-draft-pr', ['push', 'draft-pr']], name);
+  }
+});
+
+test('computeNext: a deleted progress comment is written again even when nothing changed', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  writeState(dir, { ...newState('fix it'), start_sha: git(dir, 'rev-parse', 'HEAD'), kind: 'feature' });
+  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  commit(dir, 'src/a.js', '1\n', 'a');
+  gh.openPr(1, 'ssi/x');
+  next(dir, gh);
+  assert.equal(gh.s.comments.length, 1);
+  gh.s.comments.length = 0;
+  next(dir, gh);
+  assert.equal(gh.s.comments.length, 1);
+});
+
 test('computeNext: no run yet asks to start', () => {
   const out = next(makeRepo(), makeGhStub());
   assert.equal(out.action.kind, 'start');
@@ -178,7 +212,7 @@ test('computeNext: queued issue is created when the network is back', () => {
 
 test('actionFor review: read-only Codex, no forced model unless configured, fallback spelled out', () => {
   const st = newState('g');
-  const f = { base: 'main', commitsSinceStart: 1, pr: null, onBase: false };
+  const f = { base: 'main', commitsSinceStart: 1, pr: { number: 1, headSha: 'L' }, headSha: 'L', onBase: false };
   const plain = actionFor({ name: 'review', state: st, facts: f, config: DEFAULTS }).instructions;
   assert.match(plain, /codex exec review --base main/);
   assert.match(plain, /sandbox_mode="read-only"/);

@@ -210,3 +210,20 @@ test('recording a pass with uncommitted changes warns', () => {
   const r = ssi('record', '--phase', '5', '--result', 'pass', '--evidence', 't');
   assert.match(r.json.warning, /uncommitted/);
 });
+
+test('after adopting a closed PR the run opens a new draft PR instead of saying done', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  bugRunUntilReview(dir, gh, ssi);
+  ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 'r.md');
+  ssi('record', '--phase', '8', '--result', 'pass');
+  assert.equal(ssi('next').json.done, true);
+  gh.s.pr.state = 'CLOSED';
+  ssi('next');
+  ssi('answer', 'A. adopt');
+  const out = ssi('next').json;
+  assert.equal(out.stop, null);
+  assert.equal(out.done, false);
+  assert.equal(out.action.kind, 'open-draft-pr');
+});

@@ -39,16 +39,6 @@ test('a skipped issue satisfies the reproduce gate', () => {
   assert.equal(run(state).phase, 4);
 });
 
-test('recovery moves on: once the implementation is recorded the run reaches review, it does not clamp to 5 forever', () => {
-  const f = facts({ branch: 'ssi/x', onBase: false, commitsSinceStart: 2, headSha: 'H2' });
-  assert.equal(run(st(), f).phase, 5);
-  const after = st({ evidence: { implement: ev('H2') } });
-  const r = run(after, f);
-  assert.deepEqual([r.phase, r.name], [6, 'review']);
-  const done = st({ evidence: { implement: ev('H2'), review: ev('H2'), land: ev('H2') } });
-  assert.equal(run(done, f).phase, 9);
-});
-
 test('a queued issue satisfies the reproduce gate while offline', () => {
   const state = st({ kind: 'bug', evidence: { analyze: ev(), confirm: ev(), reproduce: ev() }, pending: [{ op: 'issue', title: 't', body: 'b' }] });
   assert.equal(run(state).phase, 4);
@@ -93,11 +83,9 @@ test('an unknown sha makes evidence stale', () => {
   assert.equal(run(state, f).phase, 5);
 });
 
-test('floor: commits made since the run started mean at least phase 5; old work never skips analysis', () => {
-  const a = run(st(), facts({ branch: 'ssi/x', onBase: false, commitsSinceStart: 2 }));
-  assert.equal(a.phase, 5);
-  assert.match(a.warnings[0], /resumed at phase 5/);
-  assert.equal(run(st(), facts({ branch: 'ssi/x', onBase: false, commitsAhead: 5 })).phase, 1);
-  assert.equal(run(st(), facts({ branch: 'feature-y', onBase: false })).phase, 1);
-  assert.equal(run(st(), facts({ pr: { number: 3, state: 'OPEN', isDraft: true } })).phase, 1);
+test('commits made during the early phases never skip a phase: evidence decides', () => {
+  const f = facts({ branch: 'ssi/x', onBase: false, commitsSinceStart: 2, commitsAhead: 5, pr: { number: 3, state: 'OPEN', isDraft: true } });
+  assert.equal(run(st(), f).phase, 1);
+  assert.equal(run(st({ evidence: { analyze: ev(), confirm: ev() } }), f).phase, 4);
 });
+

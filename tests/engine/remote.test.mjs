@@ -96,8 +96,14 @@ test('createIssue is idempotent by key', () => {
   assert.equal(gh.s.issues.length, 1);
 });
 
-test('closedPrNumbers lists numbers and makeGh is a function factory', () => {
+test('closedPrNumbers lists closed and merged PRs, not open ones, and makeGh is a function factory', () => {
   const gh = makeGhStub();
   assert.deepEqual(closedPrNumbers(gh), []);
+  gh.openPr(7, 'ssi/x');
+  assert.deepEqual(closedPrNumbers(gh), []);
+  gh.s.pr.state = 'MERGED';
+  assert.deepEqual(closedPrNumbers(gh), [7]);
+  gh.s.pr.state = 'CLOSED';
+  assert.deepEqual(closedPrNumbers(gh), [7]);
   assert.equal(typeof makeGh('.'), 'function');
 });

@@ -18,7 +18,9 @@ export const whoami = (gh) => json(gh(['api', 'user']))?.login ?? null;
 export const isTransient = (e) => /could not resolve|timed out|timeout|network|econn|enotfound|eai_again|connection|http 5\d\d/i.test(String(e?.message ?? e));
 
 export function listComments(gh, n) {
-  return json(gh(['api', `repos/{owner}/{repo}/issues/${n}/comments`, '--paginate'])) ?? [];
+  // --paginate alone prints one JSON array per page back to back; --slurp wraps them in one array.
+  const pages = json(gh(['api', `repos/{owner}/{repo}/issues/${n}/comments`, '--paginate', '--slurp'])) ?? [];
+  return Array.isArray(pages) ? pages.flat() : [];
 }
 
 export function readRemoteState(gh, n, login = null) {
@@ -54,5 +56,8 @@ export function createIssue(gh, { title, body, key }) {
   return { number: Number(url.split('/').pop()), created: true };
 }
 
+// `--state closed` leaves merged PRs out, so list everything and drop the open ones.
 export const closedPrNumbers = (gh) =>
-  (json(gh(['pr', 'list', '--state', 'closed', '--json', 'number', '--limit', '200'])) ?? []).map((r) => r.number);
+  (json(gh(['pr', 'list', '--state', 'all', '--json', 'number,state', '--limit', '200'])) ?? [])
+    .filter((r) => r.state !== 'OPEN')
+    .map((r) => r.number);
