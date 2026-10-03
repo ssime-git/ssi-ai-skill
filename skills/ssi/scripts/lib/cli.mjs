@@ -68,6 +68,9 @@ export function main(argv, { cwd, gh, run, write }) {
         const state = needState();
         const phase = Number(flags.phase);
         const here = gitFacts(run);
+        if (flags.result === 'pass' && [5, 6, 7].includes(phase) && here.dirty) {
+          throw new Error('You have uncommitted changes. Commit them first, so this proof covers the committed code.');
+        }
         applyRecord(state, {
           phase,
           result: flags.result,
@@ -80,8 +83,7 @@ export function main(argv, { cwd, gh, run, write }) {
           publicApi: truthy(flags['public-api']),
         }, here.headSha);
         writeState(cwd, state);
-        const dirty = phase >= 5 && flags.result === 'pass' && here.dirty;
-        out({ ok: true, recorded: PHASES[phase - 1], attempts: state.attempts, ...(dirty ? { warning: 'You have uncommitted changes. This proof covers the committed code only.' } : {}) });
+        out({ ok: true, recorded: PHASES[phase - 1], attempts: state.attempts });
         return 0;
       }
       case 'answer': {

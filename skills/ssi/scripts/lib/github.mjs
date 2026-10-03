@@ -9,7 +9,7 @@ export const makeGh = (cwd) => (args) =>
 export function findPr(gh, branch, known = null) {
   const rows = json(gh(['pr', 'list', '--head', branch, '--state', 'all', '--json', 'number,state,isDraft,url,headRefOid,isCrossRepository', '--limit', '10'])) ?? [];
   const mine = rows.filter((r) => !r.isCrossRepository);
-  const row = mine.find((r) => r.state === 'OPEN') ?? mine.find((r) => r.number === known);
+  const row = mine.find((r) => r.number === known && r.state === 'OPEN') ?? mine.find((r) => r.state === 'OPEN') ?? mine.find((r) => r.number === known);
   return row ? { number: row.number, state: row.state, isDraft: row.isDraft, url: row.url, headSha: row.headRefOid ?? null } : null;
 }
 

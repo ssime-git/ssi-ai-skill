@@ -77,7 +77,7 @@ export function purgeAssets({ run, makeRun = makeRunner, branch, closed, push, d
   ok(run, ['fetch', '-q', 'origin', `${branch}:refs/remotes/origin/${branch}`]);
   for (const ref of [`origin/${branch}`, branch]) {
     try {
-      paths = run('git', ['ls-tree', '-r', '--name-only', ref]).split('\n').filter(Boolean);
+      paths = run('git', ['-c', 'core.quotePath=false', 'ls-tree', '-r', '--name-only', ref]).split('\n').filter(Boolean);
       break;
     } catch {
       paths = null;

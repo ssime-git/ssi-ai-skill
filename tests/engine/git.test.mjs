@@ -103,6 +103,16 @@ test('remoteSha follows the remote-tracking ref of the current branch', () => {
   assert.equal(facts(dir).remoteSha, git(dir, 'rev-parse', 'HEAD'));
 });
 
+test('non-ASCII file names are reported as they are, not as octal escapes', () => {
+  const dir = makeRepo();
+  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  const first = commit(dir, 'src/a.js', '1\n', 'a');
+  commit(dir, 'src/é.js', '2\n', 'b');
+  const f = facts(dir);
+  assert.ok(f.changedFiles.includes('src/é.js'), f.changedFiles.join('|'));
+  assert.deepEqual(f.changedSince(first), ['src/é.js']);
+});
+
 test('a sha that is not hex is never passed to git', () => {
   const f = facts(makeRepo());
   assert.equal(f.changedSince('--output=/tmp/ssi-pwn'), null);

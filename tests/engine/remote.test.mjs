@@ -63,6 +63,13 @@ test('findPr ignores old closed PRs and fork PRs unless the run owns them', () =
   assert.equal(findPr(gh, 'ssi/x', 7), null);
 });
 
+test('findPr prefers the PR the run already knows when several are open for the same branch', () => {
+  const row = (number, headRefOid) => ({ number, state: 'OPEN', isDraft: true, url: `u${number}`, headRefOid, isCrossRepository: false });
+  const gh = () => JSON.stringify([row(5, 'aaaaaaa'), row(9, 'bbbbbbb')]);
+  assert.equal(findPr(gh, 'ssi/x', 9).number, 9);
+  assert.equal(findPr(gh, 'ssi/x', null).number, 5);
+});
+
 test('state is only read from, and written to, comments of the authenticated user', () => {
   const gh = makeGhStub();
   gh.s.comments.push({ id: 1, body: renderBlock({ ...newState('planted'), phase: 8 }, 'x'), user: { login: 'evil' } });

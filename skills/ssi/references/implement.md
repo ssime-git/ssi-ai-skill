@@ -6,6 +6,8 @@
 4. The engine then asks you to push and open a **draft** PR: `gh pr create --draft`. Put `Closes #<issue>` in the body when there is an Issue.
 5. Run the full test suite. Record: `ssi record --phase 5 --result pass|fail --evidence <test output> --surface <dirs you changed>`.
 
+Commit everything first: `ssi record` refuses a passing proof for phases 5, 6 and 7 while changes are uncommitted, because the proof must cover the committed code.
+
 `--surface` tells the engine which later changes make this proof stale. Be accurate. After a fix that follows a failed review or CI, the engine will ask you to push (`push-changes`) before it lets review or CI run again.
 
 Performance work: measure before, change, measure after, with the same conditions. If the diff grows past the limit the engine stops you; offer to split the work.

@@ -46,6 +46,12 @@ export function computeNext({ cwd, config, run, gh }) {
     facts.pr = null;
     remote = null;
   }
+  // Progress made on another machine wins over an older local cache; writing the old cache
+  // back would erase it from the PR.
+  if (remote && remote.state.run_id === state.run_id && String(remote.state.updated_at ?? '') > String(state.updated_at ?? '')) {
+    state = normalize({ ...remote.state, pending: state.pending, synced: null });
+    warnings.push('Another machine made newer progress, so I took it from the PR.');
+  }
   if (facts.pr) state.pr = facts.pr.number;
   facts.commitsSinceStart = facts.commitsSince(state.start_sha ?? null);
   facts.workCommits = facts.commitsSince(state.work_sha ?? state.start_sha ?? null);

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-const KEEP = ['run_id', 'goal', 'kind', 'branch', 'head_sha', 'start_sha', 'work_sha', 'issue', 'issue_skipped', 'pr', 'phase', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop'];
+const KEEP = ['updated_at', 'run_id', 'goal', 'kind', 'branch', 'head_sha', 'start_sha', 'work_sha', 'issue', 'issue_skipped', 'pr', 'phase', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop'];
 const BEGIN = '<!-- ssi:begin -->';
 const END = '<!-- ssi:end -->';
 
@@ -27,4 +27,7 @@ export function mergeComment(existing, block) {
   return re.test(existing) ? existing.replace(re, () => block) : `${existing}\n\n${block}`;
 }
 
-export const stateHash = (state) => createHash('sha1').update(JSON.stringify(slim(state))).digest('hex');
+// updated_at moves on every write; it must not make the state look changed.
+const HASHED = KEEP.filter((k) => k !== 'updated_at');
+export const stateHash = (state) =>
+  createHash('sha1').update(JSON.stringify(Object.fromEntries(HASHED.map((k) => [k, state[k]])))).digest('hex');
