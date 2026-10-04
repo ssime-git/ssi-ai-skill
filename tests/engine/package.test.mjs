@@ -37,3 +37,14 @@ test('the design spec and plan ship with the package', () => {
   assert.ok(existsSync('docs/superpowers/specs/2026-10-03-ssi-design.md'));
   assert.ok(existsSync('docs/superpowers/plans/2026-10-03-ssi-v2.md'));
 });
+
+test('the repo has an MIT licence and a short README that credits every upstream and shows the flow', () => {
+  assert.match(read('LICENSE'), /^MIT License\n\nCopyright \(c\) 2026 /);
+  const readme = read('README.md');
+  assert.ok(readme.split('\n').length < 110, 'README must stay short');
+  for (const m of read('skills/ssi/NOTICE.md').matchAll(/^## ([\w.-]+\/[\w.-]+)/gm)) {
+    assert.ok(readme.includes(m[1]), `README credits ${m[1]}`);
+  }
+  assert.ok((readme.match(/```mermaid/g) ?? []).length >= 2, 'README shows the flow with diagrams');
+  assert.match(readme, /## What is different/);
+});
