@@ -65,3 +65,12 @@ test('the skill, its guides, the README and the docs are written in English', ()
   }
   assert.deepEqual(offenders, []);
 });
+
+test('CI runs the validator and the tests on every pull request, on Node 20 and 22', () => {
+  const ci = read('.github/workflows/ci.yml');
+  assert.match(ci, /pull_request:/);
+  assert.match(ci, /node: \[20, 22\]/);
+  assert.match(ci, /run: npm run validate/);
+  assert.match(ci, /run: npm test/);
+  assert.doesNotMatch(read('package.json'), /--test \\"/);
+});
