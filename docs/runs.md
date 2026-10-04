@@ -1,5 +1,7 @@
 # SSI v2: real runs (2026-10-03)
 
+The disposable repository used here was deleted on 2026-10-04, so the pull request numbers below no longer resolve.
+
 Disposable private repository `ssime-git/ssi-sandbox`, real `gh`, real GitHub Actions CI, driven by following `skills/ssi/SKILL.md`. Reviews were done by sub-agents because Codex could not run on this account (see below).
 
 | Run | Kind | Result | Pull request |
@@ -23,7 +25,7 @@ Disposable private repository `ssime-git/ssi-sandbox`, real `gh`, real GitHub Ac
 
 ## Found by the independent review of the engine and fixed (before the runs 2 and 3)
 
-See the appendix of `2026-10-03-ssi-v2.md`.
+They are summarised in [philosophy.md](philosophy.md#what-review-taught-us); the code is the reference.
 
 ## Codex
 
