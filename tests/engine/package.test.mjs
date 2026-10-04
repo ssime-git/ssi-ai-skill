@@ -34,9 +34,18 @@ test('the skill folder is self-contained and the repo is a plugin', () => {
   assert.equal(JSON.parse(read('.claude-plugin/plugin.json')).name, 'ssi');
 });
 
-test('the design spec and plan ship with the package', () => {
-  assert.ok(existsSync('docs/superpowers/specs/2026-10-03-ssi-design.md'));
-  assert.ok(existsSync('docs/superpowers/plans/2026-10-03-ssi-v2.md'));
+test('the docs folder holds the philosophy, the design reference and the runs, and the README links them', () => {
+  const readme = read('README.md');
+  for (const f of ['philosophy.md', 'design.md', 'runs.md']) {
+    assert.ok(existsSync(`docs/${f}`), `docs/${f} exists`);
+    assert.ok(readme.includes(`docs/${f}`), `README links docs/${f}`);
+  }
+  assert.equal(existsSync('docs/superpowers'), false, 'the plan-era folder is gone');
+});
+
+test('public docs state nothing about the author\'s health', () => {
+  const files = ['README.md', 'docs/philosophy.md', 'docs/design.md', 'docs/runs.md', 'skills/ssi/SKILL.md'];
+  for (const f of files) assert.doesNotMatch(read(f), /\bthe author has\b|\bI have ADHD\b/i, f);
 });
 
 test('the repo has an MIT licence and a short README that credits every upstream and shows the flow', () => {

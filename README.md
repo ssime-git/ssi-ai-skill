@@ -75,9 +75,15 @@ Settings live in `ssi.config.json` (repo) and `.ssi/config.local.json` (yours); 
 - [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail): the "smallest change that works" lens in planning.
 - [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd): the reader-friendly message rules.
 - [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc): how Codex is called (installed binary, read-only, optional model) and the review report shape.
-- [obra/superpowers](https://github.com/obra/superpowers): the brainstorm, spec and plan process used to build this.
+- [obra/superpowers](https://github.com/obra/superpowers): the brainstorm and design process used to build this.
 
-Exact versions and licences: [`skills/ssi/NOTICE.md`](skills/ssi/NOTICE.md). Design and history: [`docs/superpowers`](docs/superpowers).
+Exact versions and licences: [`skills/ssi/NOTICE.md`](skills/ssi/NOTICE.md).
+
+## Read more
+
+- [docs/philosophy.md](docs/philosophy.md): why it is built this way.
+- [docs/design.md](docs/design.md): how it works, as a reference.
+- [docs/runs.md](docs/runs.md): the real runs and what they found.
 
 ## Status
 
