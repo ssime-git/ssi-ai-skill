@@ -211,6 +211,30 @@ test('computeNext: with GitHub down after a commit the run verifies locally inst
   assert.match(out.warnings.join(' '), /not reachable/);
 });
 
+test('actionFor: with GitHub unreachable nothing is declared done or ready', () => {
+  const st = newState('g');
+  const f = { base: 'main', workCommits: 1, pr: null, prUnknown: true, headSha: 'L', onBase: false, dirty: false };
+  const a = actionFor({ name: 'done', state: st, facts: f, config: merge(DEFAULTS, { mandate: { ready: true } }) });
+  assert.equal(a.kind, 'wait-for-github');
+  assert.equal(a.requires.length, 0);
+});
+
+test('computeNext: skipping the Issue cancels one that was queued offline', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  writeState(dir, { ...newState('fix it'), kind: 'bug', pending: [{ op: 'issue', title: 'T', body: 'B' }], issue_skipped: 'Issues are disabled' });
+  next(dir, gh);
+  assert.equal(gh.s.issues.length, 0);
+  assert.equal(readState(dir).state.pending.length, 0);
+});
+
+test('computeNext: the state records what the engine really answered, for the cockpit', () => {
+  const dir = makeRepo();
+  writeState(dir, newState('fix it'));
+  next(dir, makeGhStub());
+  assert.deepEqual(readState(dir).state.last, { action: 'analyze', stop: null, done: false });
+});
+
 test('computeNext: no run yet asks to start', () => {
   const out = next(makeRepo(), makeGhStub());
   assert.equal(out.action.kind, 'start');

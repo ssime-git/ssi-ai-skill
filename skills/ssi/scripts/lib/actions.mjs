@@ -148,6 +148,15 @@ export function actionFor({ name, state, facts, config }) {
           requires: [],
         };
       }
+      if (facts.prUnknown) {
+        return {
+          kind: 'wait-for-github',
+          headline: 'Finish once GitHub is reachable',
+          instructions: 'GitHub is not reachable, so I cannot check or finalize the PR yet. Nothing is lost. Run: ssi next again when the connection is back.',
+          refs: ref('land'),
+          requires: [],
+        };
+      }
       if (config.mandate.ready && facts.pr?.isDraft) {
         return {
           kind: 'mark-ready',

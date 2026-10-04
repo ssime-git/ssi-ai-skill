@@ -81,4 +81,4 @@ Exact versions and licences: [`skills/ssi/NOTICE.md`](skills/ssi/NOTICE.md). Des
 
 ## Status
 
-Early. 126 engine tests, three real runs, and six rounds of Codex review; open findings are listed in the pull requests. MIT, see [LICENSE](LICENSE).
+Early. 134 engine tests, three real runs, six rounds of Codex review (the last round's fixes are not re-reviewed yet). MIT, see [LICENSE](LICENSE).

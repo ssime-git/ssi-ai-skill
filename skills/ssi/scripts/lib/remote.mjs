@@ -29,5 +29,11 @@ export function mergeComment(existing, block) {
 
 // updated_at moves on every write; it must not make the state look changed.
 const HASHED = KEEP.filter((k) => k !== 'updated_at');
+// What counts as progress for ordering two machines. Volatile fields (head sha, phase,
+// bookkeeping) are left out so merely running `ssi next` never makes an old cache look new.
+const PROGRESS = ['goal', 'kind', 'branch', 'issue', 'issue_skipped', 'pr', 'work_sha', 'last_failure', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop'];
+export const progressHash = (state) =>
+  createHash('sha1').update(JSON.stringify(Object.fromEntries(PROGRESS.map((k) => [k, state[k]])))).digest('hex');
+
 export const stateHash = (state) =>
   createHash('sha1').update(JSON.stringify(Object.fromEntries(HASHED.map((k) => [k, state[k]])))).digest('hex');

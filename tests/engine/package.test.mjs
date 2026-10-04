@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { PHASES } from '../../skills/ssi/scripts/lib/state.mjs';
 
 const read = (p) => readFileSync(p, 'utf8');
@@ -47,4 +48,18 @@ test('the repo has an MIT licence and a short README that credits every upstream
   }
   assert.ok((readme.match(/```mermaid/g) ?? []).length >= 2, 'README shows the flow with diagrams');
   assert.match(readme, /## What is different/);
+});
+
+test('the skill, its guides, the README and the docs are written in English', () => {
+  const files = execFileSync('git', ['ls-files', 'skills', 'README.md', 'docs', 'mods'], { encoding: 'utf8' }).split('\n')
+    .filter((f) => /\.(md|mjs|tsx|ts)$/.test(f) && !f.endsWith('NOTICE.md'));
+  const french = /\b(le|la|les|des|une|est|pour|avec|dans|que|qui|mais|cette|nous|vous)\b/gi;
+  const english = /\b(the|and|to|of|is|for|with|this|that|you)\b/i;
+  const offenders = [];
+  for (const f of files) {
+    read(f).split('\n').forEach((line, i) => {
+      if ((line.match(french) ?? []).length >= 2 && !english.test(line)) offenders.push(`${f}:${i + 1}`);
+    });
+  }
+  assert.deepEqual(offenders, []);
 });

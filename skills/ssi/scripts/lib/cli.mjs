@@ -109,6 +109,7 @@ export function main(argv, { cwd, gh, run, write }) {
         const state = needState();
         if (sub === 'skip') {
           state.issue_skipped = typeof flags.because === 'string' ? flags.because : 'skipped';
+          state.pending = state.pending.filter((p) => p.op !== 'issue');
           writeState(cwd, state);
           out({ ok: true, skipped: state.issue_skipped });
           return 0;

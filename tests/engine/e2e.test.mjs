@@ -138,6 +138,19 @@ test('switching to another branch never writes this run into that branch\'s PR',
   assert.equal(JSON.parse(readFileSync(join(dir, '.ssi/state.json'), 'utf8')).pr, 1);
 });
 
+test('ssi issue skip drops a queued Issue creation, so it is not created later', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  ssi('start', 'Bug');
+  gh.s.offline = true;
+  assert.equal(ssi('issue', 'create', '--title', 'T', '--body', 'b').json.queued, true);
+  ssi('issue', 'skip', '--because', 'Issues are disabled');
+  gh.s.offline = false;
+  ssi('next');
+  assert.equal(gh.s.issues.length, 0);
+});
+
 test('a closed PR is adopted with an answer and does not come back as a stop', () => {
   const dir = makeRepo();
   const gh = makeGhStub();

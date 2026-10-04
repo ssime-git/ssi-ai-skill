@@ -60,6 +60,10 @@ export function computeNext({ cwd, config, run, gh }) {
   if (!offline) {
     for (const p of [...state.pending]) {
       if (p.op !== 'issue') continue;
+      if (state.issue_skipped) {
+        state.pending = state.pending.filter((q) => q !== p);
+        continue;
+      }
       const drop = (why) => {
         state.pending = state.pending.filter((q) => q !== p);
         warnings.push(`Dropped a queued Issue: ${why}`);
@@ -109,9 +113,10 @@ export function computeNext({ cwd, config, run, gh }) {
       }
     }
   }
+  const done = action?.kind === 'done';
+  state.last = { action: action?.kind ?? null, stop: stop?.code ?? null, done };
   writeState(cwd, state);
 
-  const done = action?.kind === 'done';
   const nextText = stop ? 'Answer the question below' : action.headline;
   return {
     phase: det.phase,

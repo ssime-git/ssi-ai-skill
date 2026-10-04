@@ -15,7 +15,8 @@ async function load($: any): Promise<Snapshot | null> {
   try {
     const state = JSON.parse((await $.fs.read('.ssi/state.json')) as string)
     const open = state.stop && !state.stop.answer
-    return { phase: Number(state.phase ?? 1), goal: String(state.goal ?? ''), stop: open ? String(state.stop.because) : null }
+    // `done` and `action` are what the engine actually answered last: phase 9 alone is not completion.
+    return { phase: Number(state.phase ?? 1), goal: String(state.goal ?? ''), stop: open ? String(state.stop.because) : null, done: state.last?.done === true, action: state.last?.action ? String(state.last.action) : null }
   } catch {
     return null
   }
@@ -31,7 +32,7 @@ async function refresh($: any) {
     return
   }
   const p = Math.min(snap.phase, 8)
-  $.ui.status(snap.stop ? 'ssi: stopped' : snap.phase > 8 ? 'ssi: done' : `ssi ${p}/8 ${NAMES[p - 1]}`)
+  $.ui.status(snap.stop ? 'ssi: stopped' : snap.done ? 'ssi: done' : snap.phase > 8 ? `ssi: finishing (${snap.action ?? '…'})` : `ssi ${p}/8 ${NAMES[p - 1]}`)
   const before = await read($, lastPhase)
   const stopBefore = await read($, lastStop)
   const stopNow = snap.stop ?? ''
@@ -42,7 +43,7 @@ async function refresh($: any) {
   if (before !== snap.phase) {
     await update($, lastPhase, () => snap.phase)
     if (before !== 0 && !stopNow) {
-      $.ui.toast(snap.phase > 8 ? '✓ Done. The PR is ready for you.' : snap.phase < before ? `↩ Back to ${NAMES[p - 1]}: something needs a fix.` : `✓ Phase done. Now: ${NAMES[p - 1]}`)
+      $.ui.toast(snap.done ? '✓ Done. The PR is ready for you.' : snap.phase > 8 ? `One last step: ${snap.action ?? 'finish the delivery'}` : snap.phase < before ? `↩ Back to ${NAMES[p - 1]}: something needs a fix.` : `✓ Phase done. Now: ${NAMES[p - 1]}`)
     }
   }
 }
@@ -70,7 +71,7 @@ export const register: Register = on => {
     if (!snap || e.props.hasSurvey) return next(e)
     const { Box, Text } = $.ui.resolve(e)
     const p = Math.min(snap.phase, 8)
-    const where = snap.phase > 8 ? `${bar(8)} 8/8 Done` : `${bar(p)} ${p}/8 ${NAMES[p - 1]}`
+    const where = snap.done ? `${bar(8)} 8/8 Done` : snap.phase > 8 ? `${bar(8)} 8/8 Finishing: ${snap.action ?? '…'}` : `${bar(p)} ${p}/8 ${NAMES[p - 1]}`
     return (
       <Box>
         <Text>{where}</Text>
