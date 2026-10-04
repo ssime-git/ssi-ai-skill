@@ -27,6 +27,12 @@ function parseArgs(argv) {
   return { pos, flags };
 }
 
+// The base branch and the branch we are on are source branches: assets must never go there.
+function sourceBranches(run) {
+  const f = gitFacts(run);
+  return [f.base, f.base?.replace(/^origin\//, ''), f.branch].filter(Boolean);
+}
+
 const csv = (v) => (typeof v === 'string' ? v.split(',').filter(Boolean) : undefined);
 const truthy = (v) => v !== undefined && v !== 'false';
 
@@ -129,7 +135,7 @@ export function main(argv, { cwd, gh, run, write }) {
         const pr = flags.pr ?? state.pr;
         if (!pr) throw new Error('There is no PR yet. Open the draft PR first.');
         if (!opAllowed('push', config)) throw new Error('The config does not allow pushing.');
-        out(uploadAsset({ run, branch: config.assets.branch, pr, file: resolve(cwd, flags.file), push: true }));
+        out(uploadAsset({ run, branch: config.assets.branch, pr, file: resolve(cwd, flags.file), push: true, forbid: sourceBranches(run) }));
         return 0;
       }
       case 'purge': {
@@ -138,7 +144,7 @@ export function main(argv, { cwd, gh, run, write }) {
           return 0;
         }
         const dry = truthy(flags['dry-run']);
-        out(purgeAssets({ run, branch: config.assets.branch, closed: closedPrNumbers(gh), push: opAllowed('push', config) && !dry, dryRun: dry }));
+        out(purgeAssets({ run, branch: config.assets.branch, closed: closedPrNumbers(gh), push: opAllowed('push', config) && !dry, dryRun: dry, forbid: sourceBranches(run) }));
         return 0;
       }
       default:

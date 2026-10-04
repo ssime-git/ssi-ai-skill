@@ -37,4 +37,5 @@ Whatever the reviewer, write one report with this shape (it is the schema OpenAI
 - A "simplification" that removes a protection or a test is not a simplification. Reject it.
 
 Record: `ssi record --phase 6 --result pass|fail --evidence <report file> --note "<reviewer>; independent: yes|no"`.
+When you record a `fail`, always pass `--evidence <report file>` and `--note "<what to fix>"`: the engine keeps them, so a fix that is interrupted can be resumed.
 `fail` sends you back to implement. After the configured number of failed rounds the engine stops and asks the user.

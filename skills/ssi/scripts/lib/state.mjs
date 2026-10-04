@@ -17,6 +17,7 @@ export function newState(goal) {
     work_sha: null,
     issue: null,
     issue_skipped: null,
+    last_failure: null,
     pr: null,
     phase: 1,
     evidence: {},

@@ -167,6 +167,50 @@ test('computeNext: a deleted progress comment is written again even when nothing
   assert.equal(gh.s.comments.length, 1);
 });
 
+test('actionFor: leftover uncommitted changes block "done" and "mark ready"', () => {
+  const st = newState('g');
+  const f = { base: 'main', workCommits: 1, pr: { number: 1, headSha: 'L', isDraft: true }, headSha: 'L', onBase: false, dirty: true };
+  const ready = merge(DEFAULTS, { mandate: { ready: true } });
+  for (const config of [DEFAULTS, ready]) {
+    assert.equal(actionFor({ name: 'done', state: st, facts: f, config }).kind, 'commit-changes');
+  }
+  assert.equal(actionFor({ name: 'done', state: st, facts: { ...f, dirty: false }, config: DEFAULTS }).kind, 'done');
+});
+
+test('applyRecord and actionFor: the failure report survives an interruption', () => {
+  const s = newState('g');
+  applyRecord(s, { phase: 6, result: 'fail', evidence: 'review-1.json', note: 'auth check missing' }, 'abc');
+  assert.equal(s.last_failure.phase, 'review');
+  assert.equal(s.last_failure.evidence, 'review-1.json');
+  const f = { base: 'main', workCommits: 0, pr: { number: 1, headSha: 'L' }, headSha: 'L', onBase: false };
+  const a = actionFor({ name: 'implement', state: s, facts: f, config: DEFAULTS });
+  assert.match(a.instructions, /review-1\.json/);
+  assert.match(a.instructions, /auth check missing/);
+  applyRecord(s, { phase: 6, result: 'pass' }, 'abc');
+  assert.equal(s.last_failure, null);
+});
+
+test('actionFor: an unreachable GitHub is not an absent PR', () => {
+  const st = newState('g');
+  const f = { base: 'main', workCommits: 1, pr: null, prUnknown: true, headSha: 'L', onBase: false };
+  assert.equal(actionFor({ name: 'implement', state: st, facts: f, config: DEFAULTS }).kind, 'verify-implementation');
+  for (const name of ['review', 'visual', 'land']) {
+    assert.notEqual(actionFor({ name, state: st, facts: f, config: DEFAULTS }).kind, 'open-draft-pr', name);
+  }
+});
+
+test('computeNext: with GitHub down after a commit the run verifies locally instead of opening a PR', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  gh.s.offline = true;
+  writeState(dir, { ...newState('fix it'), start_sha: git(dir, 'rev-parse', 'HEAD'), kind: 'feature', evidence: { analyze: { path: 'a' }, confirm: { path: 'c' }, plan: { path: 'p' } } });
+  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  commit(dir, 'src/a.js', '1\n', 'a');
+  const out = next(dir, gh);
+  assert.equal(out.action.kind, 'verify-implementation');
+  assert.match(out.warnings.join(' '), /not reachable/);
+});
+
 test('computeNext: no run yet asks to start', () => {
   const out = next(makeRepo(), makeGhStub());
   assert.equal(out.action.kind, 'start');

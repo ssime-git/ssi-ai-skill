@@ -15,6 +15,10 @@ export function planPurge(closed, paths) {
   return paths.filter((p) => gone.has(p.slice(0, p.indexOf('/') + 1)));
 }
 
+function assertSafeBranch(branch, forbid = []) {
+  if (forbid.includes(branch)) throw new Error(`The assets branch "${branch}" is a source branch. Choose another one with assets.branch.`);
+}
+
 function ok(run, args) {
   try {
     run('git', args);
@@ -53,7 +57,8 @@ function commitAll(w, message) {
   return true;
 }
 
-export function uploadAsset({ run, makeRun = makeRunner, branch, pr, file, push }) {
+export function uploadAsset({ run, makeRun = makeRunner, branch, pr, file, push, forbid = [] }) {
+  assertSafeBranch(branch, forbid);
   const rel = `pr-${pr}/${basename(file)}`;
   withTree({ run, makeRun, branch }, (w, dir) => {
     mkdirSync(join(dir, `pr-${pr}`), { recursive: true });
@@ -72,7 +77,8 @@ export function uploadAsset({ run, makeRun = makeRunner, branch, pr, file, push 
   return { path: rel, url, markdown: url ? `![demo](${url})` : null, pushed: !!push };
 }
 
-export function purgeAssets({ run, makeRun = makeRunner, branch, closed, push, dryRun }) {
+export function purgeAssets({ run, makeRun = makeRunner, branch, closed, push, dryRun, forbid = [] }) {
+  assertSafeBranch(branch, forbid);
   let paths = null;
   ok(run, ['fetch', '-q', 'origin', `${branch}:refs/remotes/origin/${branch}`]);
   for (const ref of [`origin/${branch}`, branch]) {

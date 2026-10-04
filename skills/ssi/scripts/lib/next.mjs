@@ -20,6 +20,7 @@ export function computeNext({ cwd, config, run, gh }) {
     if (facts.pr) login = whoami(gh);
   } catch {
     facts.pr = null;
+    facts.prUnknown = true;
     offline = true;
     warnings.push('GitHub is not reachable. I keep working locally and will catch up later.');
   }

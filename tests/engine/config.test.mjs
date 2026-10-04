@@ -62,6 +62,17 @@ test('opAllowed honours the mandate and the floor', () => {
   assert.equal(opAllowed('merge', { mandate: { allow: ['merge'], ready: true } }), false);
 });
 
+test('the assets branch can never be a source branch or an unsafe name', () => {
+  for (const bad of ['main', 'master', 'trunk', 'develop', 'HEAD', '-x', 'a b', 'x;y']) {
+    const d = tmp();
+    put(d, 'ssi.config.json', { assets: { branch: bad } });
+    assert.throws(() => loadConfig({ cwd: d }), /assets\.branch/, bad);
+  }
+  const ok = tmp();
+  put(ok, 'ssi.config.json', { assets: { branch: 'ssi-evidence' } });
+  assert.equal(loadConfig({ cwd: ok }).assets.branch, 'ssi-evidence');
+});
+
 test('the Codex model and effort are plain names, never shell text', () => {
   const ok = tmp();
   put(ok, 'ssi.config.json', { review: { codexModel: 'gpt-5.5-terra', codexEffort: 'medium' } });

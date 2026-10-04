@@ -55,6 +55,10 @@ function checkValues(over) {
       throw new Error(`Config key ${p} must be one of: ${allowed.join(', ')}`);
     }
   }
+  const ab = at(over, 'assets.branch');
+  if (ab !== undefined && (!/^[A-Za-z0-9._][A-Za-z0-9._\/-]*$/.test(ab) || ['main', 'master', 'trunk', 'develop', 'HEAD'].includes(ab))) {
+    throw new Error('Config key assets.branch must be a plain branch name that is not a source branch (main, master, trunk, develop)');
+  }
   for (const p of ['review.codexModel', 'review.codexEffort']) {
     const v = at(over, p);
     if (v !== undefined && v !== '' && !/^[\w.-]+$/.test(v)) throw new Error(`Config key ${p} may only contain letters, digits, dots, dashes and underscores`);

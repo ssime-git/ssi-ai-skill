@@ -110,6 +110,15 @@ test('createIssue is idempotent by key', () => {
   assert.equal(gh.s.issues.length, 1);
 });
 
+test('an existing Issue is found even past the first 200, so no duplicate is created', () => {
+  const gh = makeGhStub();
+  gh.s.issues = [{ number: 1, body: 'x\n\n<!-- ssi:r9:issue -->' }];
+  for (let i = 2; i <= 250; i++) gh.s.issues.push({ number: i, body: `other ${i}` });
+  const r = createIssue(gh, { title: 't', body: 'b', key: 'ssi:r9:issue' });
+  assert.deepEqual([r.number, r.created], [1, false]);
+  assert.equal(gh.s.issues.length, 250);
+});
+
 test('closedPrNumbers lists closed and merged PRs, not open ones, and makeGh is a function factory', () => {
   const gh = makeGhStub();
   assert.deepEqual(closedPrNumbers(gh), []);

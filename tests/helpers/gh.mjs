@@ -14,6 +14,9 @@ export function makeGhStub() {
     }
     if (a === 'api') {
       const path = args.find((x) => x.startsWith('repos/'));
+      const pages = (arr) => JSON.stringify(args.includes('--slurp') ? [arr.slice(0, 100), arr.slice(100)].filter((p) => p.length) : arr);
+      if (path?.includes('/pulls')) return pages(s.pr && s.pr.state !== 'OPEN' ? [{ number: s.pr.number, state: 'closed' }] : []);
+      if (path?.includes('/issues?')) return pages(s.issues);
       const body = (args.find((x) => x.startsWith('body=')) ?? '').slice(5);
       if (args.includes('PATCH')) {
         s.comments.find((c) => c.id === Number(path.split('/').pop())).body = body;
@@ -26,7 +29,10 @@ export function makeGhStub() {
       }
       return JSON.stringify(args.includes('--slurp') ? [s.comments] : s.comments);
     }
-    if (a === 'issue' && b === 'list') return JSON.stringify(s.issues);
+    if (a === 'issue' && b === 'list') {
+      const limit = Number(args[args.indexOf('--limit') + 1]) || s.issues.length;
+      return JSON.stringify(s.issues.slice(-limit));
+    }
     if (a === 'issue' && b === 'create') {
       const n = s.issues.length + 1;
       s.issues.push({ number: n, body: args[args.indexOf('--body') + 1] });

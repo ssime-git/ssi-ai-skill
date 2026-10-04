@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-const KEEP = ['updated_at', 'run_id', 'goal', 'kind', 'branch', 'head_sha', 'start_sha', 'work_sha', 'issue', 'issue_skipped', 'pr', 'phase', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop'];
+const KEEP = ['updated_at', 'run_id', 'goal', 'kind', 'branch', 'head_sha', 'start_sha', 'work_sha', 'issue', 'issue_skipped', 'last_failure', 'pr', 'phase', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop'];
 const BEGIN = '<!-- ssi:begin -->';
 const END = '<!-- ssi:end -->';
 

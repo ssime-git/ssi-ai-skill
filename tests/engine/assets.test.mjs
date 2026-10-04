@@ -21,6 +21,14 @@ test('the link works for private repos: github.com blob ?raw=true, never raw.git
   assert.equal(rawUrl('/local/path', 'ssi-assets', 'x'), null);
 });
 
+test('upload and purge refuse to touch the base branch or the current branch', () => {
+  const dir = makeRepo();
+  const run = makeRunner(dir);
+  assert.throws(() => uploadAsset({ run, branch: 'main', pr: 1, file: gif(), push: false, forbid: ['main'] }), /source branch/);
+  assert.throws(() => purgeAssets({ run, branch: 'ssi/x', closed: [1], push: false, dryRun: false, forbid: ['ssi/x'] }), /source branch/);
+  assert.deepEqual(git(dir, 'ls-tree', '-r', '--name-only', 'main').split('\n'), ['README.md']);
+});
+
 test('planPurge keeps open PRs and removes closed ones', () => {
   assert.deepEqual(planPurge([1], ['pr-1/a.gif', 'pr-2/b.gif', 'pr-10/c.gif']), ['pr-1/a.gif']);
 });

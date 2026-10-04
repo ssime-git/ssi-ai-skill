@@ -44,9 +44,15 @@ export function upsertStateComment(gh, n, mergeFn, login = null) {
   return { commentId: created?.id, changed: true };
 }
 
+// Every page, never a "latest 200": an old run's Issue must still be found, or a retry duplicates it.
+const allPages = (gh, path) => {
+  const pages = json(gh(['api', path, '--paginate', '--slurp'])) ?? [];
+  return Array.isArray(pages) ? pages.flat() : [];
+};
+
 export function findIssueByKey(gh, key) {
-  const rows = json(gh(['issue', 'list', '--state', 'all', '--json', 'number,body', '--limit', '200'])) ?? [];
-  return rows.find((r) => (r.body ?? '').includes(key))?.number ?? null;
+  const rows = allPages(gh, 'repos/{owner}/{repo}/issues?state=all&per_page=100');
+  return rows.find((r) => !r.pull_request && (r.body ?? '').includes(key))?.number ?? null;
 }
 
 export function createIssue(gh, { title, body, key }) {
@@ -56,8 +62,5 @@ export function createIssue(gh, { title, body, key }) {
   return { number: Number(url.split('/').pop()), created: true };
 }
 
-// `--state closed` leaves merged PRs out, so list everything and drop the open ones.
-export const closedPrNumbers = (gh) =>
-  (json(gh(['pr', 'list', '--state', 'all', '--json', 'number,state', '--limit', '200'])) ?? [])
-    .filter((r) => r.state !== 'OPEN')
-    .map((r) => r.number);
+// The REST "closed" state includes merged PRs, and every page is read.
+export const closedPrNumbers = (gh) => allPages(gh, 'repos/{owner}/{repo}/pulls?state=closed&per_page=100').map((r) => r.number);

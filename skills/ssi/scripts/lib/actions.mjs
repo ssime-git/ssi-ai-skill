@@ -14,7 +14,7 @@ export function actionFor({ name, state, facts, config }) {
       requires: ['push'],
     };
   }
-  if (AFTER_PUSH.has(name) && !facts.pr) {
+  if (AFTER_PUSH.has(name) && !facts.pr && !facts.prUnknown) {
     return {
       kind: 'open-draft-pr',
       headline: 'Push the branch and open a draft PR',
@@ -81,7 +81,7 @@ export function actionFor({ name, state, facts, config }) {
           ? {
               kind: 'implement',
               headline: 'Fix what the last check found',
-              instructions: 'Read what the review, the visual check or CI reported. Fix it, add or adjust a test for it, and commit. Then run: ssi next.',
+              instructions: `Read what the ${state.last_failure?.phase ?? 'last'} check reported${state.last_failure?.evidence ? ` (report: ${state.last_failure.evidence})` : ''}${state.last_failure?.note ? `. Note: ${state.last_failure.note}` : ''}. Fix it, add or adjust a test for it, and commit. Then run: ssi next.`,
               refs: ref('implement'),
               requires: [],
             }
@@ -93,7 +93,7 @@ export function actionFor({ name, state, facts, config }) {
               requires: [],
             };
       }
-      if (!facts.pr) {
+      if (!facts.pr && !facts.prUnknown) {
         return {
           kind: 'open-draft-pr',
           headline: 'Push the branch and open a draft PR',
@@ -139,6 +139,15 @@ export function actionFor({ name, state, facts, config }) {
         requires: [],
       };
     default:
+      if (facts.dirty) {
+        return {
+          kind: 'commit-changes',
+          headline: 'Commit or discard the leftover changes',
+          instructions: 'There are uncommitted changes, so the PR does not hold everything. Commit them (the engine then re-checks the proofs) or discard them if they are not part of this work. Then run: ssi next.',
+          refs: ref('implement'),
+          requires: [],
+        };
+      }
       if (config.mandate.ready && facts.pr?.isDraft) {
         return {
           kind: 'mark-ready',
