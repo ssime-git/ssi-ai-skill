@@ -107,10 +107,10 @@ test('non-ASCII file names are reported as they are, not as octal escapes', () =
   const dir = makeRepo();
   git(dir, 'checkout', '-q', '-b', 'ssi/x');
   const first = commit(dir, 'src/a.js', '1\n', 'a');
-  commit(dir, 'src/é.js', '2\n', 'b');
+  commit(dir, 'src/ж.js', '2\n', 'b');
   const f = facts(dir);
-  assert.ok(f.changedFiles.includes('src/é.js'), f.changedFiles.join('|'));
-  assert.deepEqual(f.changedSince(first), ['src/é.js']);
+  assert.ok(f.changedFiles.includes('src/ж.js'), f.changedFiles.join('|'));
+  assert.deepEqual(f.changedSince(first), ['src/ж.js']);
 });
 
 test('a sha that is not hex is never passed to git', () => {

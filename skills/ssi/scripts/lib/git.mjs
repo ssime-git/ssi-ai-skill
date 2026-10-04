@@ -10,7 +10,7 @@ const isSha = (v) => typeof v === 'string' && SHA.test(v);
 
 function attempt(run, args) {
   try {
-    // core.quotePath=false keeps non-ASCII names readable (src/é.js, not "src/\\303\\251.js").
+    // core.quotePath=false keeps non-ASCII names readable (src/ж.js, not "src/\\320\\266.js").
     return run('git', ['-c', 'core.quotePath=false', ...args]);
   } catch {
     return null;

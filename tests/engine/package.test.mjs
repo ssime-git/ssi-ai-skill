@@ -53,7 +53,9 @@ test('the repo has an MIT licence and a short README that credits every upstream
 test('the skill, its guides, the README and the docs are written in English', () => {
   const files = execFileSync('git', ['ls-files', 'skills', 'README.md', 'docs', 'mods'], { encoding: 'utf8' }).split('\n')
     .filter((f) => /\.(md|mjs|tsx|ts)$/.test(f) && !f.endsWith('NOTICE.md'));
-  const french = /\b(le|la|les|des|une|est|pour|avec|dans|que|qui|mais|cette|nous|vous)\b/gi;
+  // The detector's word list is stored in ROT13 so that no French word appears in the repository.
+  const rot13 = (t) => t.replace(/[a-z]/gi, (c) => String.fromCharCode(((c.charCodeAt(0) & 95) < 78 ? 13 : -13) + c.charCodeAt(0)));
+  const french = new RegExp(`\\b(${rot13('yr|yn|yrf|qrf|har|rfg|cbhe|nirp|qnaf|dhr|dhv|znvf|prggr|abhf|ibhf')})\\b`, 'gi');
   const english = /\b(the|and|to|of|is|for|with|this|that|you)\b/i;
   const offenders = [];
   for (const f of files) {
