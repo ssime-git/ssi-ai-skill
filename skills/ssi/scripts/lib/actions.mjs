@@ -2,6 +2,11 @@ const ref = (n) => [`references/${n}.md`];
 
 const AFTER_PUSH = new Set(['review', 'visual', 'land', 'done']);
 
+// Values reach a shell command line: allow only safe characters, else fall back.
+function safeToken(v, fallback) {
+  return typeof v === 'string' && /^[A-Za-z0-9][A-Za-z0-9._\/-]*$/.test(v) && !v.includes('..') ? v : fallback;
+}
+
 export function actionFor({ name, state, facts, config }) {
   // GitHub reports the new PR head a few seconds after a push; our own remote-tracking ref is immediate.
   const pushed = facts.remoteSha && facts.remoteSha === facts.headSha;
@@ -111,9 +116,9 @@ export function actionFor({ name, state, facts, config }) {
       };
     case 'review': {
       const r = config.review;
-      const codex = [`codex exec review --base ${facts.base ?? 'main'}`, '-c \'sandbox_mode="read-only"\'', '-c \'approval_policy="never"\''];
-      if (r.codexModel) codex.push(`-c 'model="${r.codexModel}"'`);
-      if (r.codexEffort) codex.push(`-c 'model_reasoning_effort="${r.codexEffort}"'`);
+      const codex = [`codex exec review --base ${safeToken(facts.base, 'main')}`, '-c \'sandbox_mode="read-only"\'', '-c \'approval_policy="never"\''];
+      if (r.codexModel) codex.push(`-c 'model="${safeToken(r.codexModel, "")}"'`);
+      if (r.codexEffort) codex.push(`-c 'model_reasoning_effort="${safeToken(r.codexEffort, "")}"'`);
       return {
         kind: 'review',
         headline: 'Get an independent review',
