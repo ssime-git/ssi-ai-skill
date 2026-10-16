@@ -71,6 +71,17 @@ export function evaluateStops({ state, facts, config, phase }) {
   if (state.analysis?.blockingGaps > 0) {
     return stop('STOP_UNCLEAR', `${state.analysis.blockingGaps} gap(s) in the request block me from starting.`, 'Can you answer the gaps I listed?', ['A. Answered, go on (add the answer)', 'B. Stop here'], 'A');
   }
+  for (const [name, code, label] of [['analyze', 'STOP_ANALYSIS', 'the analysis'], ['confirm', 'STOP_ANALYSIS', 'the confirmation']]) {
+    if (!state.evidence[name] && tries(name) >= t.analysisRetries) {
+      return stop(code, `I failed ${label} ${t.analysisRetries} times.`, 'How should I continue?', ['A. Try again with a new idea (add it)', 'B. Stop and look together'], 'B');
+    }
+  }
+  if (!state.evidence.plan && phase === 4 && tries('plan') >= t.planRetries) {
+    return stop('STOP_PLAN', `I could not make a plan that holds after ${t.planRetries} tries.`, 'How should I continue?', ['A. Try again with a new idea (add it)', 'B. Stop and look together'], 'B');
+  }
+  if (!state.evidence.implement && tries('implement') >= t.implementRetries) {
+    return stop('STOP_IMPLEMENT', `The implementation failed ${t.implementRetries} times.`, 'How should I continue?', ['A. Try again (add guidance)', 'B. Stop and look together'], 'B');
+  }
   if (!state.evidence.reproduce && tries('reproduce') >= t.reproAttempts) {
     return stop('STOP_NO_REPRO', `I could not reproduce the bug after ${t.reproAttempts} tries.`, 'How should I continue?', ['A. Try again with a new idea (add it)', 'B. Stop and look together'], 'B');
   }
@@ -127,6 +138,9 @@ export function applyAnswer(state, facts, text) {
       state.evidence.analyze = { path: null, at: now, note: text };
       break;
     case 'STOP_NO_REPRO': state.attempts.reproduce = 0; break;
+    case 'STOP_ANALYSIS': state.attempts.analyze = 0; state.attempts.confirm = 0; break;
+    case 'STOP_PLAN': state.attempts.plan = 0; break;
+    case 'STOP_IMPLEMENT': state.attempts.implement = 0; break;
     case 'STOP_REVIEW': state.attempts.review = 0; break;
     case 'STOP_VISUAL': state.attempts.visual = 0; break;
     case 'STOP_CI': state.attempts.land = 0; break;

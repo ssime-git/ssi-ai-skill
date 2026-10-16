@@ -91,7 +91,7 @@ Stops are computed, not judged: unclear request, no reproduction, protected code
 ```json
 {
   "mandate": { "allow": ["push", "draft-pr", "issue", "comment"], "ready": false },
-  "thresholds": { "diff": { "lines": 300, "files": 8 }, "reproAttempts": 3, "reviewRounds": 2, "visualRetries": 2, "ciRetries": 2 },
+  "thresholds": { "diff": { "lines": 300, "files": 8 }, "analysisRetries": 3, "reproAttempts": 3, "planRetries": 3, "implementRetries": 3, "reviewRounds": 2, "visualRetries": 2, "ciRetries": 2 },
   "review": { "reviewers": ["codex", "subagent"], "parallel": false, "codexModel": "", "codexEffort": "" },
   "ci": { "watch": true, "reviewComments": false },
   "visual": { "enabled": "auto", "tool": "playwright" },
