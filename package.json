@@ -1,6 +1,6 @@
 {
   "name": "ssi-ai-skill",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Single-entry engineering loop (Claude Code skill) that takes a request to a reviewed draft PR",
   "keywords": [
     "claude-code",
