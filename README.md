@@ -6,6 +6,13 @@ One command takes a request to a **reviewed draft PR**. A small script, not the 
 /ssi Fix: total() ignores percentage discounts
 ```
 
+## Quick install
+
+```bash
+git clone https://github.com/ssime-git/ssi-ai-skill && cd ssi-ai-skill
+cp -R skills/ssi ~/.claude/skills/ssi   # then run: /ssi <your request>
+```
+
 ## The flow
 
 ```mermaid
