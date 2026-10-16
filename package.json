@@ -1,9 +1,40 @@
 {
-  "name": "ssi",
+  "name": "ssi-ai-skill",
   "version": "0.1.0",
-  "private": true,
+  "description": "Single-entry engineering loop (Claude Code skill) that takes a request to a reviewed draft PR",
+  "keywords": [
+    "claude-code",
+    "agent-skills",
+    "ai-agents",
+    "claude-plugin",
+    "developer-tools"
+  ],
+  "license": "MIT",
+  "author": "sebastien sime",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ssime-git/ssi-ai-skill.git"
+  },
+  "homepage": "https://github.com/ssime-git/ssi-ai-skill#readme",
+  "bugs": {
+    "url": "https://github.com/ssime-git/ssi-ai-skill/issues"
+  },
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "skills",
+    "mods",
+    ".claude-plugin",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "test": "node --test tests/engine/*.test.mjs",
     "validate": "node scripts/validate.mjs"
