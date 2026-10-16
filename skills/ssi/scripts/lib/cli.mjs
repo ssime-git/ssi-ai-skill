@@ -73,6 +73,17 @@ export function main(argv, { cwd, gh, run, write }) {
       case 'record': {
         const state = needState();
         const phase = Number(flags.phase);
+        const KNOWN = ['phase', 'result', 'evidence', 'surface', 'note', 'kind', 'gaps', 'touches', 'public-api'];
+        const unknown = Object.keys(flags).filter((k) => !KNOWN.includes(k));
+        if (unknown.length) {
+          throw new Error(`Unknown option for record: ${unknown.map((k) => '--' + k).join(', ')}. Allowed: ${KNOWN.map((k) => '--' + k).join(' ')}`);
+        }
+        if (flags.result === 'pass' && phase === 6 && !/independent:\s*(yes|no)\b/i.test(typeof flags.note === 'string' ? flags.note : '')) {
+          throw new Error('Review needs --note "<reviewer>; independent: yes|no" (yes only for Codex or another model; a fresh-context sub-agent of the same model is "no").');
+        }
+        if (flags.result === 'pass' && phase === 8 && (typeof flags.note !== 'string' || !flags.note.trim())) {
+          throw new Error('Land needs --note saying what CI showed: "checks green", or "no CI configured" if the repo has none.');
+        }
         const here = gitFacts(run);
         if (flags.result === 'pass' && [5, 6, 7].includes(phase) && here.dirty) {
           throw new Error('You have uncommitted changes. Commit them first, so this proof covers the committed code.');

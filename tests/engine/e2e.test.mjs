@@ -45,7 +45,7 @@ test('a bug goes through every phase to done, never merging', () => {
   assert.equal(gh.s.issues.length, 1);
   ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 'review.md', '--note', 'codex; independent: yes');
   assert.equal(ssi('next').json.action.kind, 'watch-ci');
-  ssi('record', '--phase', '8', '--result', 'pass');
+  ssi('record', '--phase', '8', '--result', 'pass', '--note', 'no CI configured');
   const done = ssi('next').json;
   assert.equal(done.done, true);
   assert.match(done.action.instructions, /Do not merge/);
@@ -268,12 +268,12 @@ test('a passing proof is refused while changes are uncommitted, and accepted onc
   const ssi = cli(dir, makeGhStub());
   ssi('start', 'x');
   writeFileSync(join(dir, 'loose.js'), 'x\n');
-  assert.match(ssi('record', '--phase', '5', '--result', 'pass', '--evidence', 't').json.error, /uncommitted/);
-  assert.match(ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 't').json.error, /uncommitted/);
+  assert.match(ssi('record', '--phase', '5', '--result', 'pass', '--evidence', 't', '--note', 'x; independent: no').json.error, /uncommitted/);
+  assert.match(ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 't', '--note', 'x; independent: no').json.error, /uncommitted/);
   assert.equal(ssi('record', '--phase', '5', '--result', 'fail').code, 0);
   git(dir, 'add', 'loose.js');
   git(dir, 'commit', '-q', '-m', 'loose');
-  assert.equal(ssi('record', '--phase', '5', '--result', 'pass', '--evidence', 't').code, 0);
+  assert.equal(ssi('record', '--phase', '5', '--result', 'pass', '--evidence', 't', '--note', 'x; independent: no').code, 0);
 });
 
 test('an older local cache never overwrites newer progress made on another machine', () => {
@@ -283,12 +283,22 @@ test('an older local cache never overwrites newer progress made on another machi
   bugRunUntilReview(dir, gh, ssi);
   const stale = JSON.parse(readFileSync(join(dir, '.ssi/state.json'), 'utf8'));
   stale.updated_at = '2000-01-01T00:00:00.000Z';
-  ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 'review.md');
-  ssi('record', '--phase', '8', '--result', 'pass');
+  ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 'review.md', '--note', 'sub-agent; independent: no');
+  ssi('record', '--phase', '8', '--result', 'pass', '--note', 'no CI configured');
   assert.equal(ssi('next').json.done, true);
   writeFileSync(join(dir, '.ssi/state.json'), JSON.stringify(stale));
   const out = ssi('next').json;
   assert.equal(out.done, true);
   assert.match(out.warnings.join(' '), /newer progress/);
   assert.match(gh.s.comments[0].body, /"land"/);
+});
+
+test('record rejects unknown options and demands a reviewer note and a CI note', () => {
+  const dir = makeRepo();
+  const ssi = cli(dir, makeGhStub());
+  ssi('start', 'x');
+  assert.match(ssi('record', '--phase', '6', '--result', 'pass', '--reviewer', 'a', '--independent', 'yes').json.error, /Unknown option for record: --reviewer, --independent/);
+  assert.match(ssi('record', '--phase', '6', '--result', 'pass').json.error, /independent: yes\|no/);
+  assert.match(ssi('record', '--phase', '8', '--result', 'pass').json.error, /Land needs --note/);
+  assert.equal(ssi('record', '--phase', '8', '--result', 'pass', '--note', 'no CI configured').json.ok, true);
 });

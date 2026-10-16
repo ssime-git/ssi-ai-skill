@@ -139,7 +139,7 @@ export function actionFor({ name, state, facts, config }) {
       return {
         kind: 'watch-ci',
         headline: 'Watch CI and fix failures',
-        instructions: `${config.ci.watch ? 'Watch the checks: gh pr checks --watch. ' : ''}If they fail, read the logs and run: ssi record --phase 8 --result fail (this sends you back to implement). If they are green, run: ssi record --phase 8 --result pass.`,
+        instructions: `${config.ci.watch ? 'Watch the checks: gh pr checks --watch. ' : ''}If they fail, read the logs and run: ssi record --phase 8 --result fail (this sends you back to implement). If they are green, run: ssi record --phase 8 --result pass --note "checks green" (or --note "no CI configured" if the repo has none).`,
         refs: ref('land'),
         requires: [],
       };

@@ -45,6 +45,8 @@ Follow [communication](references/communication.md) in every message. The short 
 - A test's expected value comes from the requirement, never from the code under test.
 - Keep the diff small. Structure improvements go to a follow-up Issue, not into the PR, unless the plan guide says otherwise.
 - Do not install tools or enable paid services without asking.
+- `ssi record` refuses unknown options. Review (phase 6) needs `--note "<reviewer>; independent: yes|no"`; a same-model sub-agent is `no`. Land (phase 8) needs a `--note` saying what CI showed.
+- Shell tips: call the script directly (a small wrapper script works when variables or heredocs are blocked). `gh` commands can block a shell and delay output, so run `ssi next` again rather than assuming the engine is slow.
 
 ## Settings
 
