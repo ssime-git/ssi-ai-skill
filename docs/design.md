@@ -44,10 +44,10 @@ Action kinds: `start`, `analyze`, `confirm`, `reproduce`, `open-issue`, `plan`, 
 | # | Phase | Exit evidence | If it fails |
 |---|---|---|---|
 | 1 | Analyze | Brief: goal, one observable success check, listed gaps | a blocking gap → `STOP_UNCLEAR` |
-| 2 | Confirm | The gap or bug established by a fact | not confirmed → back to 1 |
+| 2 | Confirm | The gap or bug established by a fact | not confirmed → back to 1; repeated failure → `STOP_ANALYSIS` |
 | 3 | Reproduce (bugs only) | A replayable artifact, then the Issue | repeated failure → `STOP_NO_REPRO` |
-| 4 | Plan | Smallest plan, reuse list, declared touched files | protected code or public API → `STOP_PROTECTED` |
-| 5 | Implement | Tests green on committed code, branch pushed, **draft PR open** | big diff → `STOP_BIG_DIFF` |
+| 4 | Plan | Smallest plan, reuse list, declared touched files | protected code or public API → `STOP_PROTECTED`; repeated failure → `STOP_PLAN` |
+| 5 | Implement | Tests green on committed code, branch pushed, **draft PR open** | big diff → `STOP_BIG_DIFF`; repeated failure → `STOP_IMPLEMENT` |
 | 6 | Review | Independent review report, blockers fixed | rounds used up → `STOP_REVIEW` |
 | 7 | Visual (UI only) | GIF on `ssi-assets`, linked in the PR | retries used up → `STOP_VISUAL` |
 | 8 | Land | CI green; PR stays draft unless the config allows ready | CI retries used up → `STOP_CI` |
@@ -91,7 +91,7 @@ Stops are computed, not judged: unclear request, no reproduction, protected code
 ```json
 {
   "mandate": { "allow": ["push", "draft-pr", "issue", "comment"], "ready": false },
-  "thresholds": { "diff": { "lines": 300, "files": 8 }, "reproAttempts": 3, "reviewRounds": 2, "visualRetries": 2, "ciRetries": 2 },
+  "thresholds": { "diff": { "lines": 300, "files": 8 }, "analysisRetries": 3, "reproAttempts": 3, "planRetries": 3, "implementRetries": 3, "reviewRounds": 2, "visualRetries": 2, "ciRetries": 2 },
   "review": { "reviewers": ["codex", "subagent"], "parallel": false, "codexModel": "", "codexEffort": "" },
   "ci": { "watch": true, "reviewComments": false },
   "visual": { "enabled": "auto", "tool": "playwright" },
