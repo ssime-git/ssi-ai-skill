@@ -11,3 +11,5 @@ Commit everything first: `ssi record` refuses a passing proof for phases 5, 6 an
 `--surface` tells the engine which later changes make this proof stale. Be accurate. After a fix that follows a failed review or CI, the engine will ask you to push (`push-changes`) before it lets review or CI run again.
 
 Performance work: measure before, change, measure after, with the same conditions. If the diff grows past the limit the engine stops you; offer to split the work.
+
+Stuck rule: after 3 failed fixes for the same problem, stop patching. Re-read the evidence, question the design or the plan, and tell the user before trying a fourth.

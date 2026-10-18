@@ -9,3 +9,5 @@
 Never merge. Say plainly what was verified and what was not.
 
 Housekeeping: `ssi purge` removes the GIFs of closed PRs from `ssi-assets`.
+
+Done means proven: do not say "fixed", "passing" or "ready" from memory. Run the command in this turn and quote its result.
