@@ -115,3 +115,7 @@ SOFTWARE.
 
 Source: https://github.com/openai/codex-plugin-cc
 No files are copied. The Codex calling approach (installed `codex` binary, read-only sandbox, no approvals, model left to the user's config, background run) and the field names of the review report in `references/review.md` follow that project. It is licensed under Apache-2.0; consult its LICENSE for terms.
+## obra/superpowers and cursor/plugins (pstack), inspiration only
+Four one-line rules (blast radius, stop after 3 failed fixes, verify review findings, no completion claim without fresh output) were rewritten in our own words from the ideas in `systematic-debugging`, `receiving-code-review`, `verification-before-completion` (obra/superpowers) and `blast-radius` (cursor/plugins pstack). No text copied.
+
+Ponytail 5 (DietrichGebert/ponytail, v5.0.0, MIT, already credited above): added two short rules, adapted in our own words: the "skipped / not checked / risk" closing line and "Deferred" shortcuts in `references/communication.md`, and the cut pass in `references/review.md`.
