@@ -27,3 +27,5 @@ The reader may find long technical text hard to follow. Short, concrete, calm. T
 - `plain`: no template.
 
 Adapted from the MIT-licensed `i-have-adhd` skill (see NOTICE.md).
+
+Close every phase report with one line: what you skipped or did not check, and the biggest remaining risk. Shortcuts taken on purpose go in the PR body under "Deferred", so they stay visible.
