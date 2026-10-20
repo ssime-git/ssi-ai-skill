@@ -13,3 +13,5 @@ Housekeeping: `ssi purge` removes the GIFs of closed PRs from `ssi-assets`.
 Done means proven: do not say "fixed", "passing" or "ready" from memory. Run the command in this turn and quote its result.
 
 Before landing, read the PR body "Open items". Any `- [ ]` left means you are not done: go back to the earliest open item, close it, and re-run the checks. Do not report completion, or mark the PR ready, while one remains unless the user waived it.
+
+The engine enforces this: while the PR body has a "- [ ]" under "Open items", ssi next answers close-open-items and never mark-ready or done.
