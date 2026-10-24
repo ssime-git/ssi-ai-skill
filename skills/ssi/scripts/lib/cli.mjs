@@ -90,6 +90,13 @@ export function main(argv, { cwd, gh, run, write }) {
         if (flags.result === 'pass' && phase === 8 && (typeof flags.note !== 'string' || !flags.note.trim())) {
           throw new Error('Land needs --note saying what CI showed: "checks green", or "no CI configured" if the repo has none.');
         }
+        if (flags.result === 'pass' && phase === 8) {
+          const g = evaluateGuards(cwd);
+          if (!g.ok) {
+            const bad = g.results.filter((r) => !['pass', 'waived', 'n/a'].includes(r.status)).map((r) => r.id + ' (' + r.status + ')').join('; ');
+            throw new Error('Land is blocked: these safety contracts are not proven: ' + bad + '. Run: ssi guards. Fix them, or ask the user for a waiver (never yours to give).');
+          }
+        }
         const here = gitFacts(run);
         if (flags.result === 'pass' && [5, 6, 7].includes(phase) && here.dirty) {
           throw new Error('You have uncommitted changes. Commit them first, so this proof covers the committed code.');

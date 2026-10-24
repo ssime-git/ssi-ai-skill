@@ -320,3 +320,15 @@ test('guards gate landing: an uncovered contract replaces watch-ci and done unti
   assert.equal(ssi('guards').code, 0);
   assert.equal(ssi('next').json.action.kind, 'watch-ci');
 });
+
+test('ssi record --phase 8 refuses to land while guards are not proven', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  commit(dir, 'migrations/001.sql', 'select 1;\n', 'add migration');
+  bugRunUntilReview(dir, gh, ssi);
+  ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 'review.md', '--note', 'codex; independent: yes');
+  assert.match(ssi('record', '--phase', '8', '--result', 'pass', '--note', 'checks green').json.error, /Land is blocked.*db-migration/);
+  writeFileSync(join(dir, 'ssi.guards.json'), JSON.stringify({ waivers: [{ id: 'db-migration', by: 'owner', reason: 'test fixture' }] }));
+  assert.equal(ssi('record', '--phase', '8', '--result', 'pass', '--note', 'checks green').json.ok, true);
+});
