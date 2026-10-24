@@ -6,6 +6,8 @@
 4. With `ci.reviewComments` on, also read human review comments: apply the clear ones, answer or ask about unclear ones, and never resolve a thread for someone else.
 5. The PR stays a draft unless `mandate.ready` is true; then the engine will ask you to run `gh pr ready`.
 
+Run ssi guards first; exit 1 means a prod-risk contract is uncovered or unproven (see [guards](guards.md)). Do not land until it exits 0. The engine enforces this: while a contract is not pass or waived, ssi next returns satisfy-guards instead of the landing step.
+
 Never merge. Say plainly what was verified and what was not.
 
 Housekeeping: `ssi purge` removes the GIFs of closed PRs from `ssi-assets`.

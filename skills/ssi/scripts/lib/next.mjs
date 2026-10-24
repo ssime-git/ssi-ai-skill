@@ -7,8 +7,26 @@ import { evaluateStops, mandateStop } from './stops.mjs';
 import { actionFor } from './actions.mjs';
 import { say, bar } from './say.mjs';
 import { opAllowed } from './config.mjs';
+import { evaluateGuards } from './guards.mjs';
 
-export function computeNext({ cwd, config, run, gh }) {
+// Landing is blocked until every applicable contract is pass or waived. The engine decides,
+// not the agent: the action is replaced, so no instruction to land is ever emitted.
+const GUARDED = new Set(['land', 'done']);
+const SETTLED = ['pass', 'waived', 'n/a'];
+function guardAction(g) {
+  const bad = g.results.filter((r) => !SETTLED.includes(r.status));
+  const list = bad.map((r) => `${r.id} (${r.status}${r.why ? ': ' + r.why : ''})`).join('; ');
+  return {
+    kind: 'satisfy-guards',
+    headline: 'Cover the safety contracts before landing',
+    instructions: `Run: ssi guards. These contracts are not proven: ${list}. Fix them in ssi.guards.json, or ask the user for a waiver (a waiver needs "by" and "reason" and is the user's decision, never yours). Then run: ssi next.`,
+    refs: [],
+    requires: [],
+    guards: bad,
+  };
+}
+
+export function computeNext({ cwd, config, run, gh, guards = evaluateGuards }) {
   const warnings = [];
   const read = readState(cwd);
   if (read.warning) warnings.push(read.warning);
@@ -91,6 +109,10 @@ export function computeNext({ cwd, config, run, gh }) {
   let action = null;
   if (!stop) {
     action = actionFor({ name: det.name, state, facts, config });
+    if (GUARDED.has(det.name) && !['push-changes', 'commit-changes', 'wait-for-github'].includes(action.kind)) {
+      const g = guards(cwd);
+      if (!g.ok) action = guardAction(g);
+    }
     const missing = action.requires.find((op) => !opAllowed(op, config));
     if (missing) stop = mandateStop(missing);
   }

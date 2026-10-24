@@ -4,7 +4,7 @@ export function applyRecord(state, args, headSha) {
   const { phase, result, evidence, surface, note, kind, gaps, touches, publicApi } = args;
   const name = PHASES[phase - 1];
   if (!name) throw new Error(`Unknown phase: ${phase}`);
-  if (result !== 'pass' && result !== 'fail') throw new Error('--result must be pass or fail');
+  if (result !== 'pass' && result !== 'fail') throw new Error('--result must be pass or fail (pass if it worked, fail if not).');
   if (kind) state.kind = kind;
   state.attempts ??= {};
   if (result === 'fail') {
