@@ -32,6 +32,7 @@ If the notes and the repo disagree, the repo wins; the engine already handles it
 | 6 | Review: independent reviewer | [review](references/review.md) |
 | 7 | Visual: GIF proof (UI changes only) | [visual](references/visual.md) |
 | 8 | Land: CI green, PR ready for a human | [land](references/land.md) |
+| - | Guards: real blocks for prod-risk areas (migrations, infra, models, LLM evals) | [guards](references/guards.md) |
 
 ## How you talk to the user
 

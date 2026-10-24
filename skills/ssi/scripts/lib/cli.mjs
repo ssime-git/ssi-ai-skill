@@ -6,6 +6,7 @@ import { computeNext } from './next.mjs';
 import { applyRecord } from './record.mjs';
 import { applyAnswer } from './stops.mjs';
 import { createIssue, closedPrNumbers, isTransient, findPr } from './github.mjs';
+import { evaluateGuards } from './guards.mjs';
 import { uploadAsset, purgeAssets } from './assets.mjs';
 
 const USAGE = 'Usage: ssi <start|next|record|answer|config|allow|issue|upload|purge> [options]\n';
@@ -51,6 +52,11 @@ export function main(argv, { cwd, gh, run, write }) {
       case 'config':
         out(config);
         return 0;
+      case 'guards': {
+        const g = evaluateGuards(cwd);
+        out(g);
+        return g.ok ? 0 : 1;
+      }
       case 'allow': {
         const allowed = opAllowed(sub, config);
         out({ op: sub, allowed });
