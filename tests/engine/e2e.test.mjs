@@ -268,8 +268,8 @@ test('a passing proof is refused while changes are uncommitted, and accepted onc
   const ssi = cli(dir, makeGhStub());
   ssi('start', 'x');
   writeFileSync(join(dir, 'loose.js'), 'x\n');
-  assert.match(ssi('record', '--phase', '5', '--result', 'pass', '--evidence', 't', '--note', 'x; independent: no').json.error, /uncommitted/);
-  assert.match(ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 't', '--note', 'x; independent: no').json.error, /uncommitted/);
+  assert.match(ssi('record', '--phase', '5', '--result', 'pass', '--evidence', 't', '--note', 'x; independent: no').json.error, /not saved in a commit/);
+  assert.match(ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 't', '--note', 'x; independent: no').json.error, /not saved in a commit/);
   assert.equal(ssi('record', '--phase', '5', '--result', 'fail').code, 0);
   git(dir, 'add', 'loose.js');
   git(dir, 'commit', '-q', '-m', 'loose');
@@ -317,4 +317,34 @@ test('an open item in the PR body blocks done until it is ticked, end to end', (
   assert.match(blocked.action.instructions, /verify the retry path/);
   gh.s.pr.body = '## Open items\n- [x] verify the retry path (test added)';
   assert.equal(ssi('next').json.action.kind, 'done');
+});
+
+test('guards gate landing: an uncovered contract replaces watch-ci and done until waived', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  commit(dir, 'migrations/001.sql', 'select 1;\n', 'add migration');
+  bugRunUntilReview(dir, gh, ssi);
+  ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 'review.md', '--note', 'codex; independent: yes');
+  const blocked = ssi('next').json;
+  assert.equal(blocked.action.kind, 'satisfy-guards');
+  assert.match(blocked.action.instructions, /db-migration \(uncovered/);
+  assert.match(blocked.action.instructions, /never yours/);
+  assert.equal(blocked.done, false);
+  assert.equal(ssi('guards').code, 1);
+  writeFileSync(join(dir, 'ssi.guards.json'), JSON.stringify({ waivers: [{ id: 'db-migration', by: 'owner', reason: 'test fixture' }] }));
+  assert.equal(ssi('guards').code, 0);
+  assert.equal(ssi('next').json.action.kind, 'watch-ci');
+});
+
+test('ssi record --phase 8 refuses to land while guards are not proven', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  commit(dir, 'migrations/001.sql', 'select 1;\n', 'add migration');
+  bugRunUntilReview(dir, gh, ssi);
+  ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 'review.md', '--note', 'codex; independent: yes');
+  assert.match(ssi('record', '--phase', '8', '--result', 'pass', '--note', 'checks green').json.error, /Land is blocked.*db-migration/);
+  writeFileSync(join(dir, 'ssi.guards.json'), JSON.stringify({ waivers: [{ id: 'db-migration', by: 'owner', reason: 'test fixture' }] }));
+  assert.equal(ssi('record', '--phase', '8', '--result', 'pass', '--note', 'checks green').json.ok, true);
 });
