@@ -45,7 +45,7 @@ export function main(argv, { cwd, gh, run, write }) {
     const config = loadConfig({ cwd, flags: flags.style ? { ui: { style: flags.style } } : {} });
     const needState = () => {
       const { state } = readState(cwd);
-      if (!state) throw new Error('No active run. Run: ssi start "<request>"');
+      if (!state) throw new Error('No active run yet, so there is nothing to continue. Begin one with: ssi start "<request>"');
       return state;
     };
     switch (cmd) {
@@ -66,7 +66,7 @@ export function main(argv, { cwd, gh, run, write }) {
         const goal = pos.slice(1).join(' ').trim();
         if (!goal) throw new Error('Usage: ssi start "<request>"');
         const { state: old } = readState(cwd);
-        if (old && !flags.force && !old.evidence?.land) throw new Error(`A run is already active: "${old.goal}". Use --force to replace it.`);
+        if (old && !flags.force && !old.evidence?.land) throw new Error(`A run is already active: "${old.goal}". Finish it first, or add --force if you really want to drop it and start over.`);
         const s = newState(goal);
         s.start_sha = gitFacts(run).headSha ?? 'EMPTY';
         writeState(cwd, s);
@@ -85,21 +85,21 @@ export function main(argv, { cwd, gh, run, write }) {
           throw new Error(`Unknown option for record: ${unknown.map((k) => '--' + k).join(', ')}. Allowed: ${KNOWN.map((k) => '--' + k).join(' ')}`);
         }
         if (flags.result === 'pass' && phase === 6 && !/independent:\s*(yes|no)\b/i.test(typeof flags.note === 'string' ? flags.note : '')) {
-          throw new Error('Review needs --note "<reviewer>; independent: yes|no" (yes only for Codex or another model; a fresh-context sub-agent of the same model is "no").');
+          throw new Error('Review needs --note "<reviewer>; independent: yes|no". Say "yes" only if someone else did the review, such as Codex or a different model. A fresh helper running the same model as you counts as "no".');
         }
         if (flags.result === 'pass' && phase === 8 && (typeof flags.note !== 'string' || !flags.note.trim())) {
-          throw new Error('Land needs --note saying what CI showed: "checks green", or "no CI configured" if the repo has none.');
+          throw new Error('Land needs --note saying what the automatic checks (CI) showed: "checks green", or "no CI configured" if the project has none.');
         }
         if (flags.result === 'pass' && phase === 8) {
           const g = evaluateGuards(cwd);
           if (!g.ok) {
             const bad = g.results.filter((r) => !['pass', 'waived', 'n/a'].includes(r.status)).map((r) => r.id + ' (' + r.status + ')').join('; ');
-            throw new Error('Land is blocked: these safety contracts are not proven: ' + bad + '. Run: ssi guards. Fix them, or ask the user for a waiver (never yours to give).');
+            throw new Error('Land is blocked: some safety promises are not proven yet: ' + bad + '. Run: ssi guards to see what is missing, and fix it. Only the user can choose to skip one, never you.');
           }
         }
         const here = gitFacts(run);
         if (flags.result === 'pass' && [5, 6, 7].includes(phase) && here.dirty) {
-          throw new Error('You have uncommitted changes. Commit them first, so this proof covers the committed code.');
+          throw new Error('You have changes that are not saved in a commit yet. Commit them first, so the proof covers the code that will really ship.');
         }
         applyRecord(state, {
           phase,
@@ -139,7 +139,7 @@ export function main(argv, { cwd, gh, run, write }) {
           return 0;
         }
         if (sub !== 'create') throw new Error('Usage: ssi issue create --title T [--body B] | ssi issue skip --because R');
-        if (!opAllowed('issue', config)) throw new Error('The config does not allow creating issues.');
+        if (!opAllowed('issue', config)) throw new Error('The settings do not allow creating issues.');
         if (typeof flags.title !== 'string' || !flags.title.trim()) throw new Error('--title is required.');
         const body = typeof flags.body === 'string' ? flags.body : '';
         try {
@@ -158,8 +158,8 @@ export function main(argv, { cwd, gh, run, write }) {
       case 'upload': {
         const state = needState();
         const pr = flags.pr ?? state.pr;
-        if (!pr) throw new Error('There is no PR yet. Open the draft PR first.');
-        if (!opAllowed('push', config)) throw new Error('The config does not allow pushing.');
+        if (!pr) throw new Error('There is no pull request yet. Open the draft one first.');
+        if (!opAllowed('push', config)) throw new Error('The settings do not allow pushing code online.');
         out(uploadAsset({ run, branch: config.assets.branch, pr, file: resolve(cwd, flags.file), push: true, forbid: sourceBranches(run) }));
         return 0;
       }
