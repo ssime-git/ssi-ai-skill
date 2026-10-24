@@ -303,6 +303,22 @@ test('record rejects unknown options and demands a reviewer note and a CI note',
   assert.equal(ssi('record', '--phase', '8', '--result', 'pass', '--note', 'no CI configured').json.ok, true);
 });
 
+test('an open item in the PR body blocks done until it is ticked, end to end', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  bugRunUntilReview(dir, gh, ssi);
+  ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 'review.md', '--note', 'codex; independent: yes');
+  ssi('next');
+  ssi('record', '--phase', '8', '--result', 'pass', '--note', 'no CI configured');
+  gh.s.pr.body = '## Open items\n- [ ] verify the retry path';
+  const blocked = ssi('next').json;
+  assert.equal(blocked.action.kind, 'close-open-items');
+  assert.match(blocked.action.instructions, /verify the retry path/);
+  gh.s.pr.body = '## Open items\n- [x] verify the retry path (test added)';
+  assert.equal(ssi('next').json.action.kind, 'done');
+});
+
 test('guards gate landing: an uncovered contract replaces watch-ci and done until waived', () => {
   const dir = makeRepo();
   const gh = makeGhStub();

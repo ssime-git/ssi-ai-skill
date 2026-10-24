@@ -1,3 +1,4 @@
+import { parseOpenItems } from './open-items.mjs';
 const ref = (n) => [`references/${n}.md`];
 
 const AFTER_PUSH = new Set(['review', 'visual', 'land', 'done']);
@@ -158,6 +159,16 @@ export function actionFor({ name, state, facts, config }) {
           kind: 'wait-for-github',
           headline: 'Finish once GitHub is reachable',
           instructions: 'GitHub is not reachable, so I cannot check or finalize the PR yet. Nothing is lost. Run: ssi next again when the connection is back.',
+          refs: ref('land'),
+          requires: [],
+        };
+      }
+      const openItems = parseOpenItems(facts.pr?.body);
+      if (openItems.length) {
+        return {
+          kind: 'close-open-items',
+          headline: `Close the open items first (${openItems.length} left, next: ${openItems[0]})`,
+          instructions: `The PR body still has ${openItems.length} unchecked item(s) under "Open items". Do the first one now: ${openItems[0]}. Then tick it in the PR body with proof (- [x] <what you did and how it was checked>), or, only if the user says so, write "- [x] waived by user: <reason>". Re-run the checks, commit and push if the code changed, then run: ssi next. The run is not done and the PR is not marked ready while any "- [ ]" remains.`,
           refs: ref('land'),
           requires: [],
         };

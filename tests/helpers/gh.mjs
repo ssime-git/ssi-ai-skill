@@ -1,4 +1,4 @@
-const pub = ({ number, state, isDraft, url, sha, cross }) => ({ number, state, isDraft, url, headRefOid: sha, isCrossRepository: !!cross });
+const pub = ({ number, state, isDraft, url, sha, cross, body }) => ({ number, state, isDraft, url, headRefOid: sha, isCrossRepository: !!cross, body });
 
 export function makeGhStub() {
   const s = { pr: null, comments: [], issues: [], offline: false, calls: [] };

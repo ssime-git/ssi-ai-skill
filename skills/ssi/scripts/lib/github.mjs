@@ -7,10 +7,10 @@ export const makeGh = (cwd) => (args) =>
   execFileSync('gh', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
 
 export function findPr(gh, branch, known = null) {
-  const rows = json(gh(['pr', 'list', '--head', branch, '--state', 'all', '--json', 'number,state,isDraft,url,headRefOid,isCrossRepository', '--limit', '10'])) ?? [];
+  const rows = json(gh(['pr', 'list', '--head', branch, '--state', 'all', '--json', 'number,state,isDraft,url,headRefOid,isCrossRepository,body', '--limit', '10'])) ?? [];
   const mine = rows.filter((r) => !r.isCrossRepository);
   const row = mine.find((r) => r.number === known && r.state === 'OPEN') ?? mine.find((r) => r.state === 'OPEN') ?? mine.find((r) => r.number === known);
-  return row ? { number: row.number, state: row.state, isDraft: row.isDraft, url: row.url, headSha: row.headRefOid ?? null } : null;
+  return row ? { number: row.number, state: row.state, isDraft: row.isDraft, url: row.url, headSha: row.headRefOid ?? null, body: row.body ?? null } : null;
 }
 
 export const whoami = (gh) => json(gh(['api', 'user']))?.login ?? null;
