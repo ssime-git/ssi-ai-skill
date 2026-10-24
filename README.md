@@ -76,6 +76,10 @@ claude --plugin-dir .                          # or load the repo as a plugin
 
 Settings live in `ssi.config.json` (repo) and `.ssi/config.local.json` (yours); `ssi config` prints them. Optional status band and phase map: `mods/ssi-cockpit`.
 
+## Use with Codex
+
+The CLI does not depend on any agent. For Codex, copy [docs/codex/AGENTS.md](docs/codex/AGENTS.md) into your repository root and set the ssi.mjs path. Codex loads AGENTS.md from the git root down to the working directory.
+
 ## Inspired by
 
 - [mattpocock/skills](https://github.com/mattpocock/skills) and [jsmastery-pro/skills](https://github.com/jsmastery-pro/skills): engineering practices adapted into the phase guides.
