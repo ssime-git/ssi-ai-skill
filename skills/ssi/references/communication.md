@@ -38,3 +38,5 @@ The user must feel they are chatting with a thoughtful colleague, even when the 
 - `plain`: no template.
 
 Adapted from the MIT-licensed `i-have-adhd` skill (see NOTICE.md).
+
+Never write "I skipped X" and move on. Every gap (skipped, unchecked, deferred) becomes an open item: a `- [ ]` line in the PR body under "Open items", ordered by the sequence in which it must be handled. Each phase report ends with the open-items count and the next item to close. An item leaves the list only when it is done with proof, or the user explicitly waives it (then write `- [x] waived by user: <reason>`).

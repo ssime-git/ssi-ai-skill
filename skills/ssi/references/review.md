@@ -39,3 +39,7 @@ Whatever the reviewer, write one report with this shape (it is the schema OpenAI
 Record: `ssi record --phase 6 --result pass|fail --evidence <report file> --note "<reviewer>; independent: yes|no"`.
 When you record a `fail`, always pass `--evidence <report file>` and `--note "<what to fix>"`: the engine keeps them, so a fix that is interrupted can be resumed.
 `fail` sends you back to implement. After the configured number of failed rounds the engine stops and asks the user.
+
+Acting on findings: check each one against the code before you change anything. Fix what is real, one item at a time, with a test. Push back with evidence on what is wrong. No performative agreement.
+
+Cut pass: before approving, list what the diff adds that nothing requires (unused helpers, speculative options, abstractions with one caller, a new dependency the stdlib covers) and remove it or justify it in one line.

@@ -9,3 +9,5 @@ Goal: the smallest change that works, built from what already exists.
 5. Record: `ssi record --phase 4 --result pass --evidence <plan file> --touches <a,b,c> [--public-api true]`.
 
 If the engine stops for a protected path, show the user the files and ask for approval. Do not argue the stop away.
+
+Blast radius: before you code, list who else uses what you will change (callers, importers, config, docs, other packages). For the one fact that makes the change safe, run real code and paste the output. Reading is not proof.
