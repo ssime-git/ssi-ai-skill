@@ -116,9 +116,9 @@ export function evaluateStops({ state, facts, config, phase }) {
 // condition is re-checked on the next call, so fixing the cause lets the run continue.
 export function applyAnswer(state, facts, text) {
   const s = state.stop;
-  if (!s) throw new Error('There is no open question.');
+  if (!s) throw new Error('There is no open question right now, so nothing to answer.');
   const m = /^\s*([ab])\b/i.exec(text ?? '');
-  if (!m) throw new Error('Answer with the letter of an option (A or B), then your words.');
+  if (!m) throw new Error('Please answer with the letter of an option (A or B), then a few words if you like.');
   const now = new Date().toISOString();
   if (m[1].toUpperCase() === 'B') {
     state.declined = { code: s.code, note: text, at: now };

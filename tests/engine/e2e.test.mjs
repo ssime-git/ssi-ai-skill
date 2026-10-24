@@ -268,8 +268,8 @@ test('a passing proof is refused while changes are uncommitted, and accepted onc
   const ssi = cli(dir, makeGhStub());
   ssi('start', 'x');
   writeFileSync(join(dir, 'loose.js'), 'x\n');
-  assert.match(ssi('record', '--phase', '5', '--result', 'pass', '--evidence', 't', '--note', 'x; independent: no').json.error, /uncommitted/);
-  assert.match(ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 't', '--note', 'x; independent: no').json.error, /uncommitted/);
+  assert.match(ssi('record', '--phase', '5', '--result', 'pass', '--evidence', 't', '--note', 'x; independent: no').json.error, /not saved in a commit/);
+  assert.match(ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 't', '--note', 'x; independent: no').json.error, /not saved in a commit/);
   assert.equal(ssi('record', '--phase', '5', '--result', 'fail').code, 0);
   git(dir, 'add', 'loose.js');
   git(dir, 'commit', '-q', '-m', 'loose');
