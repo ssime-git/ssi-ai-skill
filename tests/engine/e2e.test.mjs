@@ -302,3 +302,21 @@ test('record rejects unknown options and demands a reviewer note and a CI note',
   assert.match(ssi('record', '--phase', '8', '--result', 'pass').json.error, /Land needs --note/);
   assert.equal(ssi('record', '--phase', '8', '--result', 'pass', '--note', 'no CI configured').json.ok, true);
 });
+
+test('guards gate landing: an uncovered contract replaces watch-ci and done until waived', () => {
+  const dir = makeRepo();
+  const gh = makeGhStub();
+  const ssi = cli(dir, gh);
+  commit(dir, 'migrations/001.sql', 'select 1;\n', 'add migration');
+  bugRunUntilReview(dir, gh, ssi);
+  ssi('record', '--phase', '6', '--result', 'pass', '--evidence', 'review.md', '--note', 'codex; independent: yes');
+  const blocked = ssi('next').json;
+  assert.equal(blocked.action.kind, 'satisfy-guards');
+  assert.match(blocked.action.instructions, /db-migration \(uncovered/);
+  assert.match(blocked.action.instructions, /never yours/);
+  assert.equal(blocked.done, false);
+  assert.equal(ssi('guards').code, 1);
+  writeFileSync(join(dir, 'ssi.guards.json'), JSON.stringify({ waivers: [{ id: 'db-migration', by: 'owner', reason: 'test fixture' }] }));
+  assert.equal(ssi('guards').code, 0);
+  assert.equal(ssi('next').json.action.kind, 'watch-ci');
+});
