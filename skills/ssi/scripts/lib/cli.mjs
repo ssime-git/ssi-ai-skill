@@ -6,6 +6,7 @@ import { computeNext } from './next.mjs';
 import { applyRecord } from './record.mjs';
 import { applyAnswer } from './stops.mjs';
 import { createIssue, closedPrNumbers, isTransient, findPr } from './github.mjs';
+import { evaluateGuards } from './guards.mjs';
 import { uploadAsset, purgeAssets } from './assets.mjs';
 
 const USAGE = 'Usage: ssi <start|next|record|answer|config|allow|issue|upload|purge> [options]\n';
@@ -51,6 +52,11 @@ export function main(argv, { cwd, gh, run, write }) {
       case 'config':
         out(config);
         return 0;
+      case 'guards': {
+        const g = evaluateGuards(cwd);
+        out(g);
+        return g.ok ? 0 : 1;
+      }
       case 'allow': {
         const allowed = opAllowed(sub, config);
         out({ op: sub, allowed });
@@ -83,6 +89,13 @@ export function main(argv, { cwd, gh, run, write }) {
         }
         if (flags.result === 'pass' && phase === 8 && (typeof flags.note !== 'string' || !flags.note.trim())) {
           throw new Error('Land needs --note saying what CI showed: "checks green", or "no CI configured" if the repo has none.');
+        }
+        if (flags.result === 'pass' && phase === 8) {
+          const g = evaluateGuards(cwd);
+          if (!g.ok) {
+            const bad = g.results.filter((r) => !['pass', 'waived', 'n/a'].includes(r.status)).map((r) => r.id + ' (' + r.status + ')').join('; ');
+            throw new Error('Land is blocked: these safety contracts are not proven: ' + bad + '. Run: ssi guards. Fix them, or ask the user for a waiver (never yours to give).');
+          }
         }
         const here = gitFacts(run);
         if (flags.result === 'pass' && [5, 6, 7].includes(phase) && here.dirty) {
