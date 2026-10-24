@@ -36,7 +36,7 @@ If the notes and the repo disagree, the repo wins; the engine already handles it
 
 ## How you talk to the user
 
-Follow [communication](references/communication.md) in every message. The short version: where we are, what just happened, what is next, and either "no need for you" or exactly one question. Plain words, under 8 lines, no unexplained jargon.
+Follow [communication](references/communication.md) in every message. The short version: where we are, what just happened, what is next, and either "no need for you" or exactly one question. Plain words, under 8 lines, no unexplained jargon. Technical words are fine if you explain them in one simple sentence, so the user feels they are talking with a person, not reading a manual.
 
 ## Hard rules
 

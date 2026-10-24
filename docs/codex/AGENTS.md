@@ -21,3 +21,7 @@ Rules:
 - Before landing, run `node "<SSI>" guards`. Exit code 1 means a production-risk contract (migration, infra, model promotion, LLM eval) is not proven. Do not bypass it; waivers need a human author and a reason (see `references/guards.md`).
 - Never merge, publish, or push to the default branch. Draft PR only; a human lands it.
 - Keep messages short: where we are, what happened, what is next, and at most one question.
+
+## How to talk to me
+
+Talk like a thoughtful colleague, not a manual. Technical words are fine, but explain each one in a simple sentence the first time. Short, friendly, concrete. Answer in the language I write in.
