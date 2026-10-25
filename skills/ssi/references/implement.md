@@ -1,15 +1,22 @@
-# Phase 5: Implement
+# Implement
 
-1. Branch: if you are on the base branch, create `ssi/<short-name>`. Never push the base branch; if the engine says `create-branch`, do it before anything else.
-2. Test first: write a test that fails for the right reason (for a bug, the phase 3 artifact becomes a regression test). Run it and see it fail.
-3. Write the least code that passes. Reuse before writing. Commit in small steps.
-4. The engine then asks you to push and open a **draft** PR: `gh pr create --draft`. Put `Closes #<issue>` in the body when there is an Issue.
-5. Run the full test suite. Record: `ssi record --phase 5 --result pass|fail --evidence <test output> --surface <dirs you changed>`.
+Read the affected code and callers. Make the smallest change that satisfies the request.
+Use explicit names and existing patterns; add abstractions only when they simplify real usage.
+A reviewer should understand why the change exists, what it does and how it was verified.
 
-Commit everything first: `ssi record` refuses a passing proof for phases 5, 6 and 7 while changes are uncommitted, because the proof must cover the committed code.
+For a bug, make the reproduction fail before the fix and pass afterwards; retain it as a regression test.
+For other work, select checks that can detect a real failure. A static text edit need not gain a unit test.
+Measure performance work before and after under comparable conditions.
 
-`--surface` tells the engine which later changes make this proof stale. Be accurate. After a fix that follows a failed review or CI, the engine will ask you to push (`push-changes`) before it lets review or CI run again.
+Local route: preserve unrelated edits; no commit or remote operation is needed.
+PR route: create a working branch before editing the base branch, commit, push and open a draft PR.
+Do not include unrelated work. Never push the base branch. Preserve the project's own contribution rules.
 
-Performance work: measure before, change, measure after, with the same conditions. If the diff grows past the limit the engine stops you; offer to split the work.
+Run `ssi check --phase 5 -- <command> [args]`. It executes directly, without shell expansion.
+Use a project script or `sh -c '<command>'` only when a shell is genuinely needed.
+For PRs, commit code first. Checks must not modify the tested tree. Receipts live in ignored `.ssi/evidence/`.
+Multiple checks on the same snapshot are retained. Start with focused checks, then complete required project checks.
+Do not repeat an unchanged successful check without a reason such as a flaky environment or changed inputs.
 
-Stuck rule: after 3 failed fixes for the same problem, stop patching. Re-read the evidence, question the design or the plan, and tell the user before trying a fourth.
+After a failed review or check, inspect the saved failure report, fix the cause, then verify again.
+Stop repeated guessing; ask for missing information when the retry budget is exhausted.

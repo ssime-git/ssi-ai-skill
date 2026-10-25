@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newState } from '../../skills/ssi/scripts/lib/state.mjs';
+import { newState as createState } from '../../skills/ssi/scripts/lib/state.mjs';
 import { DEFAULTS } from '../../skills/ssi/scripts/lib/config.mjs';
 import { detectPhase } from '../../skills/ssi/scripts/lib/detect.mjs';
+
+const newState = (goal) => createState(goal, { target: 'pr', scope: 'standard', issues: 'required' });
 
 const facts = (o = {}) => ({ branch: 'main', onBase: true, headSha: 'H2', commitsAhead: 0, pr: null, uiChanged: false, changedSince: () => [], ...o });
 const ev = (sha, extra = {}) => ({ path: 'p', at: 't', sha, ...extra });

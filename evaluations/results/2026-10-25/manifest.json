@@ -1,0 +1,79 @@
+{
+  "model": "gpt-6.1-sol",
+  "effort": "medium",
+  "repeats": 2,
+  "baseline_commit": "4f486cf",
+  "current_skill_sha256": "b8158429411ead848989f78297ada9aff0d1a991aac901e74210b8f6d8eba025",
+  "cases": {
+    "mean_local": {
+      "target": "local",
+      "scope": "small",
+      "request": "Add mean(values) to src/stats.cjs. Reuse sum(values). An empty array returns null; otherwise return the arithmetic mean. Accept only arrays of finite numbers, rejecting other inputs with TypeError. Do not mutate the input. Preserve sum behavior. Add meaningful tests and run them. Deliver a verified LOCAL change; no PR, Issue or publication is wanted.",
+      "files": {
+        "src/stats.cjs": "function sum(values) { return values.reduce((a, b) => a + b, 0); }\nmodule.exports = { sum };\n",
+        "test/stats.test.cjs": "const test=require('node:test'); const assert=require('node:assert/strict'); const {sum}=require('../src/stats.cjs');\ntest('sum',()=>assert.equal(sum([1,2,3]),6));\n"
+      },
+      "assertions": [
+        "assert.equal(api.mean([]), null)",
+        "assert.equal(api.mean([1, 2, 6]), 3)",
+        "assert.equal(api.mean([-5, 5]), 0)",
+        "assert.equal(api.mean([2.5, 3.5]), 3)",
+        "for (const bad of [null, \"12\", {}, [1, \"2\"], [NaN], [Infinity]]) assert.throws(()=>api.mean(bad), TypeError)",
+        "const xs=[3,1,2]; api.mean(xs); assert.deepEqual(xs,[3,1,2])",
+        "assert.equal(api.sum([2, 4]), 6)"
+      ],
+      "module": "stats.cjs"
+    },
+    "discount_local": {
+      "target": "local",
+      "scope": "small",
+      "request": "Fix totalCents(items, discountPercent=0) in src/pricing.cjs: discountPercent is a percentage of the whole subtotal, not a flat number of cents. Return Math.round(subtotal * (1 - discountPercent / 100)). Accept only finite numeric discounts from 0 through 100; otherwise throw RangeError. Retain subtotalCents validation and exports, and never mutate items. Add a regression test that fails before the fix, then run the tests. Deliver a verified LOCAL fix; do not create an Issue or PR.",
+      "files": {
+        "src/pricing.cjs": "function subtotalCents(items) { if (!Array.isArray(items)) throw new TypeError('items'); return items.reduce((sum, item) => { if (!Number.isInteger(item.unitCents) || item.unitCents < 0 || !Number.isInteger(item.quantity) || item.quantity < 0) throw new RangeError('item'); return sum + item.unitCents * item.quantity; }, 0); }\nfunction totalCents(items, discountPercent=0) { return Math.round(subtotalCents(items) - discountPercent); }\nmodule.exports = { subtotalCents, totalCents };\n",
+        "test/pricing.test.cjs": "const test=require('node:test'); const assert=require('node:assert/strict'); const {totalCents}=require('../src/pricing.cjs');\ntest('no discount',()=>assert.equal(totalCents([{unitCents:100,quantity:2}]),200));\n"
+      },
+      "assertions": [
+        "assert.equal(api.totalCents([{unitCents:1000,quantity:2}],20),1600)",
+        "assert.equal(api.totalCents([{unitCents:105,quantity:1}],50),53)",
+        "assert.equal(api.totalCents([{unitCents:399,quantity:3}],100),0)",
+        "assert.equal(api.totalCents([],25),0)",
+        "for(const bad of [-1,101,NaN,Infinity,\"20\",null]) assert.throws(()=>api.totalCents([],bad),RangeError)",
+        "assert.throws(()=>api.totalCents([{unitCents:10,quantity:-1}],0),RangeError)",
+        "const xs=[{unitCents:500,quantity:2}]; api.totalCents(xs,10); assert.deepEqual(xs,[{unitCents:500,quantity:2}])",
+        "assert.equal(api.subtotalCents([{unitCents:20,quantity:3}]),60)"
+      ],
+      "module": "pricing.cjs"
+    },
+    "quote_pr": {
+      "target": "pr",
+      "scope": "standard",
+      "request": "Prepare a reviewed DRAFT PR adding quote(items, zone, discountPercent=0) in src/quote.cjs. Reuse subtotalCents and discountedCents from pricing.cjs and shippingCents from shipping.cjs; preserve existing exports. Return {goodsCents, shippingCents, totalCents}. Shipping uses the DISCOUNTED goods total: domestic costs 500 cents but is free at 10000 cents or above; international always costs 1500 cents. Reject unknown zones with RangeError, including for empty carts. Preserve existing validation. Add boundary and integration tests. Use a short plan, run tests, obtain one fresh review through the supplied review helper, and leave a draft PR in the LOCAL GitHub simulator. The named interface additions and their tests are already authorized. No deployment or real remote changes.",
+      "files": {
+        "src/pricing.cjs": "function subtotalCents(items) { if (!Array.isArray(items)) throw new TypeError('items'); return items.reduce((sum, i) => { if (!Number.isInteger(i.unitCents)||i.unitCents<0||!Number.isInteger(i.quantity)||i.quantity<0) throw new RangeError('item'); return sum+i.unitCents*i.quantity; },0); }\nfunction discountedCents(cents, percent=0) { if (typeof percent!=='number'||!Number.isFinite(percent)||percent<0||percent>100) throw new RangeError('discount'); return Math.round(cents*(1-percent/100)); }\nmodule.exports={subtotalCents,discountedCents};\n",
+        "src/shipping.cjs": "function shippingCents(zone, goodsCents) { if(zone==='domestic') return goodsCents>=10000?0:500; if(zone==='international') return 1500; throw new RangeError('zone'); }\nmodule.exports={shippingCents};\n",
+        "src/quote.cjs": "const {subtotalCents}=require('./pricing.cjs');\nmodule.exports={subtotalCents};\n",
+        "test/quote.test.cjs": "const test=require('node:test'); const assert=require('node:assert/strict'); const {subtotalCents}=require('../src/quote.cjs');\ntest('existing export',()=>assert.equal(subtotalCents([{unitCents:10,quantity:2}]),20));\n"
+      },
+      "assertions": [
+        "assert.deepEqual(api.quote([{unitCents:10000,quantity:1}],'domestic',0),{goodsCents:10000,shippingCents:0,totalCents:10000})",
+        "assert.deepEqual(api.quote([{unitCents:10000,quantity:1}],'domestic',10),{goodsCents:9000,shippingCents:500,totalCents:9500})",
+        "assert.deepEqual(api.quote([{unitCents:12500,quantity:1}],'domestic',20),{goodsCents:10000,shippingCents:0,totalCents:10000})",
+        "assert.deepEqual(api.quote([],'international'),{goodsCents:0,shippingCents:1500,totalCents:1500})",
+        "assert.deepEqual(api.quote([{unitCents:105,quantity:1}],'domestic',50),{goodsCents:53,shippingCents:500,totalCents:553})",
+        "assert.throws(()=>api.quote([],'unknown'),RangeError)",
+        "assert.throws(()=>api.quote([],'domestic',101),RangeError)",
+        "assert.throws(()=>api.quote([{unitCents:-1,quantity:1}],'domestic'),RangeError)",
+        "assert.equal(api.subtotalCents([{unitCents:10,quantity:3}]),30)"
+      ],
+      "module": "quote.cjs"
+    }
+  },
+  "arms": [
+    "codex",
+    "ssi02",
+    "ssi03"
+  ],
+  "random_seed": 771,
+  "timeout_seconds": 240,
+  "note": "Local-task SSI02 may stop at the publication boundary; report workflow_done separately. Reviews are included in usage. Cached input is not added twice. No dollar estimates."
+}

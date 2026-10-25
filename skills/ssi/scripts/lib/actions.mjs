@@ -1,4 +1,5 @@
 import { parseOpenItems } from './open-items.mjs';
+import { targetOf } from './workflow.mjs';
 const ref = (n) => [`references/${n}.md`];
 
 const AFTER_PUSH = new Set(['review', 'visual', 'land', 'done']);
@@ -9,9 +10,27 @@ function safeToken(v, fallback) {
 }
 
 export function actionFor({ name, state, facts, config }) {
+  const target = targetOf(state);
+  if (target !== 'pr') {
+    if (name === 'implement') return {
+      kind: 'implement-local', headline: 'Make the smallest useful change and verify it',
+      instructions: 'Read the relevant code and callers. Reuse existing code; make the requested change locally. For a bug, keep the reproduction as a regression test. Run: ssi check --phase 5 -- <verification command>. No commit, Issue, push or PR is required.',
+      refs: ref('implement'), requires: [],
+    };
+    if (name === 'visual') return {
+      kind: 'capture-visual', headline: 'Check the changed screen or interaction',
+      instructions: 'Check the affected flow with the available browser. Save a screenshot, or a short recording only when motion matters. Record phase 7 with the artifact path and what was observed. Keep it local; do not upload it.',
+      refs: ref('visual'), requires: [],
+    };
+    if (name === 'done') return {
+      kind: 'done', headline: target === 'answer' ? 'The analysis is ready' : 'The local change is verified',
+      instructions: 'Give the requested answer or summarize the local diff. State the checks actually executed, their limits, and any useful deferred work. Do not publish anything.',
+      refs: [], requires: [],
+    };
+  }
   // GitHub reports the new PR head a few seconds after a push; our own remote-tracking ref is immediate.
   const pushed = facts.remoteSha && facts.remoteSha === facts.headSha;
-  if (AFTER_PUSH.has(name) && facts.pr?.headSha && facts.pr.headSha !== facts.headSha && !pushed) {
+  if (target === 'pr' && AFTER_PUSH.has(name) && facts.pr?.headSha && facts.pr.headSha !== facts.headSha && !pushed) {
     return {
       kind: 'push-changes',
       headline: 'Push your latest commits to the PR',
@@ -20,7 +39,7 @@ export function actionFor({ name, state, facts, config }) {
       requires: ['push'],
     };
   }
-  if (AFTER_PUSH.has(name) && !facts.pr && !facts.prUnknown) {
+  if (target === 'pr' && AFTER_PUSH.has(name) && !facts.pr && !facts.prUnknown) {
     return {
       kind: 'open-draft-pr',
       headline: 'Push the branch and open a draft PR',
@@ -67,7 +86,7 @@ export function actionFor({ name, state, facts, config }) {
       return {
         kind: 'plan',
         headline: 'Write the smallest plan that reuses what exists',
-        instructions: 'Search for code to reuse first, then write the smallest plan that works. Put structure ideas in a follow-up issue. Then run: ssi record --phase 4 --result pass --evidence <plan file> --touches <comma-separated files> [--public-api].',
+        instructions: 'Search for code to reuse first, then write the smallest useful plan. Keep unrelated ideas in the handoff or an optional authorized Issue. Then run: ssi record --phase 4 --result pass --evidence <plan file> --touches <comma-separated files> [--public-api].',
         refs: ref('plan'),
         requires: [],
       };
@@ -111,7 +130,7 @@ export function actionFor({ name, state, facts, config }) {
       return {
         kind: 'verify-implementation',
         headline: 'Run the full tests and record the result',
-        instructions: 'Run the full test suite. Then run: ssi record --phase 5 --result pass|fail --evidence <test output file> --surface <comma-separated directories you changed>.',
+        instructions: 'Run the verification suited to this change: ssi check --phase 5 -- <command and arguments>. Use focused regression tests first; run the required project checks before completion. The engine stores the command, exit status, output and code snapshot.',
         refs: ref('implement'),
         requires: [],
       };
@@ -120,10 +139,12 @@ export function actionFor({ name, state, facts, config }) {
       const codex = [`codex exec review --base ${safeToken(facts.base, 'main')}`, '-c \'sandbox_mode="read-only"\'', '-c \'approval_policy="never"\''];
       if (r.codexModel) codex.push(`-c 'model="${safeToken(r.codexModel, "")}"'`);
       if (r.codexEffort) codex.push(`-c 'model_reasoning_effort="${safeToken(r.codexEffort, "")}"'`);
+      const codexHelp = r.reviewers.includes('codex')
+        ? `For Codex check it first (codex --version, codex login status), then run it in the background: ${codex.join(' ')}. If it fails, treat it as missing and use the next reviewer. ` : '';
       return {
         kind: 'review',
         headline: 'Get an independent review',
-        instructions: `Review with an independent reviewer, in this order: ${r.reviewers.join(', ')}${r.parallel ? ' (run them in parallel and merge the findings)' : ''}. For Codex check it first (codex --version, codex login status), then run it in the background: ${codex.join(' ')}. If Codex is missing, not logged in, or fails for any reason (an unsupported model counts), treat it as missing and say why; then use a sub-agent on another model, else a fresh-context sub-agent. Say which reviewer really ran and whether it was independent. Fix blockers. Then run: ssi record --phase 6 --result pass|fail --evidence <report file> --note "<reviewer>; independent: yes|no".`,
+        instructions: `Review in this order: ${r.reviewers.join(', ')}${r.parallel ? ' (parallel reviews only for distinct risks)' : ''}. ${codexHelp}Use fresh context and report the actual reviewer; same-model review is independent: no. Fix real blockers. Then run: ssi record --phase 6 --result pass|fail --evidence <report file> --note "<reviewer>; independent: yes|no".`,
         refs: ref('review'),
         requires: [],
       };
@@ -131,8 +152,8 @@ export function actionFor({ name, state, facts, config }) {
     case 'visual':
       return {
         kind: 'capture-visual',
-        headline: 'Record a short GIF of the change working',
-        instructions: 'Capture a short GIF with a headless browser. Run: ssi upload --file <gif>. Paste the printed Markdown into the PR body. Then run: ssi record --phase 7 --result pass|fail --evidence <gif path>.',
+        headline: 'Check the changed screen or interaction',
+        instructions: 'Capture a screenshot for static appearance or a short recording when motion matters. Run: ssi upload --file <artifact>. Include the link in the PR. Then run: ssi record --phase 7 --result pass|fail --evidence <artifact path> --note "<what was observed>".',
         refs: ref('visual'),
         requires: ['push'],
       };
@@ -140,7 +161,7 @@ export function actionFor({ name, state, facts, config }) {
       return {
         kind: 'watch-ci',
         headline: 'Watch CI and fix failures',
-        instructions: `${config.ci.watch ? 'Watch the checks: gh pr checks --watch. ' : ''}If they fail, read the logs and run: ssi record --phase 8 --result fail (this sends you back to implement). If they are green, run: ssi record --phase 8 --result pass --note "checks green" (or --note "no CI configured" if the repo has none).`,
+        instructions: 'Run: ssi ci. It reads checks for the exact PR commit and records their real status. Pending checks mean wait; failed checks need a fix. No checks means unverified CI, explicitly reported.',
         refs: ref('land'),
         requires: [],
       };
@@ -149,7 +170,7 @@ export function actionFor({ name, state, facts, config }) {
         return {
           kind: 'commit-changes',
           headline: 'Commit or discard the leftover changes',
-          instructions: 'There are uncommitted changes, so the PR does not hold everything. Commit them (the engine then re-checks the proofs) or discard them if they are not part of this work. Then run: ssi next.',
+          instructions: 'Identify the uncommitted changes. Commit only the task changes, then re-check their proofs. Preserve unrelated user edits; explain any remaining limitation instead of discarding them. Then run: ssi next.',
           refs: ref('implement'),
           requires: [],
         };

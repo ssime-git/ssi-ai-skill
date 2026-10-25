@@ -3,12 +3,15 @@ import assert from 'node:assert/strict';
 import { makeRepo, commit, git } from '../helpers/repo.mjs';
 import { makeGhStub } from '../helpers/gh.mjs';
 import { makeRunner } from '../../skills/ssi/scripts/lib/git.mjs';
-import { DEFAULTS, merge } from '../../skills/ssi/scripts/lib/config.mjs';
-import { newState, readState, writeState } from '../../skills/ssi/scripts/lib/state.mjs';
+import { DEFAULTS as CURRENT_DEFAULTS, merge } from '../../skills/ssi/scripts/lib/config.mjs';
+import { newState as createState, readState, writeState } from '../../skills/ssi/scripts/lib/state.mjs';
 import { applyRecord } from '../../skills/ssi/scripts/lib/record.mjs';
 import { bar, say } from '../../skills/ssi/scripts/lib/say.mjs';
 import { actionFor } from '../../skills/ssi/scripts/lib/actions.mjs';
 import { computeNext } from '../../skills/ssi/scripts/lib/next.mjs';
+
+const DEFAULTS = merge(CURRENT_DEFAULTS, { workflow: { target: 'pr', scope: 'standard', issues: 'required' }, ui: { style: 'guided' } });
+const newState = (goal) => createState(goal, { target: 'pr', scope: 'standard', issues: 'required' });
 
 const next = (dir, gh, config = DEFAULTS) => computeNext({ cwd: dir, config, run: makeRunner(dir), gh });
 

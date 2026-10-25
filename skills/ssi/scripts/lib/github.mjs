@@ -15,6 +15,18 @@ export function findPr(gh, branch, known = null) {
 
 export const whoami = (gh) => json(gh(['api', 'user']))?.login ?? null;
 
+export function readCi(gh, pr, sha) {
+  const data = json(gh(['pr', 'view', String(pr), '--json', 'headRefOid,statusCheckRollup']));
+  if (data?.headRefOid !== sha) throw new Error('The PR does not point at the verified local commit. Push the changes first.');
+  if (!Array.isArray(data.statusCheckRollup)) throw new Error('GitHub did not return the check results.');
+  const checks = data.statusCheckRollup;
+  const pending = checks.some((c) => c.__typename === 'CheckRun' ? c.status !== 'COMPLETED' : ['PENDING', 'EXPECTED'].includes(c.state));
+  const success = checks.every((c) => c.__typename === 'CheckRun'
+    ? c.status === 'COMPLETED' && ['SUCCESS', 'NEUTRAL', 'SKIPPED'].includes(c.conclusion)
+    : c.__typename === 'StatusContext' && c.state === 'SUCCESS');
+  return { checks, pending, pass: !pending && success, note: checks.length ? 'GitHub checks inspected for this commit' : 'No CI checks reported by GitHub; CI unverified' };
+}
+
 export const isTransient = (e) => /could not resolve|timed out|timeout|network|econn|enotfound|eai_again|connection|http 5\d\d/i.test(String(e?.message ?? e));
 
 export function listComments(gh, n) {

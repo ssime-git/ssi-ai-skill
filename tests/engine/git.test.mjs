@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync, symlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { makeRepo, commit, git } from '../helpers/repo.mjs';
 import { makeRunner, gitFacts, resolveBase } from '../../skills/ssi/scripts/lib/git.mjs';
@@ -126,4 +127,34 @@ test('a detached HEAD does not throw', () => {
   const f = facts(dir);
   assert.equal(f.branch, 'HEAD');
   assert.equal(typeof f.headSha, 'string');
+});
+
+test('local snapshots support unborn repositories and include staged files', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'ssi-unborn-'));
+  git(dir, 'init', '-q', '-b', 'main');
+  writeFileSync(join(dir, 'a.js'), 'one\n');
+  git(dir, 'add', 'a.js');
+  const before = gitFacts(makeRunner(dir), { local: true });
+  assert.ok(before.changedFiles.includes('a.js'));
+  writeFileSync(join(dir, 'a.js'), 'two\n');
+  assert.notEqual(gitFacts(makeRunner(dir), { local: true }).tree, before.tree);
+});
+
+test('untracked symlinks are hashed as links without reading their target', () => {
+  const dir = makeRepo();
+  symlinkSync('/ssi-does-not-exist', join(dir, 'external-link'));
+  const f = gitFacts(makeRunner(dir), { local: true });
+  assert.ok(f.changedFiles.includes('external-link'));
+  assert.match(f.tree, /^[a-f0-9]{64}$/);
+});
+
+test('local changes use the run baseline even when the branch is named develop', () => {
+  const dir = makeRepo();
+  git(dir, 'branch', '-m', 'develop');
+  const startSha = commit(dir, 'src/auth/login.js', 'old\n', 'seed');
+  writeFileSync(join(dir, 'src/auth/login.js'), 'new\n');
+  const f = gitFacts(makeRunner(dir), { local: true, startSha });
+  assert.equal(f.base, null);
+  assert.ok(f.changedFiles.includes('src/auth/login.js'));
+  assert.equal(f.diff.lines, 2);
 });

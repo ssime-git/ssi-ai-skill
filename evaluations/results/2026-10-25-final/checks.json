@@ -1,0 +1,108 @@
+{
+  "engine": {
+    "passed": 158,
+    "failed": 0
+  },
+  "evaluation_unit_tests": {
+    "passed": 9,
+    "failed": 0
+  },
+  "skill_validator": "pass",
+  "package_validator": "pass",
+  "diff_check": "pass",
+  "package_dry_run": {
+    "package": "ssi-ai-skill",
+    "version": "0.3.0",
+    "files": 40,
+    "compressed_bytes": 36826,
+    "required_resources_present": true,
+    "private_artifacts_excluded": true
+  },
+  "workflow_replay": {
+    "metric": "UTF-8 engine output bytes; not model tokens",
+    "github": "stubbed; no remote objects created",
+    "results": [
+      {
+        "target": "local",
+        "scope": "small",
+        "current": {
+          "actions": 3,
+          "calls": 6,
+          "outputBytes": 1286,
+          "instructionBytes": 8509,
+          "contextBytes": 9795,
+          "githubCalls": 0
+        },
+        "baseline": {
+          "actions": 10,
+          "calls": 17,
+          "outputBytes": 7255,
+          "instructionBytes": 15513,
+          "contextBytes": 22768,
+          "githubCalls": 22
+        },
+        "outputReductionPercent": 82,
+        "contextReductionPercent": 57
+      },
+      {
+        "target": "local",
+        "scope": "standard",
+        "current": {
+          "actions": 6,
+          "calls": 12,
+          "outputBytes": 3035,
+          "instructionBytes": 12320,
+          "contextBytes": 15355,
+          "githubCalls": 0
+        },
+        "baseline": {
+          "actions": 10,
+          "calls": 17,
+          "outputBytes": 7255,
+          "instructionBytes": 15513,
+          "contextBytes": 22768,
+          "githubCalls": 22
+        },
+        "outputReductionPercent": 58,
+        "contextReductionPercent": 33
+      },
+      {
+        "target": "pr",
+        "scope": "standard",
+        "current": {
+          "actions": 10,
+          "calls": 17,
+          "outputBytes": 4376,
+          "instructionBytes": 13332,
+          "contextBytes": 17708,
+          "githubCalls": 24
+        },
+        "baseline": {
+          "actions": 10,
+          "calls": 17,
+          "outputBytes": 7255,
+          "instructionBytes": 15513,
+          "contextBytes": 22768,
+          "githubCalls": 22
+        },
+        "outputReductionPercent": 40,
+        "contextReductionPercent": 22
+      }
+    ]
+  },
+  "limits": [
+    "Node 20/22 not executed locally; tests ran on Node 26.8.1",
+    "No real remote PR/CI or end-to-end reviewed-PR execution in Claude",
+    "No new paired token-savings comparison"
+  ],
+  "answer_review": {
+    "codex": "No material error identified in this small answer",
+    "claude": "Overgeneralized accepted input shapes and silent invalid-element handling; the detailed BigInt exception was correct",
+    "counterexamples": {
+      "custom_reduce_object": 42,
+      "infinity": "Infinity",
+      "bigint": "TypeError"
+    },
+    "scope": "Manual review of natural-language output, separate from passing operational assertions"
+  }
+}

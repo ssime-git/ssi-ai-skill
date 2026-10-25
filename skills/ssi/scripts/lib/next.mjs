@@ -8,6 +8,7 @@ import { actionFor } from './actions.mjs';
 import { say, bar } from './say.mjs';
 import { opAllowed } from './config.mjs';
 import { evaluateGuards } from './guards.mjs';
+import { targetOf } from './workflow.mjs';
 
 // Landing is blocked until every applicable contract is pass or waived. The engine decides,
 // not the agent: the action is replaced, so no instruction to land is ever emitted.
@@ -30,12 +31,15 @@ export function computeNext({ cwd, config, run, gh, guards = evaluateGuards }) {
   const warnings = [];
   const read = readState(cwd);
   if (read.warning) warnings.push(read.warning);
-  const facts = gitFacts(run);
+  const local = targetOf(read.state ?? { workflow: config.workflow }) !== 'pr';
+  const facts = gitFacts(run, { local, startSha: read.state?.start_sha });
   let offline = false;
   let login = null;
   try {
+    if (!local) {
     facts.pr = facts.branch && !facts.onBase ? findPr(gh, facts.branch, read.state?.pr ?? null) : null;
     if (facts.pr) login = whoami(gh);
+    }
   } catch {
     facts.pr = null;
     facts.prUnknown = true;
@@ -78,7 +82,7 @@ export function computeNext({ cwd, config, run, gh, guards = evaluateGuards }) {
   if (!offline) {
     for (const p of [...state.pending]) {
       if (p.op !== 'issue') continue;
-      if (state.issue_skipped) {
+      if (state.issue_skipped && !p.followup) {
         state.pending = state.pending.filter((q) => q !== p);
         continue;
       }
@@ -91,7 +95,9 @@ export function computeNext({ cwd, config, run, gh, guards = evaluateGuards }) {
         continue;
       }
       try {
-        state.issue = createIssue(gh, { title: p.title, body: p.body, key: `ssi:${state.run_id}:issue` }).number;
+        const issue = createIssue(gh, { title: p.title, body: p.body, key: p.key ?? `ssi:${state.run_id}:issue` }).number;
+        if (p.followup) state.followups = [...new Set([...state.followups, issue])];
+        else state.issue = issue;
         state.pending = state.pending.filter((q) => q !== p);
       } catch (e) {
         if (isTransient(e)) offline = true;
@@ -109,8 +115,8 @@ export function computeNext({ cwd, config, run, gh, guards = evaluateGuards }) {
   let action = null;
   if (!stop) {
     action = actionFor({ name: det.name, state, facts, config });
-    if (GUARDED.has(det.name) && !['push-changes', 'commit-changes', 'wait-for-github'].includes(action.kind)) {
-      const g = guards(cwd);
+    if (targetOf(state) !== 'answer' && GUARDED.has(det.name) && !['push-changes', 'commit-changes', 'wait-for-github'].includes(action.kind)) {
+      const g = guards(cwd, { changedFiles: facts.changedFiles });
       if (!g.ok) action = guardAction(g);
     }
     const missing = action.requires.find((op) => !opAllowed(op, config));

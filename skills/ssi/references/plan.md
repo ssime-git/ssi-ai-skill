@@ -1,13 +1,14 @@
-# Phase 4: Plan
+# Plan
 
-Goal: the smallest change that works, built from what already exists.
+Use a plan when uncertainty, multiple components or consequential choices justify one.
+The engine omits this phase for a small, safe change. Do not create a second planning workflow.
 
-1. Search first: existing functions, helpers, patterns, config, libraries already in the repo. Standard library and native platform features before a new dependency.
-2. Write a plan of at most one page: files to touch, what is reused, how it will be tested.
-3. List every public interface or protected path you will touch (auth, payments, migrations, schema, exported API). Say `--public-api` if an exported contract changes.
-4. Structure ideas (renames, splits, cleanups): do **not** put them in this plan. Create a follow-up Issue for them. They join the PR only if they block the task, or remove more lines than they add in the touched area, as a separate commit.
-5. Record: `ssi record --phase 4 --result pass --evidence <plan file> --touches <a,b,c> [--public-api true]`.
+Search existing code and standard tools first. Write at most one page: intended behavior, affected files,
+what will be reused and how correctness will be checked. Specify interfaces and decisions, not the entire implementation.
+Read callers and identify compatibility risks. Prefer fewer moving parts and familiar code a reviewer can follow.
+List protected paths and public interface changes accurately with `--touches` and `--public-api`.
+Record phase 4 with the plan file as evidence.
 
-If the engine stops for a protected path, show the user the files and ask for approval. Do not argue the stop away.
-
-Blast radius: before you code, list who else uses what you will change (callers, importers, config, docs, other packages). For the one fact that makes the change safe, run real code and paste the output. Reading is not proof.
+Keep unrelated improvements outside the change. Mention useful follow-ups in the handoff; create an Issue
+only when it is actionable, worth retaining and authorized. A follow-up Issue is never mandatory.
+Ask only about a choice that materially changes the requested result or exceeds existing authorization.

@@ -1,0 +1,23 @@
+[
+  {
+    "host": "claude",
+    "case": "mean_local",
+    "exit_code": 1,
+    "usage": null,
+    "reason": "CLI variadic allowedTools consumed the prompt; fixed by -- delimiter. No model run."
+  },
+  {
+    "host": "claude",
+    "case": "discount_local",
+    "exit_code": 1,
+    "usage": null,
+    "reason": "CLI variadic allowedTools consumed the prompt; fixed by -- delimiter. No model run."
+  },
+  {
+    "host": "claude",
+    "case": "routing",
+    "exit_code": 1,
+    "usage": null,
+    "reason": "CLI variadic allowedTools consumed the prompt; fixed by -- delimiter. No model run."
+  }
+]

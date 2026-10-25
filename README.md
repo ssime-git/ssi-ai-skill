@@ -1,101 +1,98 @@
 # SSI
 
-One command takes a request to a **reviewed draft PR**. A small script, not the model, decides what comes next, so it remembers where it was and repairs itself after an interruption. It never merges, closes an Issue or deploys.
-
-```text
-/ssi Fix: total() ignores percentage discounts
-```
+Simple, reviewable code with the least necessary workflow. Works with Codex and Claude Code.
+SSI 0.3.0 handles small tasks directly and tracks substantial or risky work when tracking is useful.
 
 ## Quick install
 
+Clone the repository, then copy the entire skill folder for your agent:
+
 ```bash
-git clone https://github.com/ssime-git/ssi-ai-skill && cd ssi-ai-skill
-cp -R skills/ssi ~/.claude/skills/ssi   # then run: /ssi <your request>
+git clone https://github.com/ssime-git/ssi-ai-skill
+cd ssi-ai-skill
+# Claude Code
+mkdir -p ~/.claude/skills
+cp -R skills/ssi ~/.claude/skills/
+# Codex
+mkdir -p ~/.agents/skills
+cp -R skills/ssi ~/.agents/skills/
 ```
 
-## The flow
+Choose either installation or both. Invoke `/ssi <request>` in Claude Code or `$ssi <request>` in Codex.
+Claude Code also supports `claude --plugin-dir .` from this checkout, using `/ssi:ssi`.
+Tracked work requires Node 20+ and git. GitHub CLI is needed only for authorized remote work.
+Updating the checkout does not update a copied installation: repeat its copy command after `git pull --ff-only`.
+Project-local Codex installation and an optional routing reminder: [Codex guide](docs/codex/AGENTS.md).
+
+## How it works
 
 ```mermaid
 flowchart LR
-  A[1 Analyze] --> B[2 Confirm] --> C[3 Reproduce<br/>bugs only] --> D[4 Plan<br/>reuse first] --> E[5 Implement<br/>draft PR] --> F[6 Review<br/>Codex or sub-agent] --> G[7 Visual GIF<br/>UI only] --> H[8 Land<br/>CI green] --> Z([Draft PR<br/>ready for you])
-  F -- blocker --> E
-  G -- wrong --> E
-  H -- CI red --> E
-  A -.-> Q{{One question<br/>to you}}
-  C -.-> Q
-  D -.-> Q
-  E -.-> Q
-  F -.-> Q
+  A[Understand result and verification] --> B{Scope and risk}
+  B --> C[Direct agent work]
+  B --> D[Tracked SSI workflow]
+  C -->|Broader impact or unresolved failures| D
+  D --> E[Answer, local change or authorized draft PR]
 ```
 
-It runs on its own and asks **one** question only when it must: unclear request, no reproduction, protected code touched, a big diff, a review or CI that keeps failing, or an action outside its mandate.
+- Clear, confined, low-risk work uses normal agent tools and relevant checks, without SSI state or phase guides.
+- Missing requirements get a targeted clarification. Ambiguity alone does not justify tracking.
+- Substantial or risky work loads the tracked guide; even a one-line permission change can be risky.
+- Direct work can escalate while reusing observations. An active tracked task resumes without bypassing stops.
 
-## What happens inside
+Explicitly invoking SSI still allows direct work. There is no session-start hook or extra routing model.
+The agent makes the routing decision; it is guidance, not a deterministic classifier.
+Previously loaded instructions remain in conversation context: SSI does not promise to unload them.
+
+For tracked work only:
 
 ```mermaid
 sequenceDiagram
-  participant You
-  participant Skill as Model (skill)
-  participant Engine as ssi engine (script)
-  participant World as git + PR
-  You->>Skill: /ssi <request>
-  loop until done or a question
-    Skill->>Engine: ssi next
-    Engine->>World: read branch, PR, recorded proof
-    Engine-->>Skill: the one next action, or a stop
-    Skill->>Skill: do the work (tests, code, review, GIF)
-    Skill->>Engine: ssi record (the proof)
+  participant Agent
+  participant Engine
+  Agent->>Engine: start (answer, local or pr)
+  loop until done or a blocking question
+    Agent->>Engine: next --compact
+    Engine-->>Agent: one relevant action
+    Agent->>Engine: real artifact or executed check
   end
-  Engine-->>You: draft PR ready, or one question
 ```
-
-If the notes and the repo disagree, **the repo wins**. Lost local notes are restored from a block in the PR's progress comment. A new commit that touches proven files makes that proof stale and it is redone.
 
 ## What is different
 
-Comparisons are about design, not quality: the projects below are good, and this one borrows from them.
+- Reuse existing code; prefer explicit names, direct control flow and small interfaces over speculative abstractions.
+- Local work needs no commit, Issue or PR. Useful follow-ups can stay in a handoff or an authorized Issue.
+- Tracked work records progress and retry budgets. Small safe tracked changes skip a separate plan and review.
+- `check` executes commands and ties receipts to the code snapshot. Manual evidence is labelled reported.
+- `ci` inspects the actual PR commit and check results; absent CI remains unverified. PRs stay draft.
+- The SSI engine never merges, closes Issues or deploys. Starting a run grants no extra authorization.
 
-| Common in prompt-only workflow skills | SSI |
-|---|---|
-| The model remembers the phase | A script derives the phase from git, the PR and recorded proof |
-| You call each step or skill yourself | One entry point; it switches phases itself |
-| Stopping is a judgement call | Stops and thresholds are computed (diff size, protected paths from the real diff, retry budgets) |
-| An interrupted run starts over | It resumes, restores notes from the PR and redoes only stale proof |
-| Review is the same model re-reading its work | Codex if it works, else a sub-agent on another model; the report says whether it was independent |
-| Output tuned for experts | One short template: where we are, what happened, what is next, at most one question; optional `adhd` style |
-| Remote side effects are ad hoc | Keyed and idempotent: no duplicate Issue or comment; evidence GIF on a `ssi-assets` branch |
+Engine commands, configuration and evidence limits: [design](docs/design.md).
+Optional display: `mods/ssi-cockpit`; direct tasks do not appear as tracked runs.
 
-## Install and use
+## Reliability and efficiency
 
-Needs Node 20+, `git`, and `gh` logged in. Optional: Codex CLI (review), Chrome or Playwright and ffmpeg (GIF).
+Validation passed 158 engine/package tests and 9 evaluation tests. Four direct implementations passed their
+held-out assertions across Codex and Claude Code; each host passed eight routing decisions and completed
+one tracked answer workflow. These are small smoke tests, not proof of production readiness or perfect answers.
+The entrypoint is 52% shorter in bytes; equivalent token savings have not been established.
+An earlier engine-only comparison reduced tokens versus SSI 0.2 but cost more than plain Codex on short tasks.
 
-```bash
-cp -R skills/ssi ~/.claude/skills/ssi          # the folder is self-contained
-claude --plugin-dir .                          # or load the repo as a plugin
-```
+Read the [routing results and limits](docs/routing-evaluation.md), [historical model comparison](docs/model-evaluation.md),
+[workflow text benchmark](docs/efficiency.md) and [run history](docs/runs.md).
+The evidence supports using SSI with normal human review, not trusting every answer or route automatically.
 
-Settings live in `ssi.config.json` (repo) and `.ssi/config.local.json` (yours); `ssi config` prints them. Optional status band and phase map: `mods/ssi-cockpit`.
+## Contributing
 
-## Use with Codex
-
-The CLI does not depend on any agent. For Codex, copy [docs/codex/AGENTS.md](docs/codex/AGENTS.md) into your repository root and set the ssi.mjs path. Codex loads AGENTS.md from the git root down to the working directory.
+Run `npm run validate` and `npm test`. See [contributing](CONTRIBUTING.md) for evaluation checks and opt-in model trials.
+Design principles: [philosophy](docs/philosophy.md). Changes: [changelog](CHANGELOG.md).
 
 ## Inspired by
 
-- [mattpocock/skills](https://github.com/mattpocock/skills) and [jsmastery-pro/skills](https://github.com/jsmastery-pro/skills): engineering practices adapted into the phase guides.
-- [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail): the "smallest change that works" lens in planning.
-- [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd): the reader-friendly message rules.
-- [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc): how Codex is called (installed binary, read-only, optional model) and the review report shape.
-- [obra/superpowers](https://github.com/obra/superpowers): the brainstorm and design process used to build this.
+- [mattpocock/skills](https://github.com/mattpocock/skills) and [jsmastery-pro/skills](https://github.com/jsmastery-pro/skills): engineering practices.
+- [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail): the smallest useful change.
+- [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd): clear communication.
+- [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc): optional read-only review.
+- [obra/superpowers](https://github.com/obra/superpowers): the original design process.
 
-Exact versions and licences: [`skills/ssi/NOTICE.md`](skills/ssi/NOTICE.md).
-
-## Read more
-
-- [docs/philosophy.md](docs/philosophy.md): why it is built this way.
-- [docs/design.md](docs/design.md): how it works, as a reference.
-- [docs/runs.md](docs/runs.md): the real runs and what they found.
-
-## Status
-
-Early. 134 engine tests, three real runs, six rounds of Codex review (the last round's fixes are not re-reviewed yet). MIT, see [LICENSE](LICENSE).
+Exact source versions and licences: [NOTICE.md](skills/ssi/NOTICE.md).

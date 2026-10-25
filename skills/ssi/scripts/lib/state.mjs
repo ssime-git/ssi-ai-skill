@@ -7,16 +7,18 @@ export const PHASES = ['analyze', 'confirm', 'reproduce', 'plan', 'implement', '
 
 export const statePath = (cwd) => join(cwd, '.ssi', 'state.json');
 
-export function newState(goal) {
+export function newState(goal, workflow = { target: 'local', scope: 'standard', issues: 'optional' }) {
   return {
     run_id: `ssi-${randomBytes(3).toString('hex')}`,
     goal,
+    workflow: { ...workflow },
     kind: null,
     branch: null,
     head_sha: null,
     start_sha: null,
     work_sha: null,
     issue: null,
+    followups: [],
     issue_skipped: null,
     last_failure: null,
     last: null,
@@ -35,7 +37,8 @@ export function newState(goal) {
 }
 
 export function normalize(state) {
-  const base = newState(state.goal ?? '');
+  // Runs created by v0.2 still end at a PR; never change their destination on resume.
+  const base = newState(state.goal ?? '', state.workflow ?? { target: 'pr', scope: 'standard', issues: 'required' });
   const approvals = { ...base.approvals, ...(state.approvals ?? {}) };
   if (!Array.isArray(approvals.protectedFiles)) approvals.protectedFiles = [];
   if (typeof approvals.bigDiff !== 'object') approvals.bigDiff = null;

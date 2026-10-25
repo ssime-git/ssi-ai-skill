@@ -22,7 +22,21 @@ const walk = (dir, depth = 3, out = []) => {
   return out;
 };
 
-export function detectContext(cwd) {
+export const riskyPath = (file) => /(^|\/)(migrations?|prompts|evals?|auth|payments?)(\/|$)|\.tf$|(^|\/)(package\.json|pyproject\.toml|requirements[^/]*\.txt)$/.test(file);
+
+export function detectContext(cwd, changedFiles = null) {
+  if (changedFiles !== null) {
+    const sourceChanged = changedFiles.some((f) => !/\.(md|rst|adoc|png|jpe?g|gif|webp)$/i.test(f)
+      && !/(^|\/)(LICENSE|NOTICE|CHANGELOG|README)(\.[^/]*)?$/i.test(f));
+    const manifests = sourceChanged ? ['requirements.txt', 'pyproject.toml', 'package.json']
+      .filter((f) => existsSync(join(cwd, f))).map((f) => readFileSync(join(cwd, f), 'utf8')).join('\n') : '';
+    return {
+      migrations: changedFiles.some((f) => /(^|\/)migrations?\//.test(f)),
+      terraform: changedFiles.some((f) => /\.tf$/.test(f)),
+      'model-registry': /mlflow|wandb|sagemaker/i.test(manifests),
+      'llm-evals': changedFiles.some((f) => /(^|\/)(evals?|prompts)\//.test(f)) || /promptfoo|deepeval|ragas|langsmith/i.test(manifests),
+    };
+  }
   const all = walk(cwd);
   const text = ['requirements.txt', 'pyproject.toml', 'package.json']
     .map((f) => (existsSync(join(cwd, f)) ? readFileSync(join(cwd, f), 'utf8') : ''))
@@ -51,8 +65,8 @@ export function loadGuards(cwd) {
 }
 
 // status: pass | fail | unproven | invalid | uncovered | waived | n/a
-export function evaluateGuards(cwd, { exec = sh } = {}) {
-  const ctx = detectContext(cwd);
+export function evaluateGuards(cwd, { exec = sh, changedFiles = null } = {}) {
+  const ctx = detectContext(cwd, changedFiles);
   const { guards, waivers } = loadGuards(cwd);
   const results = [];
   for (const c of CATALOGUE) {
@@ -60,12 +74,21 @@ export function evaluateGuards(cwd, { exec = sh } = {}) {
     const g = guards.find((x) => x.id === c.id);
     const w = waivers.find((x) => x.id === c.id);
     const r = { id: c.id, applies, status: 'n/a' };
+    if (!applies && changedFiles !== null) {
+      results.push(r);
+      continue;
+    }
     if (g) {
       if (!g.run || !g.mustFail) Object.assign(r, { status: 'invalid', why: 'needs "run" and "mustFail"' });
       else if (Object.values(g.params ?? {}).some((v) => !filled(v))) Object.assign(r, { status: 'invalid', why: 'a param is empty; fill it from the project, there is no default' });
       else if (exec(g.run, cwd).status !== 0) Object.assign(r, { status: 'fail', why: 'the check fails on the current tree' });
-      else if (exec(g.mustFail, cwd).status === 0) Object.assign(r, { status: 'unproven', why: 'the bad case did not make the check fail' });
-      else r.status = 'pass';
+      else {
+        const bad = exec(g.mustFail, cwd);
+        if (bad.error || bad.signal || !Number.isInteger(bad.status) || bad.status >= 126) {
+          Object.assign(r, { status: 'invalid', why: 'the negative check could not run (command missing, signal or timeout)' });
+        } else if (bad.status === 0) Object.assign(r, { status: 'unproven', why: 'the bad case did not make the check fail' });
+        else r.status = 'pass';
+      }
     } else if (w) {
       r.status = filled(w.by) && filled(w.reason) ? 'waived' : 'invalid';
       if (r.status === 'invalid') r.why = 'a waiver needs "by" and "reason"';

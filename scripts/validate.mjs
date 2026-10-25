@@ -15,10 +15,15 @@ check('SKILL.md frontmatter is name + description', front);
 check('SKILL.md stays under 90 lines', skill.split('\n').length < 90);
 
 const refs = readdirSync(join(root, 'skills/ssi/references')).filter((f) => f.endsWith('.md'));
-for (const f of refs) check(`SKILL.md links references/${f}`, skill.includes(`references/${f}`));
-for (const m of skill.matchAll(/\]\(([^)#]+)\)/g)) {
-  if (/^https?:/.test(m[1])) continue;
-  check(`link exists: ${m[1]}`, existsSync(join(root, 'skills/ssi', m[1])));
+const workflow = read('skills/ssi/references/workflow.md');
+for (const f of refs) {
+  check(`reference is discoverable: ${f}`, skill.includes(`references/${f}`) || workflow.includes(`](${f})`));
+}
+for (const [document, base] of [[skill, 'skills/ssi'], [workflow, 'skills/ssi/references']]) {
+  for (const m of document.matchAll(/\]\(([^)#]+)\)/g)) {
+    if (/^https?:/.test(m[1])) continue;
+    check(`link exists: ${m[1]}`, existsSync(join(root, base, m[1])));
+  }
 }
 const notice = read('skills/ssi/NOTICE.md');
 check('SKILL.md does not reach outside its folder', !/\.\.\/\.\.\//.test(skill));

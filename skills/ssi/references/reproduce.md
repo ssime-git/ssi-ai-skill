@@ -1,18 +1,15 @@
-# Phase 3: Reproduce (bugs only)
+# Reproduce a bug
 
-Goal: a replayable artifact that fails for the reason the user reported. No artifact, no plan.
+Build the smallest artifact that fails for the reported reason: a unit test, request, CLI command or browser script.
+Use the existing environment; do not introduce containers unless the bug actually requires them.
+For intermittent failures, record the conditions and observed frequency instead of claiming certainty.
 
-Pick the method by the kind of bug:
+Run the artifact and inspect its failure. `ssi check --phase 3 --expect-exit 1 -- <command>` records an
+expected failure directly. A missing command, signal or timeout never counts as a successful reproduction.
+For visual or other manually inspected symptoms, record an existing artifact and explain what it shows.
+After the fix, keep a regression test appropriate to the behavior.
 
-| Bug | Artifact |
-|---|---|
-| Pure logic | A failing unit test |
-| API or CLI | A saved request or command that returns the wrong result |
-| Visual | A headless-browser script (Playwright) that captures the wrong screen |
-| Needs a dirty environment | A script run in a container, only if the repo already has a compose file or devcontainer, or the bug truly needs it |
-
-Create the working branch `ssi/<short-name>` before you commit anything, so the base branch is never touched. Run the artifact and watch it fail. Reduce it to the smallest case. For an intermittent bug, run it many times and write down the failure rate.
-
-Record: `ssi record --phase 3 --result pass|fail --evidence <artifact path>`.
-
-When `ssi next` then returns `open-issue`, run `ssi issue create --title "<short>" --body "<what fails, how to replay, artifact path>"`. The engine dedupes it and queues it only if GitHub is unreachable. If Issues cannot be created for good (disabled, no permission), tell the user, then run `ssi issue skip --because "<reason>"`.
+No Issue is required by default. Create one for important tracking or the project's contribution rules,
+within authorization. A repository can explicitly require one with workflow.issues = "required".
+For optional out-of-scope work, use `ssi issue create --follow-up --title "..." --body "<evidence, impact, next step>"`.
+Follow-ups have separate deduplication keys and never become the current bug's closing reference.

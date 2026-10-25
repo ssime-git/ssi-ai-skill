@@ -1,0 +1,72 @@
+{
+  "metric": "UTF-8 engine output bytes; not model tokens",
+  "github": "stubbed; no remote objects created",
+  "results": [
+    {
+      "target": "local",
+      "scope": "small",
+      "current": {
+        "actions": 3,
+        "calls": 6,
+        "outputBytes": 1286,
+        "instructionBytes": 8509,
+        "contextBytes": 9795,
+        "githubCalls": 0
+      },
+      "baseline": {
+        "actions": 10,
+        "calls": 17,
+        "outputBytes": 7255,
+        "instructionBytes": 15513,
+        "contextBytes": 22768,
+        "githubCalls": 22
+      },
+      "outputReductionPercent": 82,
+      "contextReductionPercent": 57
+    },
+    {
+      "target": "local",
+      "scope": "standard",
+      "current": {
+        "actions": 6,
+        "calls": 12,
+        "outputBytes": 3035,
+        "instructionBytes": 12320,
+        "contextBytes": 15355,
+        "githubCalls": 0
+      },
+      "baseline": {
+        "actions": 10,
+        "calls": 17,
+        "outputBytes": 7255,
+        "instructionBytes": 15513,
+        "contextBytes": 22768,
+        "githubCalls": 22
+      },
+      "outputReductionPercent": 58,
+      "contextReductionPercent": 33
+    },
+    {
+      "target": "pr",
+      "scope": "standard",
+      "current": {
+        "actions": 10,
+        "calls": 17,
+        "outputBytes": 4376,
+        "instructionBytes": 13332,
+        "contextBytes": 17708,
+        "githubCalls": 24
+      },
+      "baseline": {
+        "actions": 10,
+        "calls": 17,
+        "outputBytes": 7255,
+        "instructionBytes": 15513,
+        "contextBytes": 22768,
+        "githubCalls": 22
+      },
+      "outputReductionPercent": 40,
+      "contextReductionPercent": 22
+    }
+  ]
+}

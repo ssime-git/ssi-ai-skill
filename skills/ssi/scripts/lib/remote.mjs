@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-const KEEP = ['updated_at', 'run_id', 'goal', 'kind', 'branch', 'head_sha', 'start_sha', 'work_sha', 'issue', 'issue_skipped', 'last_failure', 'pr', 'phase', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop'];
+const KEEP = ['updated_at', 'run_id', 'goal', 'workflow', 'kind', 'branch', 'head_sha', 'start_sha', 'work_sha', 'issue', 'followups', 'issue_skipped', 'last_failure', 'pr', 'phase', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop'];
 const BEGIN = '<!-- ssi:begin -->';
 const END = '<!-- ssi:end -->';
 
@@ -31,7 +31,7 @@ export function mergeComment(existing, block) {
 const HASHED = KEEP.filter((k) => k !== 'updated_at');
 // What counts as progress for ordering two machines. Volatile fields (head sha, phase,
 // bookkeeping) are left out so merely running `ssi next` never makes an old cache look new.
-const PROGRESS = ['goal', 'kind', 'branch', 'issue', 'issue_skipped', 'pr', 'work_sha', 'last_failure', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop'];
+const PROGRESS = ['goal', 'workflow', 'kind', 'branch', 'issue', 'followups', 'issue_skipped', 'pr', 'work_sha', 'last_failure', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop'];
 export const progressHash = (state) =>
   createHash('sha1').update(JSON.stringify(Object.fromEntries(PROGRESS.map((k) => [k, state[k]])))).digest('hex');
 

@@ -1,0 +1,110 @@
+[
+  {
+    "case": "quote_pr",
+    "arm": "codex",
+    "repeat": 1,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "mean_local",
+    "arm": "ssi03",
+    "repeat": 1,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "discount_local",
+    "arm": "codex",
+    "repeat": 1,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "discount_local",
+    "arm": "ssi02",
+    "repeat": 1,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "quote_pr",
+    "arm": "ssi03",
+    "repeat": 1,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "mean_local",
+    "arm": "codex",
+    "repeat": 1,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "quote_pr",
+    "arm": "ssi02",
+    "repeat": 1,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "discount_local",
+    "arm": "ssi03",
+    "repeat": 1,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "mean_local",
+    "arm": "ssi02",
+    "repeat": 1,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "mean_local",
+    "arm": "codex",
+    "repeat": 2,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "mean_local",
+    "arm": "ssi02",
+    "repeat": 2,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "discount_local",
+    "arm": "ssi02",
+    "repeat": 2,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "discount_local",
+    "arm": "codex",
+    "repeat": 2,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "quote_pr",
+    "arm": "codex",
+    "repeat": 2,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "quote_pr",
+    "arm": "ssi03",
+    "repeat": 2,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "discount_local",
+    "arm": "ssi03",
+    "repeat": 2,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "quote_pr",
+    "arm": "ssi02",
+    "repeat": 2,
+    "unexpected_skill_mutations": []
+  },
+  {
+    "case": "mean_local",
+    "arm": "ssi03",
+    "repeat": 2,
+    "unexpected_skill_mutations": []
+  }
+]

@@ -1,45 +1,35 @@
-# Phase 6: Review
+# Review
 
-Goal: a second pair of eyes that did not write the code.
+Standard or risky work gets a fresh perspective. Small safe runs skip this phase.
+Read the diff and necessary surrounding code once. Check behavior, compatibility, missing regression coverage
+and avoidable complexity. A different model alone does not establish independence.
 
-## Order of reviewers (settings can change it)
+## Reviewer
 
-1. **Codex CLI**, native review. Same approach as OpenAI's `codex-plugin-cc`: use the installed `codex` binary and your own Codex config, read-only, no approvals.
-2. A **sub-agent on a different model**.
-3. A **fresh-context sub-agent** of the same model. Tell the user this review is not independent.
+Use the configured reviewer order. Default: usable Codex CLI, else a sub-agent on another model,
+else a fresh-context helper of the same model. Report the actual setup; same-model review uses independent: no.
+Avoid several reviewers unless separate risks justify their cost.
 
-With `review.parallel` on, run several and merge the findings.
+For Codex, check `codex --version` and `codex login status`, then run from the repository root:
+`codex exec review --base <base> -c 'sandbox_mode="read-only"' -c 'approval_policy="never"'`.
+Save the output. Use the user's installed configuration; do not guess model names. Optional
+review.codexModel and review.codexEffort settings pin the model. A failed or unsupported invocation is
+not a review: explain the reason and try the next configured reviewer without repeated guessing.
 
-## Running Codex
+## Report
 
-1. Check it is usable: `codex --version` and `codex login status`. If either fails, Codex is missing: go to the next reviewer and say why.
-2. Run it in the background (a multi-file review takes a while), from the repository root, and save the output to a file:
-   `codex exec review --base <base> -c 'sandbox_mode="read-only"' -c 'approval_policy="never"'`
-3. No model is forced: Codex uses your `~/.codex/config.toml`. To pin one, set `review.codexModel` and `review.codexEffort` in `ssi.config.json` or `.ssi/config.local.json`; the engine adds `-c 'model="…"'`.
-4. A run that exits non-zero, or whose output contains `ERROR` (for example "The 'X' model is not supported when using Codex with a ChatGPT account"), did **not** review anything. Treat Codex as missing, tell the user the reason, and use the next reviewer. Do not guess other model names and do not retry in a loop.
-
-## The report
-
-Whatever the reviewer, write one report with this shape (it is the schema OpenAI's plugin uses for structured reviews):
-
+Write JSON:
 ```json
-{ "verdict": "approve | needs-attention", "summary": "…",
-  "findings": [{ "severity": "critical|high|medium|low", "title": "…", "body": "…",
-                 "file": "path", "line_start": 1, "line_end": 1,
-                 "confidence": 0.0, "recommendation": "…" }],
-  "next_steps": ["…"] }
+{"verdict":"approve","summary":"What was reviewed and its limits","findings":[],"next_steps":[]}
 ```
+Findings use severity (critical, high, medium, low), title, body, file, line_start, line_end, confidence and recommendation.
+Use needs-attention when blockers remain; the engine refuses an approving pass with critical/high findings.
+Validate findings against code before fixing them. Correct real defects with appropriate checks; reject
+incorrect feedback with evidence. Nonblocking follow-ups can stay in the handoff or an authorized Issue.
 
-## Triage
+Before approval, remove or justify unused helpers, speculative options, redundant abstractions and dependencies.
+Preserve meaningful protections and tests. Judge simplicity by what a human must understand to review the behavior.
 
-- **Blocking** (wrong behaviour, security, data loss, missing test for changed logic; severity critical or high with real confidence): fix, commit, push, then record again.
-- **Non-blocking**: list them in the PR description and open one follow-up Issue.
-- A "simplification" that removes a protection or a test is not a simplification. Reject it.
-
-Record: `ssi record --phase 6 --result pass|fail --evidence <report file> --note "<reviewer>; independent: yes|no"`.
-When you record a `fail`, always pass `--evidence <report file>` and `--note "<what to fix>"`: the engine keeps them, so a fix that is interrupted can be resumed.
-`fail` sends you back to implement. After the configured number of failed rounds the engine stops and asks the user.
-
-Acting on findings: check each one against the code before you change anything. Fix what is real, one item at a time, with a test. Push back with evidence on what is wrong. No performative agreement.
-
-Cut pass: before approving, list what the diff adds that nothing requires (unused helpers, speculative options, abstractions with one caller, a new dependency the stdlib covers) and remove it or justify it in one line.
+`ssi record --phase 6 --result pass|fail --evidence <report.json> --note "<reviewer>; independent: yes|no"`.
+A failure saves the report and returns to implementation; the retry budget limits repeated rounds.
+The engine checks the artifact and verdict, not the reviewer's identity or the truth of every finding.

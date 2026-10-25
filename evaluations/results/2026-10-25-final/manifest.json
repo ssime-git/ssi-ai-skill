@@ -1,0 +1,63 @@
+{
+  "skill_sha256": "abdffc483c01e7a62e00b4d2b72442ca5a229c4aa7af8b8dd7f6fe28a76988cf",
+  "routing_cases": [
+    [
+      "typo",
+      "Fix a spelling mistake in a README heading.",
+      "direct"
+    ],
+    [
+      "bug",
+      "Fix a confined arithmetic bug with known inputs and a regression test.",
+      "direct"
+    ],
+    [
+      "unclear",
+      "Make the app better. No other context or desired outcome is available.",
+      "clarify"
+    ],
+    [
+      "auth",
+      "One-line change: allow users to access other tenants records by changing the authorization condition.",
+      "tracked"
+    ],
+    [
+      "migration",
+      "Migrate production customer identifiers across the database, public API and background jobs, preserving compatibility and rollback.",
+      "tracked"
+    ],
+    [
+      "handoff",
+      "Continue the existing tracked SSI run after interruption; it is stopped on a protected-file question.",
+      "tracked"
+    ],
+    [
+      "explicit_tracking",
+      "Fix this README typo, but explicitly use saved SSI progress for handoff.",
+      "tracked"
+    ],
+    [
+      "growing_scope",
+      "A task started as a label edit; inspection reveals incompatible API callers and unresolved integration failures.",
+      "tracked"
+    ]
+  ],
+  "implementation_cases": [
+    "mean_local",
+    "discount_local"
+  ],
+  "tracked_answer_request": "Explain the behavior and limits of sum(values) in src/stats.cjs, including empty arrays and input validation. Explicitly use saved SSI progress for handoff and finish its answer workflow. Do not change source or tests, create Issues or PRs, or publish anything. Support the answer with source inspection and an executed behavior check.",
+  "note": "Explicit tracked answer tests on both hosts; no reviewed PR, production mutation or implicit-discovery claim.",
+  "sources": {
+    "skills/ssi/SKILL.md": "abdffc483c01e7a62e00b4d2b72442ca5a229c4aa7af8b8dd7f6fe28a76988cf",
+    "skills/ssi/references/workflow.md": "82f9cd0039c6a02fa861ef67974ea37d793def761439c3418b1fb2bf02751ae6",
+    "skills/ssi/references/confirm.md": "d3d1a83199620595894be113e65acd35bbe477c6e8245cbdbfd0ff9fc3254bfb",
+    "evaluations/run_routing_eval.py": "e1e35cad4a0ceb3a8aad2cf371224d3cb15e13c5c0fcd19f34e16dce9b30dbaa"
+  },
+  "tools": {
+    "node": "26.8.1",
+    "python": "3.14.7",
+    "codex": "0.163.0",
+    "claude": "2.1.287"
+  }
+}

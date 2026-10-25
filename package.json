@@ -1,9 +1,10 @@
 {
   "name": "ssi-ai-skill",
-  "version": "0.2.0",
-  "description": "Single-entry engineering loop (Claude Code skill) that takes a request to a reviewed draft PR",
+  "version": "0.3.0",
+  "description": "Adaptive engineering for Codex and Claude Code: direct simple tasks, verified and resumable substantial work",
   "keywords": [
     "claude-code",
+    "codex",
     "agent-skills",
     "ai-agents",
     "claude-plugin",
@@ -37,6 +38,7 @@
   },
   "scripts": {
     "test": "node --test tests/engine/*.test.mjs",
-    "validate": "node scripts/validate.mjs"
+    "validate": "node scripts/validate.mjs",
+    "benchmark": "node scripts/benchmark.mjs"
   }
 }

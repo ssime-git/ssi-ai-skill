@@ -6,12 +6,13 @@ import { PHASES } from '../../skills/ssi/scripts/lib/state.mjs';
 
 const read = (p) => readFileSync(p, 'utf8');
 
-test('SKILL.md has valid frontmatter, a bounded size and links every reference', () => {
+test('the entrypoint and workflow keep references discoverable', () => {
   const s = read('skills/ssi/SKILL.md');
   assert.match(s, /^---\nname: "?ssi"?\ndescription: .+\n---\n/);
   assert.ok(s.split('\n').length < 90, 'SKILL.md must stay thin');
+  const workflow = read('skills/ssi/references/workflow.md');
   for (const n of [...PHASES, 'communication']) {
-    assert.ok(s.includes(`references/${n}.md`), `SKILL.md links ${n}`);
+    assert.ok(s.includes(`references/${n}.md`) || workflow.includes(`](${n}.md)`), `${n} is discoverable`);
     assert.ok(existsSync(`skills/ssi/references/${n}.md`), `${n}.md exists`);
   }
 });

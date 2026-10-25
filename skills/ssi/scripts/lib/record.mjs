@@ -1,7 +1,7 @@
 import { PHASES } from './state.mjs';
 
 export function applyRecord(state, args, headSha) {
-  const { phase, result, evidence, surface, note, kind, gaps, touches, publicApi } = args;
+  const { phase, result, evidence, surface, note, kind, gaps, touches, publicApi, proof } = args;
   const name = PHASES[phase - 1];
   if (!name) throw new Error(`Unknown phase: ${phase}`);
   if (result !== 'pass' && result !== 'fail') throw new Error('--result must be pass or fail (pass if it worked, fail if not).');
@@ -21,6 +21,7 @@ export function applyRecord(state, args, headSha) {
   state.attempts[name] = 0;
   if (state.last_failure?.phase === name) state.last_failure = null;
   const entry = { path: evidence ?? null, at: new Date().toISOString(), note: note ?? null };
+  if (proof) Object.assign(entry, proof);
   if (phase >= 5) {
     entry.sha = headSha;
     if (surface?.length) entry.surface = surface;

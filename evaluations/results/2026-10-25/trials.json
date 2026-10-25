@@ -1,0 +1,1017 @@
+[
+  {
+    "case": "quote_pr",
+    "arm": "codex",
+    "repeat": 1,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 71.667,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 290472,
+      "cached_input_tokens": 257536,
+      "output_tokens": 2560,
+      "reasoning_output_tokens": 182,
+      "total_tokens": 293032,
+      "uncached_input_tokens": 32936
+    },
+    "root_usage": {
+      "input_tokens": 219260,
+      "cached_input_tokens": 198784,
+      "output_tokens": 2167,
+      "reasoning_output_tokens": 121,
+      "total_tokens": 221427,
+      "uncached_input_tokens": 20476
+    },
+    "errors": [],
+    "tool_calls": 15,
+    "reviews": [
+      {
+        "usage": {
+          "input_tokens": 71212,
+          "cached_input_tokens": 58752,
+          "output_tokens": 393,
+          "reasoning_output_tokens": 61,
+          "total_tokens": 71605,
+          "uncached_input_tokens": 12460
+        },
+        "errors": [],
+        "tool_calls": 3,
+        "report": "{\"verdict\":\"approve\",\"summary\":\"Reviewed changes relative to fe5521dd6405bf1110183a5e2fa8db042a28e736. The implementation meets TASK.md requirements, preserves existing exports and validation, and includes boundary and integration coverage. npm test passes. No concrete correctness or readability problems found.\",\"findings\":[],\"next_steps\":[]}"
+      }
+    ],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 9,
+        "total": 9,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/quote.cjs",
+        "test/quote.test.cjs"
+      ],
+      "diff_numstat": "10\t2\tsrc/quote.cjs\n63\t0\ttest/quote.test.cjs\n",
+      "workflow_done": null,
+      "github_calls": 2
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-codex-1.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-codex-1.final.txt",
+    "seed_commit": "fe5521dd6405bf1110183a5e2fa8db042a28e736"
+  },
+  {
+    "case": "mean_local",
+    "arm": "ssi03",
+    "repeat": 1,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 43.848,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 150469,
+      "cached_input_tokens": 141184,
+      "output_tokens": 1679,
+      "reasoning_output_tokens": 34,
+      "total_tokens": 152148,
+      "uncached_input_tokens": 9285
+    },
+    "root_usage": {
+      "input_tokens": 150469,
+      "cached_input_tokens": 141184,
+      "output_tokens": 1679,
+      "reasoning_output_tokens": 34,
+      "total_tokens": 152148,
+      "uncached_input_tokens": 9285
+    },
+    "errors": [],
+    "tool_calls": 10,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 7,
+        "total": 7,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/stats.cjs",
+        "test/stats.test.cjs"
+      ],
+      "diff_numstat": "14\t1\tsrc/stats.cjs\n44\t0\ttest/stats.test.cjs\n",
+      "workflow_done": true,
+      "github_calls": 0
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi03-1.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi03-1.final.txt",
+    "seed_commit": "a73bf4ff0abd542e4d71b4c25ddbeaed3d9fa8fe"
+  },
+  {
+    "case": "discount_local",
+    "arm": "codex",
+    "repeat": 1,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 33.238,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 122580,
+      "cached_input_tokens": 114176,
+      "output_tokens": 1112,
+      "reasoning_output_tokens": 16,
+      "total_tokens": 123692,
+      "uncached_input_tokens": 8404
+    },
+    "root_usage": {
+      "input_tokens": 122580,
+      "cached_input_tokens": 114176,
+      "output_tokens": 1112,
+      "reasoning_output_tokens": 16,
+      "total_tokens": 123692,
+      "uncached_input_tokens": 8404
+    },
+    "errors": [],
+    "tool_calls": 6,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 8,
+        "total": 8,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/pricing.cjs",
+        "test/pricing.test.cjs"
+      ],
+      "diff_numstat": "7\t1\tsrc/pricing.cjs\n31\t0\ttest/pricing.test.cjs\n",
+      "workflow_done": null,
+      "github_calls": 0
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-codex-1.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-codex-1.final.txt",
+    "seed_commit": "06f5ad7b57f0018d263a75fd227d08f7d894b575"
+  },
+  {
+    "case": "discount_local",
+    "arm": "ssi02",
+    "repeat": 1,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 71.266,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 271233,
+      "cached_input_tokens": 255872,
+      "output_tokens": 2576,
+      "reasoning_output_tokens": 88,
+      "total_tokens": 273809,
+      "uncached_input_tokens": 15361
+    },
+    "root_usage": {
+      "input_tokens": 271233,
+      "cached_input_tokens": 255872,
+      "output_tokens": 2576,
+      "reasoning_output_tokens": 88,
+      "total_tokens": 273809,
+      "uncached_input_tokens": 15361
+    },
+    "errors": [],
+    "tool_calls": 20,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 8,
+        "total": 8,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/pricing.cjs",
+        "test/pricing.test.cjs"
+      ],
+      "diff_numstat": "7\t1\tsrc/pricing.cjs\n32\t0\ttest/pricing.test.cjs\n",
+      "workflow_done": false,
+      "github_calls": 4
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi02-1.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi02-1.final.txt",
+    "seed_commit": "cad2a35cbf49ed6fd05768f2dedb3fa0b5f70fd3"
+  },
+  {
+    "case": "quote_pr",
+    "arm": "ssi03",
+    "repeat": 1,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 104.458,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 435482,
+      "cached_input_tokens": 400512,
+      "output_tokens": 3628,
+      "reasoning_output_tokens": 295,
+      "total_tokens": 439110,
+      "uncached_input_tokens": 34970
+    },
+    "root_usage": {
+      "input_tokens": 366675,
+      "cached_input_tokens": 344960,
+      "output_tokens": 3260,
+      "reasoning_output_tokens": 236,
+      "total_tokens": 369935,
+      "uncached_input_tokens": 21715
+    },
+    "errors": [],
+    "tool_calls": 22,
+    "reviews": [
+      {
+        "usage": {
+          "input_tokens": 68807,
+          "cached_input_tokens": 55552,
+          "output_tokens": 368,
+          "reasoning_output_tokens": 59,
+          "total_tokens": 69175,
+          "uncached_input_tokens": 13255
+        },
+        "errors": [],
+        "tool_calls": 3,
+        "report": "{\n  \"verdict\": \"approve\",\n  \"summary\": \"Reviewed changes since ea23d927736dfc0fd5777aa68d0ba1f04178e481. The implementation meets TASK.md requirements, preserves existing exports and validation, and includes boundary and integration coverage. npm test passes. No concrete correctness or readability problems found.\",\n  \"findings\": [],\n  \"next_steps\": []\n}"
+      }
+    ],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 9,
+        "total": 9,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/quote.cjs",
+        "test/quote.test.cjs"
+      ],
+      "diff_numstat": "10\t2\tsrc/quote.cjs\n51\t0\ttest/quote.test.cjs\n",
+      "workflow_done": true,
+      "github_calls": 21
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi03-1.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi03-1.final.txt",
+    "seed_commit": "ea23d927736dfc0fd5777aa68d0ba1f04178e481"
+  },
+  {
+    "case": "mean_local",
+    "arm": "codex",
+    "repeat": 1,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 33.628,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 85822,
+      "cached_input_tokens": 73088,
+      "output_tokens": 1277,
+      "reasoning_output_tokens": 49,
+      "total_tokens": 87099,
+      "uncached_input_tokens": 12734
+    },
+    "root_usage": {
+      "input_tokens": 85822,
+      "cached_input_tokens": 73088,
+      "output_tokens": 1277,
+      "reasoning_output_tokens": 49,
+      "total_tokens": 87099,
+      "uncached_input_tokens": 12734
+    },
+    "errors": [],
+    "tool_calls": 5,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 7,
+        "total": 7,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/stats.cjs",
+        "test/stats.test.cjs"
+      ],
+      "diff_numstat": "14\t1\tsrc/stats.cjs\n44\t2\ttest/stats.test.cjs\n",
+      "workflow_done": null,
+      "github_calls": 0
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-codex-1.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-codex-1.final.txt",
+    "seed_commit": "fcd33e1041ae138537dcd6107859442ad157f054"
+  },
+  {
+    "case": "quote_pr",
+    "arm": "ssi02",
+    "repeat": 1,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 128.232,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 507704,
+      "cached_input_tokens": 462848,
+      "output_tokens": 4457,
+      "reasoning_output_tokens": 213,
+      "total_tokens": 512161,
+      "uncached_input_tokens": 44856
+    },
+    "root_usage": {
+      "input_tokens": 432703,
+      "cached_input_tokens": 397568,
+      "output_tokens": 3971,
+      "reasoning_output_tokens": 147,
+      "total_tokens": 436674,
+      "uncached_input_tokens": 35135
+    },
+    "errors": [],
+    "tool_calls": 19,
+    "reviews": [
+      {
+        "usage": {
+          "input_tokens": 75001,
+          "cached_input_tokens": 65280,
+          "output_tokens": 486,
+          "reasoning_output_tokens": 66,
+          "total_tokens": 75487,
+          "uncached_input_tokens": 9721
+        },
+        "errors": [],
+        "tool_calls": 3,
+        "report": "{\n  \"verdict\": \"approve\",\n  \"summary\": \"Reviewed changes from 7c00875b6b4a7a556740e6b2493f57cd30a664f3 to HEAD against TASK.md. The implementation reuses the required helpers, preserves the existing export and validation, and calculates shipping from discounted goods. Tests cover boundaries, integration, rounding, and unknown zones including empty carts. npm test passes. No concrete correctness or readability problems found.\",\n  \"findings\": [],\n  \"next_steps\": []\n}"
+      }
+    ],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 9,
+        "total": 9,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/quote.cjs",
+        "test/quote.test.cjs"
+      ],
+      "diff_numstat": "10\t2\tsrc/quote.cjs\n68\t0\ttest/quote.test.cjs\n",
+      "workflow_done": true,
+      "github_calls": 27
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi02-1.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi02-1.final.txt",
+    "seed_commit": "7c00875b6b4a7a556740e6b2493f57cd30a664f3"
+  },
+  {
+    "case": "discount_local",
+    "arm": "ssi03",
+    "repeat": 1,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 60.668,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 240446,
+      "cached_input_tokens": 219008,
+      "output_tokens": 2194,
+      "reasoning_output_tokens": 68,
+      "total_tokens": 242640,
+      "uncached_input_tokens": 21438
+    },
+    "root_usage": {
+      "input_tokens": 240446,
+      "cached_input_tokens": 219008,
+      "output_tokens": 2194,
+      "reasoning_output_tokens": 68,
+      "total_tokens": 242640,
+      "uncached_input_tokens": 21438
+    },
+    "errors": [],
+    "tool_calls": 17,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 8,
+        "total": 8,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/pricing.cjs",
+        "test/pricing.test.cjs"
+      ],
+      "diff_numstat": "7\t1\tsrc/pricing.cjs\n36\t1\ttest/pricing.test.cjs\n",
+      "workflow_done": true,
+      "github_calls": 0
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi03-1.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi03-1.final.txt",
+    "seed_commit": "023e83be129fa4f46e8c0d865e1265cef5919a27"
+  },
+  {
+    "case": "mean_local",
+    "arm": "ssi02",
+    "repeat": 1,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 75.875,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 304282,
+      "cached_input_tokens": 275712,
+      "output_tokens": 2566,
+      "reasoning_output_tokens": 110,
+      "total_tokens": 306848,
+      "uncached_input_tokens": 28570
+    },
+    "root_usage": {
+      "input_tokens": 304282,
+      "cached_input_tokens": 275712,
+      "output_tokens": 2566,
+      "reasoning_output_tokens": 110,
+      "total_tokens": 306848,
+      "uncached_input_tokens": 28570
+    },
+    "errors": [],
+    "tool_calls": 13,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 7,
+        "total": 7,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/stats.cjs",
+        "test/stats.test.cjs"
+      ],
+      "diff_numstat": "14\t1\tsrc/stats.cjs\n47\t2\ttest/stats.test.cjs\n",
+      "workflow_done": false,
+      "github_calls": 2
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi02-1.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi02-1.final.txt",
+    "seed_commit": "c2454a959ca31e29138f2d96bc589b17ab0a56ec"
+  },
+  {
+    "case": "mean_local",
+    "arm": "codex",
+    "repeat": 2,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 30.233,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 84491,
+      "cached_input_tokens": 73216,
+      "output_tokens": 1171,
+      "reasoning_output_tokens": 25,
+      "total_tokens": 85662,
+      "uncached_input_tokens": 11275
+    },
+    "root_usage": {
+      "input_tokens": 84491,
+      "cached_input_tokens": 73216,
+      "output_tokens": 1171,
+      "reasoning_output_tokens": 25,
+      "total_tokens": 85662,
+      "uncached_input_tokens": 11275
+    },
+    "errors": [],
+    "tool_calls": 5,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 7,
+        "total": 7,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/stats.cjs",
+        "test/stats.test.cjs"
+      ],
+      "diff_numstat": "14\t1\tsrc/stats.cjs\n39\t0\ttest/stats.test.cjs\n",
+      "workflow_done": null,
+      "github_calls": 0
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-codex-2.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-codex-2.final.txt",
+    "seed_commit": "16a795e664d8d1e810d35f985ef4915d7d43ecab"
+  },
+  {
+    "case": "mean_local",
+    "arm": "ssi02",
+    "repeat": 2,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 67.857,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 257913,
+      "cached_input_tokens": 231808,
+      "output_tokens": 2258,
+      "reasoning_output_tokens": 88,
+      "total_tokens": 260171,
+      "uncached_input_tokens": 26105
+    },
+    "root_usage": {
+      "input_tokens": 257913,
+      "cached_input_tokens": 231808,
+      "output_tokens": 2258,
+      "reasoning_output_tokens": 88,
+      "total_tokens": 260171,
+      "uncached_input_tokens": 26105
+    },
+    "errors": [],
+    "tool_calls": 12,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 7,
+        "total": 7,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/stats.cjs",
+        "test/stats.test.cjs"
+      ],
+      "diff_numstat": "12\t1\tsrc/stats.cjs\n36\t1\ttest/stats.test.cjs\n",
+      "workflow_done": false,
+      "github_calls": 2
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi02-2.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi02-2.final.txt",
+    "seed_commit": "e8926c4e659af767c9d4b55962acaf5512549ca4"
+  },
+  {
+    "case": "discount_local",
+    "arm": "ssi02",
+    "repeat": 2,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 51.242,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 167897,
+      "cached_input_tokens": 156160,
+      "output_tokens": 2139,
+      "reasoning_output_tokens": 70,
+      "total_tokens": 170036,
+      "uncached_input_tokens": 11737
+    },
+    "root_usage": {
+      "input_tokens": 167897,
+      "cached_input_tokens": 156160,
+      "output_tokens": 2139,
+      "reasoning_output_tokens": 70,
+      "total_tokens": 170036,
+      "uncached_input_tokens": 11737
+    },
+    "errors": [],
+    "tool_calls": 15,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 8,
+        "total": 8,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/pricing.cjs",
+        "test/pricing.test.cjs"
+      ],
+      "diff_numstat": "5\t1\tsrc/pricing.cjs\n28\t0\ttest/pricing.test.cjs\n",
+      "workflow_done": false,
+      "github_calls": 0
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi02-2.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi02-2.final.txt",
+    "seed_commit": "e911e273c2b28feba93d51147af247e5ba1d2768"
+  },
+  {
+    "case": "discount_local",
+    "arm": "codex",
+    "repeat": 2,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 32.429,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 123628,
+      "cached_input_tokens": 115072,
+      "output_tokens": 1187,
+      "reasoning_output_tokens": 28,
+      "total_tokens": 124815,
+      "uncached_input_tokens": 8556
+    },
+    "root_usage": {
+      "input_tokens": 123628,
+      "cached_input_tokens": 115072,
+      "output_tokens": 1187,
+      "reasoning_output_tokens": 28,
+      "total_tokens": 124815,
+      "uncached_input_tokens": 8556
+    },
+    "errors": [],
+    "tool_calls": 6,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 8,
+        "total": 8,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/pricing.cjs",
+        "test/pricing.test.cjs"
+      ],
+      "diff_numstat": "7\t1\tsrc/pricing.cjs\n29\t0\ttest/pricing.test.cjs\n",
+      "workflow_done": null,
+      "github_calls": 0
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-codex-2.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-codex-2.final.txt",
+    "seed_commit": "5d9d980b7cb779be7c4075f6ddd62f2ecdd188bc"
+  },
+  {
+    "case": "quote_pr",
+    "arm": "codex",
+    "repeat": 2,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 102.643,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 540262,
+      "cached_input_tokens": 487936,
+      "output_tokens": 4293,
+      "reasoning_output_tokens": 250,
+      "total_tokens": 544555,
+      "uncached_input_tokens": 52326
+    },
+    "root_usage": {
+      "input_tokens": 382652,
+      "cached_input_tokens": 357888,
+      "output_tokens": 3126,
+      "reasoning_output_tokens": 172,
+      "total_tokens": 385778,
+      "uncached_input_tokens": 24764
+    },
+    "errors": [],
+    "tool_calls": 23,
+    "reviews": [
+      {
+        "usage": {
+          "input_tokens": 69738,
+          "cached_input_tokens": 55552,
+          "output_tokens": 668,
+          "reasoning_output_tokens": 22,
+          "total_tokens": 70406,
+          "uncached_input_tokens": 14186
+        },
+        "errors": [],
+        "tool_calls": 3,
+        "report": "{\n  \"verdict\": \"needs-attention\",\n  \"summary\": \"Commit 8d47daf does not implement the required quote API. The implementation and integration tests in the working tree are uncommitted and outside this review.\",\n  \"findings\": [\n    {\n      \"severity\": \"high\",\n      \"title\": \"Required quote function is missing\",\n      \"body\": \"The committed module exports only subtotalCents. Calling the required quote(items, zone, discountPercent) API therefore fails with TypeError instead of returning goods, shipping, and total amounts.\",\n      \"file\": \"src/quote.cjs\",\n      \"line_start\": 1,\n      \"line_end\": 2,\n      \"confidence\": 1,\n      \"recommendation\": \"Implement and export quote using the existing pricing and shipping helpers while preserving subtotalCents.\"\n    },\n    {\n      \"severity\": \"medium\",\n      \"title\": \"Required boundary and integration tests are absent\",\n      \"body\": \"The committed test only checks the existing subtotal export. It never exercises quote, so it passes despite the required API being absent.\",\n      \"file\": \"test/quote.test.cjs\",\n      \"line_start\": 1,\n      \"line_end\": 2,\n      \"confidence\": 1,\n      \"recommendation\": \"Add tests covering quote totals, discounted shipping thresholds, international shipping, empty carts, unknown zones, and preserved validation.\"\n    }\n  ],\n  \"next_steps\": [\n    \"Include the quote implementation and boundary/integration tests in the commit being reviewed.\"\n  ]\n}"
+      },
+      {
+        "usage": {
+          "input_tokens": 87872,
+          "cached_input_tokens": 74496,
+          "output_tokens": 499,
+          "reasoning_output_tokens": 56,
+          "total_tokens": 88371,
+          "uncached_input_tokens": 13376
+        },
+        "errors": [],
+        "tool_calls": 4,
+        "report": "{\n  \"verdict\": \"approve\",\n  \"summary\": \"Reviewed changes since 8d47daf5419925ded8a5dddbe2d2eaa60e6dcbd4 against TASK.md. The implementation preserves existing exports and validation, calculates shipping from discounted goods, and rejects unknown zones for empty carts. Boundary and integration tests cover the required behavior. npm test passed. No concrete correctness or readability problems found.\",\n  \"findings\": [],\n  \"next_steps\": []\n}"
+      }
+    ],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 9,
+        "total": 9,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/quote.cjs",
+        "test/quote-integration.test.cjs"
+      ],
+      "diff_numstat": "10\t2\tsrc/quote.cjs\n67\t0\ttest/quote-integration.test.cjs\n",
+      "workflow_done": null,
+      "github_calls": 4
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-codex-2.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-codex-2.final.txt",
+    "seed_commit": "8d47daf5419925ded8a5dddbe2d2eaa60e6dcbd4"
+  },
+  {
+    "case": "quote_pr",
+    "arm": "ssi03",
+    "repeat": 2,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 100.18,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 439076,
+      "cached_input_tokens": 409088,
+      "output_tokens": 3648,
+      "reasoning_output_tokens": 262,
+      "total_tokens": 442724,
+      "uncached_input_tokens": 29988
+    },
+    "root_usage": {
+      "input_tokens": 364987,
+      "cached_input_tokens": 344448,
+      "output_tokens": 3245,
+      "reasoning_output_tokens": 205,
+      "total_tokens": 368232,
+      "uncached_input_tokens": 20539
+    },
+    "errors": [],
+    "tool_calls": 21,
+    "reviews": [
+      {
+        "usage": {
+          "input_tokens": 74089,
+          "cached_input_tokens": 64640,
+          "output_tokens": 403,
+          "reasoning_output_tokens": 57,
+          "total_tokens": 74492,
+          "uncached_input_tokens": 9449
+        },
+        "errors": [],
+        "tool_calls": 3,
+        "report": "{\n  \"verdict\": \"approve\",\n  \"summary\": \"Reviewed changes since 33da8ce6e8df446c9bfd49f32f0af74c0661acba against TASK.md. The implementation reuses the required helpers, preserves existing exports and validation, and calculates shipping from discounted goods. Tests cover boundaries, integration, and unknown zones including empty carts. npm test passes. No concrete correctness or readability problems found.\",\n  \"findings\": [],\n  \"next_steps\": []\n}"
+      }
+    ],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 9,
+        "total": 9,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/quote.cjs",
+        "test/quote.test.cjs"
+      ],
+      "diff_numstat": "10\t2\tsrc/quote.cjs\n59\t0\ttest/quote.test.cjs\n",
+      "workflow_done": true,
+      "github_calls": 21
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi03-2.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi03-2.final.txt",
+    "seed_commit": "33da8ce6e8df446c9bfd49f32f0af74c0661acba"
+  },
+  {
+    "case": "discount_local",
+    "arm": "ssi03",
+    "repeat": 2,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 52.245,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 219981,
+      "cached_input_tokens": 200576,
+      "output_tokens": 1788,
+      "reasoning_output_tokens": 65,
+      "total_tokens": 221769,
+      "uncached_input_tokens": 19405
+    },
+    "root_usage": {
+      "input_tokens": 219981,
+      "cached_input_tokens": 200576,
+      "output_tokens": 1788,
+      "reasoning_output_tokens": 65,
+      "total_tokens": 221769,
+      "uncached_input_tokens": 19405
+    },
+    "errors": [],
+    "tool_calls": 11,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 8,
+        "total": 8,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/pricing.cjs",
+        "test/pricing.test.cjs"
+      ],
+      "diff_numstat": "7\t1\tsrc/pricing.cjs\n34\t0\ttest/pricing.test.cjs\n",
+      "workflow_done": true,
+      "github_calls": 0
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi03-2.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi03-2.final.txt",
+    "seed_commit": "80a9cf761d34b9e31975789381481c0713aced40"
+  },
+  {
+    "case": "quote_pr",
+    "arm": "ssi02",
+    "repeat": 2,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 126.981,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 574816,
+      "cached_input_tokens": 546560,
+      "output_tokens": 4768,
+      "reasoning_output_tokens": 230,
+      "total_tokens": 579584,
+      "uncached_input_tokens": 28256
+    },
+    "root_usage": {
+      "input_tokens": 483288,
+      "cached_input_tokens": 462592,
+      "output_tokens": 4260,
+      "reasoning_output_tokens": 147,
+      "total_tokens": 487548,
+      "uncached_input_tokens": 20696
+    },
+    "errors": [],
+    "tool_calls": 29,
+    "reviews": [
+      {
+        "usage": {
+          "input_tokens": 91528,
+          "cached_input_tokens": 83968,
+          "output_tokens": 508,
+          "reasoning_output_tokens": 83,
+          "total_tokens": 92036,
+          "uncached_input_tokens": 7560
+        },
+        "errors": [],
+        "tool_calls": 4,
+        "report": "{\n  \"verdict\": \"approve\",\n  \"summary\": \"Reviewed changes from 2a231d349157bd54742a152f88fd078307110b8e to HEAD against TASK.md. The implementation reuses the required helpers, preserves exports and validation, and calculates shipping from discounted goods. Boundary and integration tests pass. No concrete correctness or readability problems found.\",\n  \"findings\": [],\n  \"next_steps\": []\n}"
+      }
+    ],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 9,
+        "total": 9,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/quote.cjs",
+        "test/quote.test.cjs"
+      ],
+      "diff_numstat": "10\t2\tsrc/quote.cjs\n63\t0\ttest/quote.test.cjs\n",
+      "workflow_done": true,
+      "github_calls": 27
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi02-2.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi02-2.final.txt",
+    "seed_commit": "2a231d349157bd54742a152f88fd078307110b8e"
+  },
+  {
+    "case": "mean_local",
+    "arm": "ssi03",
+    "repeat": 2,
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "elapsed_seconds": 43.246,
+    "exit_code": 0,
+    "timed_out": false,
+    "usage_complete": true,
+    "usage": {
+      "input_tokens": 151598,
+      "cached_input_tokens": 134400,
+      "output_tokens": 1636,
+      "reasoning_output_tokens": 34,
+      "total_tokens": 153234,
+      "uncached_input_tokens": 17198
+    },
+    "root_usage": {
+      "input_tokens": 151598,
+      "cached_input_tokens": 134400,
+      "output_tokens": 1636,
+      "reasoning_output_tokens": 34,
+      "total_tokens": 153234,
+      "uncached_input_tokens": 17198
+    },
+    "errors": [],
+    "tool_calls": 9,
+    "reviews": [],
+    "quality": {
+      "accepted": true,
+      "acceptance": {
+        "passed": 7,
+        "total": 7,
+        "failures": []
+      },
+      "visible_tests_pass": true,
+      "destination_ok": true,
+      "forbidden_changes": [],
+      "changed_paths": [
+        "src/stats.cjs",
+        "test/stats.test.cjs"
+      ],
+      "diff_numstat": "14\t1\tsrc/stats.cjs\n47\t2\ttest/stats.test.cjs\n",
+      "workflow_done": true,
+      "github_calls": 0
+    },
+    "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi03-2.jsonl",
+    "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi03-2.final.txt",
+    "seed_commit": "6b0553007e1c02ed05bbb5c3189a96ef61984186"
+  }
+]

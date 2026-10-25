@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 export const DEFAULTS = Object.freeze({
+  workflow: { target: 'local', scope: 'standard', issues: 'optional' },
   mandate: { allow: ['push', 'draft-pr', 'issue', 'comment'], ready: false },
   thresholds: {
     diff: { lines: 300, files: 8 },
@@ -18,12 +19,15 @@ export const DEFAULTS = Object.freeze({
   visual: { enabled: 'auto', tool: 'playwright' },
   assets: { branch: 'ssi-assets', purge: true },
   protectedPaths: ['**/auth/**', '**/payment*/**', '**/migrations/**', '**/schema*'],
-  ui: { style: 'guided' },
+  ui: { style: 'plain' },
 });
 
 export const FORBIDDEN_OPS = Object.freeze(['merge', 'close-issue', 'deploy']);
 const KNOWN_OPS = ['push', 'draft-pr', 'issue', 'comment'];
 const ENUMS = {
+  'workflow.target': ['answer', 'local', 'pr'],
+  'workflow.scope': ['small', 'standard'],
+  'workflow.issues': ['optional', 'required'],
   'visual.enabled': ['auto', 'on', 'off'],
   'ui.style': ['guided', 'adhd', 'plain'],
 };

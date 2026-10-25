@@ -1,6 +1,8 @@
 {
   "name": "ssi",
-  "version": "0.1.0",
-  "description": "Single-entry engineering loop that takes a request to a reviewed draft PR",
-  "author": { "name": "sebastien sime" }
+  "version": "0.3.0",
+  "description": "Adaptive engineering for Codex and Claude Code: direct simple tasks, verified and resumable substantial work",
+  "author": {
+    "name": "sebastien sime"
+  }
 }

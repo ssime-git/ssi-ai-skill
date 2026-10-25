@@ -1,13 +1,10 @@
-# Phase 7: Visual proof (UI changes only)
+# Visual verification
 
-The engine skips this phase when the diff has no UI surface.
+Check the changed screen or interaction using the available browser. A screenshot is enough for static appearance;
+use a short recording only when interaction or motion matters. Do not manufacture a GIF for every CSS change.
+If no browser is available, state the limitation and ask only if visual verification is necessary to accept the work.
+Record phase 7 with the real artifact and a note describing what was observed. This is reported evidence, not an automatic visual verdict.
 
-1. Start the app the way the repo documents it.
-2. Drive it with a headless browser (Playwright) through the changed flow. Record a short GIF, at most 15 seconds.
-3. `ssi upload --file <gif>`. It stores the file on the `ssi-assets` branch and prints Markdown.
-4. Paste that Markdown into the PR body under "Proof".
-5. `ssi record --phase 7 --result pass|fail --evidence <gif path>`.
-
-The link uses `github.com/<owner>/<repo>/blob/ssi-assets/<path>?raw=true`, which renders for signed-in members even in private repositories. After pasting it, ask the user to confirm the GIF shows in the PR; if it does not, keep a plain link to the file instead and say so.
-
-`fail` means the screen is not right: fix it (back to phase 5). Never edit the GIF. If no browser is available, say so; do not claim visual proof.
+Local route: keep artifacts in `.ssi/`; do not upload them or ask the user to validate a link.
+PR route: upload useful evidence with `ssi upload --file <artifact>` and include the returned link in the PR.
+Check link access when possible; disclose uncertainty instead of making link confirmation a mandatory user interruption.

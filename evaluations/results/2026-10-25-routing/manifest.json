@@ -1,0 +1,64 @@
+{
+  "skill_sha256": "abdffc483c01e7a62e00b4d2b72442ca5a229c4aa7af8b8dd7f6fe28a76988cf",
+  "routing_cases": [
+    [
+      "typo",
+      "Fix a spelling mistake in a README heading.",
+      "direct"
+    ],
+    [
+      "bug",
+      "Fix a confined arithmetic bug with known inputs and a regression test.",
+      "direct"
+    ],
+    [
+      "unclear",
+      "Make the app better. No other context or desired outcome is available.",
+      "clarify"
+    ],
+    [
+      "auth",
+      "One-line change: allow users to access other tenants records by changing the authorization condition.",
+      "tracked"
+    ],
+    [
+      "migration",
+      "Migrate production customer identifiers across the database, public API and background jobs, preserving compatibility and rollback.",
+      "tracked"
+    ],
+    [
+      "handoff",
+      "Continue the existing tracked SSI run after interruption; it is stopped on a protected-file question.",
+      "tracked"
+    ],
+    [
+      "explicit_tracking",
+      "Fix this README typo, but explicitly use saved SSI progress for handoff.",
+      "tracked"
+    ],
+    [
+      "growing_scope",
+      "A task started as a label edit; inspection reveals incompatible API callers and unresolved integration failures.",
+      "tracked"
+    ]
+  ],
+  "implementation_cases": [
+    "mean_local",
+    "discount_local"
+  ],
+  "note": "Explicit entrypoint tests. Routing cases are decision-only; no real migration or auth changes. No implicit-discovery or tracked-completion claim.",
+  "codex_version": "0.163.0",
+  "codex_model": "gpt-6.1-sol",
+  "codex_effort": "medium",
+  "claude_version": "2.1.287",
+  "claude_model": "claude-opus-5-5 (existing default)",
+  "repetitions": 1,
+  "entrypoint_before_bytes": 3528,
+  "entrypoint_after_bytes": 1692,
+  "cli_settings": "See run_routing_eval.py; Claude project settings only, hooks disabled, no session persistence, explicit tool permissions. Codex host discovery disabled.",
+  "sources": {
+    "skills/ssi/SKILL.md": "abdffc483c01e7a62e00b4d2b72442ca5a229c4aa7af8b8dd7f6fe28a76988cf",
+    "skills/ssi/references/workflow.md": "82f9cd0039c6a02fa861ef67974ea37d793def761439c3418b1fb2bf02751ae6",
+    "evaluations/run_routing_eval.py": "9b3d0d5bcdaca4838006e825e921cbcbf8ddfef0a7e742d01e5488e0a4ed329d"
+  }
+}
