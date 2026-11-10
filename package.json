@@ -1,6 +1,6 @@
 {
   "name": "ssi-ai-skill",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Adaptive engineering for Codex and Claude Code: direct simple tasks, verified and resumable substantial work",
   "keywords": [
     "claude-code",

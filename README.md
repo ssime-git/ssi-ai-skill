@@ -1,7 +1,9 @@
 # Tracer
 
+Formerly SSI. The repository and npm package are still named ssi-ai-skill.
+
 Simple, reviewable code with the least necessary workflow. Works with Codex and Claude Code.
-Tracer 0.3.0 handles small tasks directly and tracks substantial or risky work when tracking is useful.
+Tracer 0.4.0 handles small tasks directly and tracks substantial or risky work when tracking is useful.
 
 ## Quick install
 
@@ -63,6 +65,8 @@ sequenceDiagram
 - Reuse existing code; prefer explicit names, direct control flow and small interfaces over speculative abstractions.
 - Local work needs no commit, Issue or PR. Useful follow-ups can stay in a handoff or an authorized Issue.
 - Tracked work records progress and retry budgets. Small safe tracked changes skip a separate plan and review.
+- The engine routes by risk: UI and UX review for UI changes, security and data roles where relevant, a model tier per step (fast, balanced, deep), and a stop before existing tests are edited.
+- Review findings, UI/UX observations and your decisions are traced in a table in the PR progress comment.
 - `check` executes commands and ties receipts to the code snapshot. Manual evidence is labelled reported.
 - `ci` inspects the actual PR commit and check results; absent CI remains unverified. PRs stay draft.
 - The Tracer engine never merges, closes Issues or deploys. Starting a run grants no extra authorization.
@@ -72,7 +76,7 @@ Optional display: `mods/tracer-cockpit`; direct tasks do not appear as tracked r
 
 ## Reliability and efficiency
 
-Validation passed 158 engine/package tests and 9 evaluation tests. Four direct implementations passed their
+Validation passed 167 engine/package tests and 9 evaluation tests. Four direct implementations passed their
 held-out assertions across Codex and Claude Code; each host passed eight routing decisions and completed
 one tracked answer workflow. These are small smoke tests, not proof of production readiness or perfect answers.
 The entrypoint is 52% shorter in bytes; equivalent token savings have not been established.

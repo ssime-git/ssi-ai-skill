@@ -37,6 +37,7 @@ export function gitFacts(run, { local = false, startSha = null } = {}) {
   let commitsAhead = 0;
   let lines = 0;
   const changedFiles = [];
+  let modifiedExisting = [];
   if (local || (base && !onBase)) {
     commitsAhead = Number(attempt(run, ['rev-list', '--count', `${base}..HEAD`]) ?? 0);
     const localBase = isSha(startSha) ? startSha : base ?? headSha;
@@ -48,6 +49,10 @@ export function gitFacts(run, { local = false, startSha = null } = {}) {
       lines += (Number(added) || 0) + (Number(deleted) || 0);
       if (!changedFiles.includes(name.join('\t'))) changedFiles.push(name.join('\t'));
     }
+  }
+  if (local || (base && !onBase)) {
+    const ns = attempt(run, ['diff', '--name-status', '--no-renames', local ? (isSha(startSha) ? startSha : base ?? headSha) : `${base}...HEAD`]) ?? '';
+    modifiedExisting = ns.split('\n').filter(Boolean).map((r) => r.split('\t')).filter(([s]) => s === 'M' || s === 'D').map(([, ...n]) => n.join('\t'));
   }
   let tree;
   if (local) {
@@ -75,6 +80,7 @@ export function gitFacts(run, { local = false, startSha = null } = {}) {
     onBase,
     commitsAhead,
     changedFiles,
+    modifiedExisting,
     diff: { lines, files: changedFiles.length },
     uiChanged: changedFiles.some((f) => UI.test(f)),
     dirty: (attempt(run, ['status', '--porcelain']) ?? '') !== '',

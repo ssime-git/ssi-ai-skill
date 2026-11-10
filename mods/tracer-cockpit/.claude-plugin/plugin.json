@@ -1,7 +1,7 @@
 {
   "name": "tracer-cockpit",
   "version": "0.1.0",
-  "description": "Progress band, toasts and a phase map for the tracer loop",
+  "description": "Progress band, toasts and a phase map for the Tracer loop",
   "author": { "name": "sebastien sime" },
   "types": "./types/index.d.ts"
 }

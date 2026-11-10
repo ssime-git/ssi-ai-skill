@@ -28,7 +28,8 @@ export function newState(goal, workflow = { target: 'local', scope: 'standard', 
     attempts: {},
     analysis: { blockingGaps: 0 },
     plan: { touches: [], publicApi: false },
-    approvals: { protectedFiles: [], publicApi: false, bigDiff: null },
+    approvals: { protectedFiles: [], frozenFiles: [], publicApi: false, bigDiff: null },
+    feedback: [],
     stop: null,
     pending: [],
     synced: null,
@@ -41,6 +42,7 @@ export function normalize(state) {
   const base = newState(state.goal ?? '', state.workflow ?? { target: 'pr', scope: 'standard', issues: 'required' });
   const approvals = { ...base.approvals, ...(state.approvals ?? {}) };
   if (!Array.isArray(approvals.protectedFiles)) approvals.protectedFiles = [];
+  if (!Array.isArray(approvals.frozenFiles)) approvals.frozenFiles = [];
   if (typeof approvals.bigDiff !== 'object') approvals.bigDiff = null;
   return {
     ...base,
@@ -51,6 +53,7 @@ export function normalize(state) {
     plan: { ...base.plan, ...state.plan },
     approvals,
     pending: state.pending ?? [],
+    feedback: Array.isArray(state.feedback) ? state.feedback : [],
   };
 }
 

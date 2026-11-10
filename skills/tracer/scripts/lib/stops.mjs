@@ -31,6 +31,10 @@ function reality(state, facts) {
   return null;
 }
 
+export function refusalStop(why) {
+  return stop('STOP_REFUSED', `I will not do this as asked: ${why}`, 'Do you want to change the request?', ['A. Yes, here is the changed request (add it)', 'B. No, stop here'], 'B');
+}
+
 export function mandateStop(op) {
   return stop(
     'STOP_OUT_OF_MANDATE',
@@ -62,6 +66,19 @@ function protectedStop(state, facts, config) {
   return s;
 }
 
+// Tests and gate configuration already in the repository are the builder's yardstick.
+// Changing or deleting one is a decision for the user, taken by file name.
+function frozenStop(state, facts, config) {
+  const globs = (config.frozenPaths ?? []).map(globToRegExp);
+  const approved = new Set(state.approvals.frozenFiles ?? []);
+  const fresh = (facts.modifiedExisting ?? []).filter((f) => globs.some((g) => g.test(f)) && !approved.has(f));
+  if (!fresh.length) return null;
+  const s = stop('STOP_FROZEN', `The change edits existing tests or gate configuration: ${fresh.join(', ')}.`,
+    'Do you approve changing these existing files? Weakening a test to make it pass is not a fix.', ['A. Yes, these edits are legitimate', 'B. No, restore them'], 'B');
+  s.files = fresh;
+  return s;
+}
+
 export function evaluateStops({ state, facts, config, phase }) {
   if (state.stop && !state.stop.answer) return state.stop;
   const t = config.thresholds;
@@ -88,6 +105,10 @@ export function evaluateStops({ state, facts, config, phase }) {
   if (state.evidence.plan || phase >= 5) {
     const p = protectedStop(state, facts, config);
     if (p) return p;
+  }
+  if (phase >= 5) {
+    const f = frozenStop(state, facts, config);
+    if (f) return f;
   }
   if (phase >= 5 && phase <= 8) {
     const ap = state.approvals.bigDiff;
@@ -129,6 +150,18 @@ export function applyAnswer(state, facts, text) {
     case 'STOP_PROTECTED':
       state.approvals.protectedFiles = [...new Set([...(state.approvals.protectedFiles ?? []), ...(s.files ?? [])])];
       if (s.publicApi) state.approvals.publicApi = true;
+      break;
+    case 'STOP_REFUSED': {
+      const goal = text.replace(/^\s*a\b[.:,)]?\s*/i, '').trim();
+      if (goal) {
+        state.goal = goal;
+        delete state.evidence.analyze;
+        state.attempts = {};
+      }
+      break;
+    }
+    case 'STOP_FROZEN':
+      state.approvals.frozenFiles = [...new Set([...(state.approvals.frozenFiles ?? []), ...(s.files ?? [])])];
       break;
     case 'STOP_BIG_DIFF':
       state.approvals.bigDiff = s.size ?? { lines: facts.diff.lines, files: facts.diff.files };

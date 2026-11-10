@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
+import { renderFeedback } from './feedback.mjs';
 
-const KEEP = ['updated_at', 'run_id', 'goal', 'workflow', 'kind', 'branch', 'head_sha', 'start_sha', 'work_sha', 'issue', 'followups', 'issue_skipped', 'last_failure', 'pr', 'phase', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop'];
+const KEEP = ['updated_at', 'run_id', 'goal', 'workflow', 'kind', 'branch', 'head_sha', 'start_sha', 'work_sha', 'issue', 'followups', 'issue_skipped', 'last_failure', 'pr', 'phase', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop', 'feedback'];
 const BEGIN = '<!-- tracer:begin -->';
 const END = '<!-- tracer:end -->';
 
@@ -8,7 +9,8 @@ const slim = (state) => Object.fromEntries(KEEP.map((k) => [k, state[k]]));
 const escape = (s) => s.replace(/</g, '\\u003c').replace(/>/g, '\\u003e');
 
 export function renderBlock(state, header) {
-  return `${BEGIN}\n${header}\n\n<!-- tracer:state ${escape(JSON.stringify(slim(state)))} -->\n${END}`;
+  const table = renderFeedback(state);
+  return `${BEGIN}\n${header}\n\n${table ? table + '\n\n' : ''}<!-- tracer:state ${escape(JSON.stringify(slim(state)))} -->\n${END}`;
 }
 
 export function parseBlock(body) {
@@ -31,7 +33,7 @@ export function mergeComment(existing, block) {
 const HASHED = KEEP.filter((k) => k !== 'updated_at');
 // What counts as progress for ordering two machines. Volatile fields (head sha, phase,
 // bookkeeping) are left out so merely running `tracer next` never makes an old cache look new.
-const PROGRESS = ['goal', 'workflow', 'kind', 'branch', 'issue', 'followups', 'issue_skipped', 'pr', 'work_sha', 'last_failure', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop'];
+const PROGRESS = ['goal', 'workflow', 'kind', 'branch', 'issue', 'followups', 'issue_skipped', 'pr', 'work_sha', 'last_failure', 'evidence', 'attempts', 'analysis', 'plan', 'approvals', 'stop', 'feedback'];
 export const progressHash = (state) =>
   createHash('sha1').update(JSON.stringify(Object.fromEntries(PROGRESS.map((k) => [k, state[k]])))).digest('hex');
 

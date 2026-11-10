@@ -20,3 +20,6 @@ Do not repeat an unchanged successful check without a reason such as a flaky env
 
 After a failed review or check, inspect the saved failure report, fix the cause, then verify again.
 Stop repeated guessing; ask for missing information when the retry budget is exhausted.
+
+Existing tests and gate configuration (`frozenPaths`, by default test files, `tracer.config.json`, `tracer.guards.json`, CI workflows) are the yardstick.
+Do not edit or delete them to make a check pass. Add new tests instead. If an existing test is genuinely wrong, the engine stops and the user approves that file by name.

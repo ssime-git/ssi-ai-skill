@@ -13,8 +13,12 @@ import { targetOf } from './workflow.mjs';
 import { detectPhase } from './detect.mjs';
 import { evaluateStops } from './stops.mjs';
 import { readEvidence, saveExecution, executeCheck } from './evidence.mjs';
+import { reviewRoles } from './route.mjs';
+import { addFeedback, fromReview, resolveFeedback } from './feedback.mjs';
+import { refusalStop } from './stops.mjs';
+import { readFileSync } from 'node:fs';
 
-const USAGE = 'Usage: tracer <start|next|check|ci|record|answer|config|allow|issue|upload|purge|guards> [options]\n';
+const USAGE = 'Usage: tracer <start|next|check|ci|record|feedback|refuse|answer|config|allow|issue|upload|purge|guards> [options]\n';
 
 function parseArgs(argv) {
   const pos = [];
@@ -97,7 +101,7 @@ export function main(argv, { cwd, gh, run, write }) {
         const next = computeNext({ cwd, config, run, gh });
         out(flags.compact ? {
           done: next.done, phase: next.phase,
-          ...(next.action ? { action: { kind: next.action.kind, instructions: next.action.instructions, refs: next.action.refs } } : {}),
+          ...(next.action ? { action: { kind: next.action.kind, instructions: next.action.instructions, refs: next.action.refs, ...(next.action.model ? { model: next.action.model } : {}), ...(next.action.roles?.length ? { roles: next.action.roles } : {}) } } : {}),
           ...(next.stop ? { stop: next.stop } : {}),
           ...(next.warnings.length ? { warnings: next.warnings } : {}),
         } : next);
@@ -168,7 +172,7 @@ export function main(argv, { cwd, gh, run, write }) {
         }
         let proof;
         if (flags.result === 'pass') {
-          proof = { ...readEvidence(cwd, flags.evidence, { review: phase === 6 }), level: 'reported',
+          proof = { ...readEvidence(cwd, flags.evidence, { review: phase === 6, roles: phase === 6 ? reviewRoles(state, here, config) : [] }), level: 'reported',
             ...((phase >= 5 || targetOf(state) === 'answer') ? { tree: here.tree } : {}) };
           requirePhase(state, phase, here);
         }
@@ -186,8 +190,42 @@ export function main(argv, { cwd, gh, run, write }) {
           publicApi: truthy(flags['public-api']),
           proof,
         }, here.headSha);
+        const source = typeof flags.note === 'string' ? flags.note.split(';')[0] : 'agent';
+        if (phase === 6 && typeof flags.evidence === 'string') {
+          try { fromReview(state, JSON.parse(readFileSync(resolve(cwd, flags.evidence), 'utf8')), source); } catch { /* a failure without a JSON report has no findings to trace */ }
+        }
+        if (phase === 7 && typeof flags.note === 'string') {
+          addFeedback(state, { phase: 7, source: 'visual', role: 'ui', title: flags.note, status: flags.result === 'pass' ? 'fixed' : 'open' });
+        }
         writeState(cwd, state);
         out({ ok: true, recorded: PHASES[phase - 1], attempts: state.attempts });
+        return 0;
+      }
+      case 'feedback': {
+        const state = needState();
+        if (sub === 'resolve') {
+          const item = resolveFeedback(state, flags.id, flags.status, flags.note);
+          writeState(cwd, state);
+          out({ ok: true, item });
+          return 0;
+        }
+        if (sub === 'add') {
+          if (typeof flags.title !== 'string' || !flags.title.trim()) throw new Error('--title is required.');
+          const id = addFeedback(state, { phase: Number(flags.phase) || null, source: typeof flags.source === 'string' ? flags.source : 'user',
+            role: typeof flags.role === 'string' ? flags.role : null, severity: typeof flags.severity === 'string' ? flags.severity : null, title: flags.title });
+          writeState(cwd, state);
+          out({ ok: true, id });
+          return 0;
+        }
+        out({ feedback: state.feedback, open: state.feedback.filter((f) => f.status === 'open').length });
+        return 0;
+      }
+      case 'refuse': {
+        const state = needState();
+        if (typeof flags.why !== 'string' || !flags.why.trim()) throw new Error('Usage: tracer refuse --why "<reason>"');
+        state.stop = refusalStop(flags.why.trim());
+        writeState(cwd, state);
+        out({ ok: true, stop: state.stop });
         return 0;
       }
       case 'answer': {
@@ -198,7 +236,10 @@ export function main(argv, { cwd, gh, run, write }) {
         } catch {
           here.pr = null;
         }
-        applyAnswer(state, here, pos.slice(1).join(' '));
+        const answerText = pos.slice(1).join(' ');
+        const asked = state.stop;
+        applyAnswer(state, here, answerText);
+        if (asked) addFeedback(state, { phase: state.phase ?? null, source: 'user', title: `${asked.code}: ${answerText}`, status: 'fixed' });
         writeState(cwd, state);
         out({ ok: true, stop: state.stop });
         return 0;

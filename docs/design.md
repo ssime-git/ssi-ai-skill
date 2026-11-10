@@ -44,6 +44,21 @@ State and receipts belong in ignored .tracer/. Use the actual user's answer for 
 Read effective settings with config; repository settings are in tracer.config.json and personal overrides
 in .tracer/config.local.json. The optional cockpit displays tracked state, not direct tasks.
 
+## Routing, models and feedback (0.4)
+
+Deterministic routing lives in `scripts/lib/route.mjs`; the agent never picks reviewers or model tiers.
+- Risk is low, medium or high from the plan and the real diff (protected or risky paths, security and data surfaces, public API, diff size, UI).
+- Review roles: `ui` and `ux` for UI surfaces, `security`, `data`. Restrict them with `review.roles`.
+- Model tier per step: `models.steps` (defaults: analyze/confirm/visual/land fast, reproduce/plan/implement balanced, review deep).
+  High risk raises plan, implement and review by one tier; a failed attempt of a step raises that step by one tier.
+  `models.tiers` maps a tier to a concrete model name (for example fast=haiku, balanced=sonnet, deep=opus on Claude Code); it is empty by default.
+- Gate before reviewers: a review is only reachable after an executed phase 5 check on the current code snapshot. Out-of-order `record` calls are refused.
+- Frozen files: `frozenPaths` lists existing files the builder may not modify or delete without a per-file approval (STOP_FROZEN).
+- Triage: accept, clarify (gaps) or refuse (`tracer refuse`).
+- Feedback ledger: findings and decisions are stored in the state, rendered in the PR progress comment and resolved with `tracer feedback resolve`.
+
+Design ideas in this section were inspired by the software factory in zazencodes/zazencodes-season-3 (GPL-3.0). No code was copied.
+
 ## Upgrading from 0.2
 
 Replace the entire installed skills/tracer folder so the new workflow guide and engine remain together.

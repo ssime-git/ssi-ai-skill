@@ -15,10 +15,15 @@ Infer it from the request; do not make the user choose a mode:
 Use `--scope small` for a clear, confined change, otherwise standard. The actual diff can restore
 planning/review when it grows or touches risky code. Bugs always retain reproduction.
 
+## Model tier
+
+Each action from `tracer next` may carry a `model` (tier fast, balanced or deep, and the configured name if any). Use a sub-agent or a model switch for that step when the host allows it, otherwise continue. Do not choose a tier yourself: the engine raises it for risky diffs and after failures.
+
 ## Loop
 
 1. New work: `tracer start "<request>" --target <answer|local|pr> [--scope small]`. Resume without restarting.
 2. `tracer next --compact` gives one action. Read its reference once, only when relevant.
+3. For a refused request run `tracer refuse --why "<reason>"`. Review findings and UI/UX notes are traced with `tracer feedback` (list, `add`, `resolve`).
 3. Do the work. Save real artifacts with record; run checks with `tracer check --phase 5 -- <command> [args]`.
 4. If stopped, ask only the blocking question. Use `tracer answer "A. <user's words>"` or `"B. <words>"`; never invent approval.
 5. Repeat until done. Give the result, checks and material limits. Recover a lost PR cache with `tracer next --target pr`.

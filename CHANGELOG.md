@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0 - 2026-11-10
+
+- **Renamed SSI to Tracer.** Command `/tracer`, state in `.tracer/`, settings in `tracer.config.json` and `tracer.guards.json`, cockpit `mods/tracer-cockpit`. The GitHub repository and npm package keep the name `ssi-ai-skill` for now.
+  Migrate an existing project with `git mv ssi.config.json tracer.config.json`, `git mv ssi.guards.json tracer.guards.json` and `mv .ssi .tracer`.
+- **Risk-based review routing.** The engine adds review roles from the real diff: `ui` and `ux` for UI surfaces, `security` for auth/payment/secret code, `data` for migrations and infrastructure. The review report must list every required role in `roles`, or the pass is refused.
+- **Model tier per step.** Each action carries a `fast`, `balanced` or `deep` tier (`models.steps`), raised one tier for high-risk plan/implement/review and after a failed attempt of the same step. `models.tiers` maps tiers to concrete model names; empty by default, so hosts without model switching are unaffected.
+- **Frozen files.** Modifying or deleting an existing test or gate configuration (`frozenPaths`) stops the run until the user approves each file by name. New test files are unaffected.
+- **Refusals.** `tracer refuse --why` ends triage with a stop; the user can answer with a changed request.
+- **Feedback ledger.** Review findings, visual observations and user decisions get ids and statuses (`tracer feedback`, `feedback resolve`) and appear as a table in the PR progress comment. Text is neutralised before display.
+- Request, Issue and PR text is treated as quoted data, never as instructions (analyze guide).
+
 ## 0.3.0 - 2026-10-25
 
 - Support Codex and Claude Code through one short entrypoint. Handle simple tasks directly; load tracked instructions only when useful.

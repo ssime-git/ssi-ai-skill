@@ -16,11 +16,21 @@ Save the output. Use the user's installed configuration; do not guess model name
 review.codexModel and review.codexEffort settings pin the model. A failed or unsupported invocation is
 not a review: explain the reason and try the next configured reviewer without repeated guessing.
 
+## Roles from the diff
+
+`tracer next` lists extra `roles` when the diff calls for them, each with its focus in the action text:
+- `ui`: consistency with existing components, states (hover, focus, disabled, loading, error), responsive layout, accessibility.
+- `ux`: the whole flow, a clear next step, empty and error states, wording, friction, confirmation of destructive actions.
+- `security` and `data` for auth/payment/secret code and for migrations or infrastructure.
+Review each role separately with that lens, set `"roles": ["general", "ui", "ux"]` in the report and tag each finding with its `role`.
+The engine refuses a pass that omits a required role. Findings are added to the PR feedback table: after fixing or rejecting one,
+run `tracer feedback resolve --id <n> --status fixed|rejected|deferred --note "<evidence>"` (rejected and deferred need a note).
+
 ## Report
 
 Write JSON:
 ```json
-{"verdict":"approve","summary":"What was reviewed and its limits","findings":[],"next_steps":[]}
+{"verdict":"approve","summary":"What was reviewed and its limits","roles":["general"],"findings":[],"next_steps":[]}
 ```
 Findings use severity (critical, high, medium, low), title, body, file, line_start, line_end, confidence and recommendation.
 Use needs-attention when blockers remain; the engine refuses an approving pass with critical/high findings.

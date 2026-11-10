@@ -2,7 +2,7 @@ import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { createHash, randomBytes } from 'node:crypto';
 
-export function readEvidence(cwd, file, { review = false } = {}) {
+export function readEvidence(cwd, file, { review = false, roles = [] } = {}) {
   if (!file) throw new Error('--evidence must name an existing, non-empty artifact.');
   const content = readFileSync(resolve(cwd, file));
   if (!content.length) throw new Error('The evidence file is empty.');
@@ -10,6 +10,8 @@ export function readEvidence(cwd, file, { review = false } = {}) {
     const report = JSON.parse(content.toString('utf8'));
     if (report.verdict !== 'approve' || typeof report.summary !== 'string' || !report.summary.trim()
       || !Array.isArray(report.findings)) throw new Error('Review must be JSON with verdict "approve", a summary and findings.');
+    const missing = roles.filter((r) => !(Array.isArray(report.roles) && report.roles.includes(r)));
+    if (missing.length) throw new Error(`Review must cover these roles too: ${missing.join(', ')}. Add them to "roles" in the report once each has really been reviewed.`);
     if (report.findings.some((f) => !['critical', 'high', 'medium', 'low'].includes(f.severity))) {
       throw new Error('Each review finding needs a recognized severity.');
     }

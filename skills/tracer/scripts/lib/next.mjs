@@ -9,6 +9,25 @@ import { say, bar } from './say.mjs';
 import { opAllowed } from './config.mjs';
 import { evaluateGuards } from './guards.mjs';
 import { targetOf } from './workflow.mjs';
+import { modelFor, modelHint, reviewRoles, ROLE_FOCUS } from './route.mjs';
+
+const STEP_KINDS = new Set(['analyze', 'confirm', 'reproduce', 'plan', 'implement', 'implement-local', 'review', 'capture-visual', 'watch-ci']);
+
+// Deterministic add-ons: model tier for the step, and the extra review roles the diff calls for.
+function enrich(action, { name, state, facts, config }) {
+  if (!STEP_KINDS.has(action.kind)) return action;
+  const model = modelFor(name, state, facts, config);
+  action.model = model;
+  action.instructions += ` ${modelHint(model)}`;
+  if (action.kind === 'review') {
+    const roles = reviewRoles(state, facts, config);
+    action.roles = roles;
+    if (roles.length) {
+      action.instructions += ` The diff also needs these roles, covered in the same report: set "roles" to [${['general', ...roles].map((r) => `"${r}"`).join(', ')}] and tag each finding with its "role". ${roles.map((r) => `${r}: ${ROLE_FOCUS[r]}`).join('; ')}.`;
+    }
+  }
+  return action;
+}
 
 // Landing is blocked until every applicable contract is pass or waived. The engine decides,
 // not the agent: the action is replaced, so no instruction to land is ever emitted.
@@ -114,7 +133,7 @@ export function computeNext({ cwd, config, run, gh, guards = evaluateGuards }) {
   let stop = evaluateStops({ state, facts, config, phase: det.phase });
   let action = null;
   if (!stop) {
-    action = actionFor({ name: det.name, state, facts, config });
+    action = enrich(actionFor({ name: det.name, state, facts, config }), { name: det.name, state, facts, config });
     if (targetOf(state) !== 'answer' && GUARDED.has(det.name) && !['push-changes', 'commit-changes', 'wait-for-github'].includes(action.kind)) {
       const g = guards(cwd, { changedFiles: facts.changedFiles });
       if (!g.ok) action = guardAction(g);

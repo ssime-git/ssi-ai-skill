@@ -14,11 +14,17 @@ export const DEFAULTS = Object.freeze({
     visualRetries: 2,
     ciRetries: 2,
   },
-  review: { reviewers: ['codex', 'subagent'], parallel: false, codexModel: '', codexEffort: '' },
+  review: { reviewers: ['codex', 'subagent'], parallel: false, codexModel: '', codexEffort: '', roles: ['ui', 'ux', 'security', 'data'] },
+  models: {
+    tiers: { fast: '', balanced: '', deep: '' },
+    steps: { analyze: 'fast', confirm: 'fast', reproduce: 'balanced', plan: 'balanced', implement: 'balanced', review: 'deep', visual: 'fast', land: 'fast' },
+  },
   ci: { watch: true, reviewComments: false },
   visual: { enabled: 'auto', tool: 'playwright' },
   assets: { branch: 'tracer-assets', purge: true },
   protectedPaths: ['**/auth/**', '**/payment*/**', '**/migrations/**', '**/schema*'],
+  // Existing files the builder may not modify or delete without an explicit, per-file approval.
+  frozenPaths: ['**/*.test.*', '**/*.spec.*', '**/test_*.py', '**/*_test.*', '**/tests/**', '**/__tests__/**', 'tracer.config.json', 'tracer.guards.json', '.github/workflows/**'],
   ui: { style: 'plain' },
 });
 
@@ -61,6 +67,16 @@ function checkValues(over) {
     if (v !== undefined && !allowed.includes(v)) {
       throw new Error(`Config key ${p} must be one of: ${allowed.join(', ')}`);
     }
+  }
+  for (const [step, tier] of Object.entries(at(over, 'models.steps') ?? {})) {
+    if (!['analyze', 'confirm', 'reproduce', 'plan', 'implement', 'review', 'visual', 'land'].includes(step)) throw new Error(`Unknown step in models.steps: ${step}`);
+    if (!['fast', 'balanced', 'deep'].includes(tier)) throw new Error(`models.steps.${step} must be one of: fast, balanced, deep`);
+  }
+  for (const [tier, name] of Object.entries(at(over, 'models.tiers') ?? {})) {
+    if (name !== '' && !/^[\w.:-]+$/.test(name)) throw new Error(`models.tiers.${tier} may only contain letters, digits, dots, colons, dashes and underscores`);
+  }
+  for (const r of at(over, 'review.roles') ?? []) {
+    if (!['ui', 'ux', 'security', 'data'].includes(r)) throw new Error(`Unknown review role: ${r}`);
   }
   const ab = at(over, 'assets.branch');
   if (ab !== undefined && (!/^[A-Za-z0-9._][A-Za-z0-9._\/-]*$/.test(ab) || ['main', 'master', 'trunk', 'develop', 'HEAD'].includes(ab))) {
