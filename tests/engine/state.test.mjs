@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { newState, readState, writeState, statePath, PHASES } from '../../skills/ssi/scripts/lib/state.mjs';
+import { newState, readState, writeState, statePath, PHASES } from '../../skills/tracer/scripts/lib/state.mjs';
 
-const tmp = () => mkdtempSync(join(tmpdir(), 'ssi-state-'));
+const tmp = () => mkdtempSync(join(tmpdir(), 'tracer-state-'));
 
 test('phases are the eight named steps', () => {
   assert.deepEqual(PHASES, ['analyze', 'confirm', 'reproduce', 'plan', 'implement', 'review', 'visual', 'land']);
@@ -15,8 +15,8 @@ test('write then read roundtrips, ignores itself and leaves no temp file', () =>
   const cwd = tmp();
   writeState(cwd, newState('fix login'));
   assert.equal(readState(cwd).state.goal, 'fix login');
-  assert.equal(readFileSync(join(cwd, '.ssi/.gitignore'), 'utf8'), '*\n');
-  assert.deepEqual(readdirSync(join(cwd, '.ssi')).sort(), ['.gitignore', 'state.json']);
+  assert.equal(readFileSync(join(cwd, '.tracer/.gitignore'), 'utf8'), '*\n');
+  assert.deepEqual(readdirSync(join(cwd, '.tracer')).sort(), ['.gitignore', 'state.json']);
 });
 
 test('a missing file is null without a warning', () => {
@@ -25,8 +25,8 @@ test('a missing file is null without a warning', () => {
 
 test('a corrupt file is null with a plain-English warning', () => {
   const cwd = tmp();
-  mkdirSync(join(cwd, '.ssi'));
-  writeFileSync(join(cwd, '.ssi/state.json'), '{ broken');
+  mkdirSync(join(cwd, '.tracer'));
+  writeFileSync(join(cwd, '.tracer/state.json'), '{ broken');
   const r = readState(cwd);
   assert.equal(r.state, null);
   assert.match(r.warning, /unreadable/);
@@ -53,14 +53,14 @@ test('the progress timestamp ignores volatile fields and moves only on real prog
 
 test('state is refused when the folder does not ignore it, and a bad ignore file is repaired', () => {
   const cwd = tmp();
-  mkdirSync(join(cwd, '.ssi'));
-  writeFileSync(join(cwd, '.ssi/.gitignore'), '# nothing useful\n');
+  mkdirSync(join(cwd, '.tracer'));
+  writeFileSync(join(cwd, '.tracer/.gitignore'), '# nothing useful\n');
   writeState(cwd, newState('g'));
-  assert.equal(readFileSync(join(cwd, '.ssi/.gitignore'), 'utf8').split('\n').includes('*'), true);
+  assert.equal(readFileSync(join(cwd, '.tracer/.gitignore'), 'utf8').split('\n').includes('*'), true);
 });
 
 test('run ids are unique and prefixed', () => {
   const a = newState('x'), b = newState('x');
-  assert.match(a.run_id, /^ssi-[0-9a-f]{6}$/);
+  assert.match(a.run_id, /^tracer-[0-9a-f]{6}$/);
   assert.notEqual(a.run_id, b.run_id);
 });

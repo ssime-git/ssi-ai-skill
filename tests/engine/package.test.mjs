@@ -2,37 +2,37 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { PHASES } from '../../skills/ssi/scripts/lib/state.mjs';
+import { PHASES } from '../../skills/tracer/scripts/lib/state.mjs';
 
 const read = (p) => readFileSync(p, 'utf8');
 
 test('the entrypoint and workflow keep references discoverable', () => {
-  const s = read('skills/ssi/SKILL.md');
-  assert.match(s, /^---\nname: "?ssi"?\ndescription: .+\n---\n/);
+  const s = read('skills/tracer/SKILL.md');
+  assert.match(s, /^---\nname: "?tracer"?\ndescription: .+\n---\n/);
   assert.ok(s.split('\n').length < 90, 'SKILL.md must stay thin');
-  const workflow = read('skills/ssi/references/workflow.md');
+  const workflow = read('skills/tracer/references/workflow.md');
   for (const n of [...PHASES, 'communication']) {
     assert.ok(s.includes(`references/${n}.md`) || workflow.includes(`](${n}.md)`), `${n} is discoverable`);
-    assert.ok(existsSync(`skills/ssi/references/${n}.md`), `${n}.md exists`);
+    assert.ok(existsSync(`skills/tracer/references/${n}.md`), `${n}.md exists`);
   }
 });
 
 test('the skill never promises a merge, a deploy or a close', () => {
-  const all = [read('skills/ssi/SKILL.md'), ...[...PHASES, 'communication'].map((n) => read(`skills/ssi/references/${n}.md`))].join('\n');
+  const all = [read('skills/tracer/SKILL.md'), ...[...PHASES, 'communication'].map((n) => read(`skills/tracer/references/${n}.md`))].join('\n');
   assert.match(all, /never merge/i);
   assert.doesNotMatch(all, /gh pr merge/);
 });
 
 test('NOTICE keeps every upstream licence, including i-have-adhd', () => {
-  const n = read('skills/ssi/NOTICE.md');
+  const n = read('skills/tracer/NOTICE.md');
   assert.ok((n.match(/^MIT License$/gm) ?? []).length >= 4);
   assert.match(n, /ayghri\/i-have-adhd/);
 });
 
 test('the skill folder is self-contained and the repo is a plugin', () => {
-  assert.ok(existsSync('skills/ssi/scripts/ssi.mjs'));
-  assert.doesNotMatch(read('skills/ssi/SKILL.md'), /\.\.\/\.\.\//);
-  assert.equal(JSON.parse(read('.claude-plugin/plugin.json')).name, 'ssi');
+  assert.ok(existsSync('skills/tracer/scripts/tracer.mjs'));
+  assert.doesNotMatch(read('skills/tracer/SKILL.md'), /\.\.\/\.\.\//);
+  assert.equal(JSON.parse(read('.claude-plugin/plugin.json')).name, 'tracer');
 });
 
 test('the docs folder holds the philosophy, the design reference and the runs, and the README links them', () => {
@@ -45,7 +45,7 @@ test('the docs folder holds the philosophy, the design reference and the runs, a
 });
 
 test('public docs state nothing about the author\'s health', () => {
-  const files = ['README.md', 'docs/philosophy.md', 'docs/design.md', 'docs/runs.md', 'skills/ssi/SKILL.md'];
+  const files = ['README.md', 'docs/philosophy.md', 'docs/design.md', 'docs/runs.md', 'skills/tracer/SKILL.md'];
   for (const f of files) assert.doesNotMatch(read(f), /\bthe author has\b|\bI have ADHD\b/i, f);
 });
 
@@ -53,7 +53,7 @@ test('the repo has an MIT licence and a short README that credits every upstream
   assert.match(read('LICENSE'), /^MIT License\n\nCopyright \(c\) 2026 /);
   const readme = read('README.md');
   assert.ok(readme.split('\n').length < 110, 'README must stay short');
-  for (const m of read('skills/ssi/NOTICE.md').matchAll(/^## ([\w.-]+\/[\w.-]+)/gm)) {
+  for (const m of read('skills/tracer/NOTICE.md').matchAll(/^## ([\w.-]+\/[\w.-]+)/gm)) {
     assert.ok(readme.includes(m[1]), `README credits ${m[1]}`);
   }
   assert.ok((readme.match(/```mermaid/g) ?? []).length >= 2, 'README shows the flow with diagrams');

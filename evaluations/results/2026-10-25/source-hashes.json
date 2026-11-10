@@ -1,5 +1,5 @@
 {
-  "ssi02": {
+  "tracer02": {
     "files": {
       "NOTICE.md": "67cbe5812b8588d37ebc35678dcb6ab0fd96bf5d3089d2e43a129d2f3802ee72",
       "SKILL.md": "85806398619d2295b9c30e8ca42be2b7b3046dadc9e55f518e3347676ea7d3b0",
@@ -28,11 +28,11 @@
       "scripts/lib/say.mjs": "ac5a13bab2c12fdb2d62160d87325f68075eb378b4667494bb6c4b82c0288df4",
       "scripts/lib/state.mjs": "429fadb9f342575d6a326156ccaf4a4257053f2c2a92ad32cbdc7ebb4cdd3da7",
       "scripts/lib/stops.mjs": "b1de9a02cb5a9c5d384cfe52d72b5b58d916e6b3c1e16a8d179697a76ddf8957",
-      "scripts/ssi.mjs": "8bd180d96653731baf1fba4adcf18f1f77fba0126d3fc895363c2d66dc86e00c"
+      "scripts/tracer.mjs": "8bd180d96653731baf1fba4adcf18f1f77fba0126d3fc895363c2d66dc86e00c"
     },
     "tree_sha256": "efa010b201bfc00e06ee7837a3881efd3f61048ac2aeb4bdd2fe52226ecd60db"
   },
-  "ssi03": {
+  "tracer03": {
     "files": {
       "NOTICE.md": "67cbe5812b8588d37ebc35678dcb6ab0fd96bf5d3089d2e43a129d2f3802ee72",
       "SKILL.md": "b8158429411ead848989f78297ada9aff0d1a991aac901e74210b8f6d8eba025",
@@ -63,7 +63,7 @@
       "scripts/lib/state.mjs": "2d54fab9b96504c78f89d36775da75cc23aabf8daac93e7fe74594f53a3b2a49",
       "scripts/lib/stops.mjs": "b1de9a02cb5a9c5d384cfe52d72b5b58d916e6b3c1e16a8d179697a76ddf8957",
       "scripts/lib/workflow.mjs": "1d20373520f8e2cb80bb7521efd22f80bf603850bfabe390bfebdfadc62f64a2",
-      "scripts/ssi.mjs": "8bd180d96653731baf1fba4adcf18f1f77fba0126d3fc895363c2d66dc86e00c"
+      "scripts/tracer.mjs": "8bd180d96653731baf1fba4adcf18f1f77fba0126d3fc895363c2d66dc86e00c"
     },
     "tree_sha256": "a4610518541d6f19929743318572d227f83910fcad338147412e8ca0793809af"
   }

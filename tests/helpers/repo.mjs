@@ -17,7 +17,7 @@ export function commit(dir, file, content, msg) {
 }
 
 export function makeRepo() {
-  const dir = mkdtempSync(join(tmpdir(), 'ssi-repo-'));
+  const dir = mkdtempSync(join(tmpdir(), 'tracer-repo-'));
   git(dir, 'init', '-q', '-b', 'main');
   git(dir, 'config', 'user.email', 't@t.t');
   git(dir, 'config', 'user.name', 't');

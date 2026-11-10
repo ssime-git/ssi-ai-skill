@@ -12,7 +12,7 @@
       "elapsed_seconds": 303.838,
       "unmetered_attempts": 0
     },
-    "ssi02": {
+    "tracer02": {
       "attempts": 6,
       "successful_tasks": 6,
       "metered_attempts": 6,
@@ -24,7 +24,7 @@
       "elapsed_seconds": 521.453,
       "unmetered_attempts": 0
     },
-    "ssi03": {
+    "tracer03": {
       "attempts": 6,
       "successful_tasks": 6,
       "metered_attempts": 6,
@@ -101,7 +101,7 @@
     {
       "case": "discount_local",
       "repeat": 1,
-      "reference": "ssi02",
+      "reference": "tracer02",
       "valid_success_pair": true,
       "total_tokens_reduction_percent": 11.38,
       "uncached_input_tokens_reduction_percent": -39.56,
@@ -111,7 +111,7 @@
     {
       "case": "discount_local",
       "repeat": 2,
-      "reference": "ssi02",
+      "reference": "tracer02",
       "valid_success_pair": true,
       "total_tokens_reduction_percent": -30.42,
       "uncached_input_tokens_reduction_percent": -65.33,
@@ -121,7 +121,7 @@
     {
       "case": "mean_local",
       "repeat": 1,
-      "reference": "ssi02",
+      "reference": "tracer02",
       "valid_success_pair": true,
       "total_tokens_reduction_percent": 50.42,
       "uncached_input_tokens_reduction_percent": 67.5,
@@ -131,7 +131,7 @@
     {
       "case": "mean_local",
       "repeat": 2,
-      "reference": "ssi02",
+      "reference": "tracer02",
       "valid_success_pair": true,
       "total_tokens_reduction_percent": 41.1,
       "uncached_input_tokens_reduction_percent": 34.12,
@@ -141,7 +141,7 @@
     {
       "case": "quote_pr",
       "repeat": 1,
-      "reference": "ssi02",
+      "reference": "tracer02",
       "valid_success_pair": true,
       "total_tokens_reduction_percent": 14.26,
       "uncached_input_tokens_reduction_percent": 22.04,
@@ -151,7 +151,7 @@
     {
       "case": "quote_pr",
       "repeat": 2,
-      "reference": "ssi02",
+      "reference": "tracer02",
       "valid_success_pair": true,
       "total_tokens_reduction_percent": 23.61,
       "uncached_input_tokens_reduction_percent": -6.13,
@@ -221,8 +221,8 @@
         "workflow_done": null,
         "github_calls": 2
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-codex-1.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-codex-1.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/quote_pr-codex-1.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/quote_pr-codex-1.final.txt",
       "seed_commit": "fe5521dd6405bf1110183a5e2fa8db042a28e736",
       "fresh_review_ok": true,
       "task_success": true,
@@ -230,7 +230,7 @@
     },
     {
       "case": "mean_local",
-      "arm": "ssi03",
+      "arm": "tracer03",
       "repeat": 1,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -275,8 +275,8 @@
         "workflow_done": true,
         "github_calls": 0
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi03-1.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi03-1.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/mean_local-tracer03-1.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/mean_local-tracer03-1.final.txt",
       "seed_commit": "a73bf4ff0abd542e4d71b4c25ddbeaed3d9fa8fe",
       "fresh_review_ok": true,
       "task_success": true,
@@ -329,8 +329,8 @@
         "workflow_done": null,
         "github_calls": 0
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-codex-1.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-codex-1.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/discount_local-codex-1.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/discount_local-codex-1.final.txt",
       "seed_commit": "06f5ad7b57f0018d263a75fd227d08f7d894b575",
       "fresh_review_ok": true,
       "task_success": true,
@@ -338,7 +338,7 @@
     },
     {
       "case": "discount_local",
-      "arm": "ssi02",
+      "arm": "tracer02",
       "repeat": 1,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -383,8 +383,8 @@
         "workflow_done": false,
         "github_calls": 4
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi02-1.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi02-1.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/discount_local-tracer02-1.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/discount_local-tracer02-1.final.txt",
       "seed_commit": "cad2a35cbf49ed6fd05768f2dedb3fa0b5f70fd3",
       "fresh_review_ok": true,
       "task_success": true,
@@ -392,7 +392,7 @@
     },
     {
       "case": "quote_pr",
-      "arm": "ssi03",
+      "arm": "tracer03",
       "repeat": 1,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -451,8 +451,8 @@
         "workflow_done": true,
         "github_calls": 21
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi03-1.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi03-1.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/quote_pr-tracer03-1.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/quote_pr-tracer03-1.final.txt",
       "seed_commit": "ea23d927736dfc0fd5777aa68d0ba1f04178e481",
       "fresh_review_ok": true,
       "task_success": true,
@@ -505,8 +505,8 @@
         "workflow_done": null,
         "github_calls": 0
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-codex-1.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-codex-1.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/mean_local-codex-1.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/mean_local-codex-1.final.txt",
       "seed_commit": "fcd33e1041ae138537dcd6107859442ad157f054",
       "fresh_review_ok": true,
       "task_success": true,
@@ -514,7 +514,7 @@
     },
     {
       "case": "quote_pr",
-      "arm": "ssi02",
+      "arm": "tracer02",
       "repeat": 1,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -573,8 +573,8 @@
         "workflow_done": true,
         "github_calls": 27
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi02-1.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi02-1.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/quote_pr-tracer02-1.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/quote_pr-tracer02-1.final.txt",
       "seed_commit": "7c00875b6b4a7a556740e6b2493f57cd30a664f3",
       "fresh_review_ok": true,
       "task_success": true,
@@ -582,7 +582,7 @@
     },
     {
       "case": "discount_local",
-      "arm": "ssi03",
+      "arm": "tracer03",
       "repeat": 1,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -627,8 +627,8 @@
         "workflow_done": true,
         "github_calls": 0
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi03-1.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi03-1.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/discount_local-tracer03-1.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/discount_local-tracer03-1.final.txt",
       "seed_commit": "023e83be129fa4f46e8c0d865e1265cef5919a27",
       "fresh_review_ok": true,
       "task_success": true,
@@ -636,7 +636,7 @@
     },
     {
       "case": "mean_local",
-      "arm": "ssi02",
+      "arm": "tracer02",
       "repeat": 1,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -681,8 +681,8 @@
         "workflow_done": false,
         "github_calls": 2
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi02-1.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi02-1.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/mean_local-tracer02-1.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/mean_local-tracer02-1.final.txt",
       "seed_commit": "c2454a959ca31e29138f2d96bc589b17ab0a56ec",
       "fresh_review_ok": true,
       "task_success": true,
@@ -735,8 +735,8 @@
         "workflow_done": null,
         "github_calls": 0
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-codex-2.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-codex-2.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/mean_local-codex-2.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/mean_local-codex-2.final.txt",
       "seed_commit": "16a795e664d8d1e810d35f985ef4915d7d43ecab",
       "fresh_review_ok": true,
       "task_success": true,
@@ -744,7 +744,7 @@
     },
     {
       "case": "mean_local",
-      "arm": "ssi02",
+      "arm": "tracer02",
       "repeat": 2,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -789,8 +789,8 @@
         "workflow_done": false,
         "github_calls": 2
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi02-2.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi02-2.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/mean_local-tracer02-2.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/mean_local-tracer02-2.final.txt",
       "seed_commit": "e8926c4e659af767c9d4b55962acaf5512549ca4",
       "fresh_review_ok": true,
       "task_success": true,
@@ -798,7 +798,7 @@
     },
     {
       "case": "discount_local",
-      "arm": "ssi02",
+      "arm": "tracer02",
       "repeat": 2,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -843,8 +843,8 @@
         "workflow_done": false,
         "github_calls": 0
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi02-2.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi02-2.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/discount_local-tracer02-2.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/discount_local-tracer02-2.final.txt",
       "seed_commit": "e911e273c2b28feba93d51147af247e5ba1d2768",
       "fresh_review_ok": true,
       "task_success": true,
@@ -897,8 +897,8 @@
         "workflow_done": null,
         "github_calls": 0
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-codex-2.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-codex-2.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/discount_local-codex-2.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/discount_local-codex-2.final.txt",
       "seed_commit": "5d9d980b7cb779be7c4075f6ddd62f2ecdd188bc",
       "fresh_review_ok": true,
       "task_success": true,
@@ -978,8 +978,8 @@
         "workflow_done": null,
         "github_calls": 4
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-codex-2.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-codex-2.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/quote_pr-codex-2.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/quote_pr-codex-2.final.txt",
       "seed_commit": "8d47daf5419925ded8a5dddbe2d2eaa60e6dcbd4",
       "fresh_review_ok": true,
       "task_success": true,
@@ -987,7 +987,7 @@
     },
     {
       "case": "quote_pr",
-      "arm": "ssi03",
+      "arm": "tracer03",
       "repeat": 2,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -1046,8 +1046,8 @@
         "workflow_done": true,
         "github_calls": 21
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi03-2.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi03-2.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/quote_pr-tracer03-2.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/quote_pr-tracer03-2.final.txt",
       "seed_commit": "33da8ce6e8df446c9bfd49f32f0af74c0661acba",
       "fresh_review_ok": true,
       "task_success": true,
@@ -1055,7 +1055,7 @@
     },
     {
       "case": "discount_local",
-      "arm": "ssi03",
+      "arm": "tracer03",
       "repeat": 2,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -1100,8 +1100,8 @@
         "workflow_done": true,
         "github_calls": 0
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi03-2.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/discount_local-ssi03-2.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/discount_local-tracer03-2.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/discount_local-tracer03-2.final.txt",
       "seed_commit": "80a9cf761d34b9e31975789381481c0713aced40",
       "fresh_review_ok": true,
       "task_success": true,
@@ -1109,7 +1109,7 @@
     },
     {
       "case": "quote_pr",
-      "arm": "ssi02",
+      "arm": "tracer02",
       "repeat": 2,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -1168,8 +1168,8 @@
         "workflow_done": true,
         "github_calls": 27
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi02-2.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/quote_pr-ssi02-2.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/quote_pr-tracer02-2.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/quote_pr-tracer02-2.final.txt",
       "seed_commit": "2a231d349157bd54742a152f88fd078307110b8e",
       "fresh_review_ok": true,
       "task_success": true,
@@ -1177,7 +1177,7 @@
     },
     {
       "case": "mean_local",
-      "arm": "ssi03",
+      "arm": "tracer03",
       "repeat": 2,
       "model": "gpt-6.1-sol",
       "effort": "medium",
@@ -1222,8 +1222,8 @@
         "workflow_done": true,
         "github_calls": 0
       },
-      "events": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi03-2.jsonl",
-      "final": "/tmp/ssi-token-bench/experiment/raw/mean_local-ssi03-2.final.txt",
+      "events": "/tmp/tracer-token-bench/experiment/raw/mean_local-tracer03-2.jsonl",
+      "final": "/tmp/tracer-token-bench/experiment/raw/mean_local-tracer03-2.final.txt",
       "seed_commit": "6b0553007e1c02ed05bbb5c3189a96ef61984186",
       "fresh_review_ok": true,
       "task_success": true,
@@ -1234,7 +1234,7 @@
     "Two repetitions per cell are exploratory, not statistically conclusive.",
     "Cached input is included in total input; reasoning is included in output.",
     "The model and tool environment are fixed; cache hits and service latency still vary.",
-    "Local SSI02 can stop before publication; workflow_done is not the same as task correctness.",
+    "Local Tracer02 can stop before publication; workflow_done is not the same as task correctness.",
     "GitHub and CI are simulated; acceptance tests and model reviews run for real.",
     "No dollar-cost estimate or proof of universal readability improvement."
   ]

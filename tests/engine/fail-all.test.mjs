@@ -10,14 +10,14 @@ const MATRIX = {
 };
 for (const [phase, [back, code, max]] of Object.entries(MATRIX)) {
   test(`repeated phase ${phase} failures stop with ${code}`, () => {
-    const { ssi } = reach(Number(phase));
+    const { tracer } = reach(Number(phase));
     for (let i = 1; i <= max; i++) {
-      assert.equal(ssi('record', '--phase', phase, '--result', 'fail', '--note', 'fixture failure').code, 0);
-      const next = ssi('next').json;
+      assert.equal(tracer('record', '--phase', phase, '--result', 'fail', '--note', 'fixture failure').code, 0);
+      const next = tracer('next').json;
       if (i < max) assert.equal(next.phase, back);
       else assert.equal(next.stop.code, code);
     }
-    assert.equal(ssi('answer', 'A. Try a different approach').code, 0);
-    assert.equal(ssi('next').json.stop, null);
+    assert.equal(tracer('answer', 'A. Try a different approach').code, 0);
+    assert.equal(tracer('next').json.stop, null);
   });
 }
