@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newState } from '../../skills/ssi/scripts/lib/state.mjs';
-import { renderBlock, parseBlock, mergeComment, stateHash } from '../../skills/ssi/scripts/lib/remote.mjs';
-import { makeGh, findPr, whoami, readRemoteState, upsertStateComment, createIssue, closedPrNumbers, isTransient } from '../../skills/ssi/scripts/lib/github.mjs';
+import { newState } from '../../skills/tracer/scripts/lib/state.mjs';
+import { renderBlock, parseBlock, mergeComment, stateHash } from '../../skills/tracer/scripts/lib/remote.mjs';
+import { makeGh, findPr, whoami, readRemoteState, upsertStateComment, createIssue, closedPrNumbers, isTransient } from '../../skills/tracer/scripts/lib/github.mjs';
 import { makeGhStub } from '../helpers/gh.mjs';
 
 test('the block roundtrips and survives quotes, newlines and angle brackets', () => {
@@ -34,7 +34,7 @@ test('mergeComment keeps human text, replaces the block, re-adds a deleted block
   assert.match(merged, /thanks/);
   assert.match(merged, /new/);
   assert.doesNotMatch(merged, /old/);
-  assert.match(mergeComment('human only', b), /^human only\n\n<!-- ssi:begin -->/);
+  assert.match(mergeComment('human only', b), /^human only\n\n<!-- tracer:begin -->/);
 });
 
 test('stateHash ignores bookkeeping fields but sees real changes', () => {
@@ -46,28 +46,28 @@ test('stateHash ignores bookkeeping fields but sees real changes', () => {
 
 test('findPr returns the first match or null', () => {
   const gh = makeGhStub();
-  assert.equal(findPr(gh, 'ssi/x'), null);
-  gh.openPr(7, 'ssi/x');
-  assert.equal(findPr(gh, 'ssi/x').number, 7);
+  assert.equal(findPr(gh, 'tracer/x'), null);
+  gh.openPr(7, 'tracer/x');
+  assert.equal(findPr(gh, 'tracer/x').number, 7);
 });
 
 test('findPr ignores old closed PRs and fork PRs unless the run owns them', () => {
   const gh = makeGhStub();
-  gh.openPr(7, 'ssi/x', true, 'abc1234');
-  assert.equal(findPr(gh, 'ssi/x', null).headSha, 'abc1234');
+  gh.openPr(7, 'tracer/x', true, 'abc1234');
+  assert.equal(findPr(gh, 'tracer/x', null).headSha, 'abc1234');
   gh.s.pr.state = 'CLOSED';
-  assert.equal(findPr(gh, 'ssi/x', null), null);
-  assert.equal(findPr(gh, 'ssi/x', 7).number, 7);
+  assert.equal(findPr(gh, 'tracer/x', null), null);
+  assert.equal(findPr(gh, 'tracer/x', 7).number, 7);
   gh.s.pr.state = 'OPEN';
   gh.s.pr.cross = true;
-  assert.equal(findPr(gh, 'ssi/x', 7), null);
+  assert.equal(findPr(gh, 'tracer/x', 7), null);
 });
 
 test('findPr prefers the PR the run already knows when several are open for the same branch', () => {
   const row = (number, headRefOid) => ({ number, state: 'OPEN', isDraft: true, url: `u${number}`, headRefOid, isCrossRepository: false });
   const gh = () => JSON.stringify([row(5, 'aaaaaaa'), row(9, 'bbbbbbb')]);
-  assert.equal(findPr(gh, 'ssi/x', 9).number, 9);
-  assert.equal(findPr(gh, 'ssi/x', null).number, 5);
+  assert.equal(findPr(gh, 'tracer/x', 9).number, 9);
+  assert.equal(findPr(gh, 'tracer/x', null).number, 5);
 });
 
 test('state is only read from, and written to, comments of the authenticated user', () => {
@@ -103,8 +103,8 @@ test('upsertStateComment creates, then patches only on change', () => {
 
 test('createIssue is idempotent by key', () => {
   const gh = makeGhStub();
-  const first = createIssue(gh, { title: 't', body: 'b', key: 'ssi:r1:issue' });
-  const again = createIssue(gh, { title: 't', body: 'b', key: 'ssi:r1:issue' });
+  const first = createIssue(gh, { title: 't', body: 'b', key: 'tracer:r1:issue' });
+  const again = createIssue(gh, { title: 't', body: 'b', key: 'tracer:r1:issue' });
   assert.deepEqual([first.created, again.created], [true, false]);
   assert.equal(first.number, again.number);
   assert.equal(gh.s.issues.length, 1);
@@ -112,9 +112,9 @@ test('createIssue is idempotent by key', () => {
 
 test('an existing Issue is found even past the first 200, so no duplicate is created', () => {
   const gh = makeGhStub();
-  gh.s.issues = [{ number: 1, body: 'x\n\n<!-- ssi:r9:issue -->' }];
+  gh.s.issues = [{ number: 1, body: 'x\n\n<!-- tracer:r9:issue -->' }];
   for (let i = 2; i <= 250; i++) gh.s.issues.push({ number: i, body: `other ${i}` });
-  const r = createIssue(gh, { title: 't', body: 'b', key: 'ssi:r9:issue' });
+  const r = createIssue(gh, { title: 't', body: 'b', key: 'tracer:r9:issue' });
   assert.deepEqual([r.number, r.created], [1, false]);
   assert.equal(gh.s.issues.length, 250);
 });
@@ -122,7 +122,7 @@ test('an existing Issue is found even past the first 200, so no duplicate is cre
 test('closedPrNumbers lists closed and merged PRs, not open ones, and makeGh is a function factory', () => {
   const gh = makeGhStub();
   assert.deepEqual(closedPrNumbers(gh), []);
-  gh.openPr(7, 'ssi/x');
+  gh.openPr(7, 'tracer/x');
   assert.deepEqual(closedPrNumbers(gh), []);
   gh.s.pr.state = 'MERGED';
   assert.deepEqual(closedPrNumbers(gh), [7]);

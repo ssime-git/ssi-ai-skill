@@ -26,5 +26,5 @@ Keep fixture requirements, independent assertions, raw failures and provider usa
 Do not turn text-byte savings into token or monetary claims. Never publish raw auth output or secrets.
 
 Open a focused PR with the concrete problem, resulting behavior and relevant validation.
-Preserve the SSI engine's boundaries: it does not merge, close Issues or deploy.
+Preserve the Tracer engine's boundaries: it does not merge, close Issues or deploy.
 Security reports belong in the private channel described in [SECURITY.md](SECURITY.md).

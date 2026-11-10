@@ -29,7 +29,7 @@ class ClaudeResultTests(unittest.TestCase):
     def test_real_tool_calls_are_preserved(self):
         _, _, calls, _ = self.parse([{'type': 'assistant', 'message': {'content': [
             {'type': 'text', 'text': 'Checking'},
-            {'type': 'tool_use', 'name': 'Skill', 'input': {'skill': 'ssi'}}]}}])
+            {'type': 'tool_use', 'name': 'Skill', 'input': {'skill': 'tracer'}}]}}])
         self.assertEqual([c['name'] for c in calls], ['Skill'])
 
 

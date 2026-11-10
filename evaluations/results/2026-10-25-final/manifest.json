@@ -28,12 +28,12 @@
     ],
     [
       "handoff",
-      "Continue the existing tracked SSI run after interruption; it is stopped on a protected-file question.",
+      "Continue the existing tracked Tracer run after interruption; it is stopped on a protected-file question.",
       "tracked"
     ],
     [
       "explicit_tracking",
-      "Fix this README typo, but explicitly use saved SSI progress for handoff.",
+      "Fix this README typo, but explicitly use saved Tracer progress for handoff.",
       "tracked"
     ],
     [
@@ -46,12 +46,12 @@
     "mean_local",
     "discount_local"
   ],
-  "tracked_answer_request": "Explain the behavior and limits of sum(values) in src/stats.cjs, including empty arrays and input validation. Explicitly use saved SSI progress for handoff and finish its answer workflow. Do not change source or tests, create Issues or PRs, or publish anything. Support the answer with source inspection and an executed behavior check.",
+  "tracked_answer_request": "Explain the behavior and limits of sum(values) in src/stats.cjs, including empty arrays and input validation. Explicitly use saved Tracer progress for handoff and finish its answer workflow. Do not change source or tests, create Issues or PRs, or publish anything. Support the answer with source inspection and an executed behavior check.",
   "note": "Explicit tracked answer tests on both hosts; no reviewed PR, production mutation or implicit-discovery claim.",
   "sources": {
-    "skills/ssi/SKILL.md": "abdffc483c01e7a62e00b4d2b72442ca5a229c4aa7af8b8dd7f6fe28a76988cf",
-    "skills/ssi/references/workflow.md": "82f9cd0039c6a02fa861ef67974ea37d793def761439c3418b1fb2bf02751ae6",
-    "skills/ssi/references/confirm.md": "d3d1a83199620595894be113e65acd35bbe477c6e8245cbdbfd0ff9fc3254bfb",
+    "skills/tracer/SKILL.md": "abdffc483c01e7a62e00b4d2b72442ca5a229c4aa7af8b8dd7f6fe28a76988cf",
+    "skills/tracer/references/workflow.md": "82f9cd0039c6a02fa861ef67974ea37d793def761439c3418b1fb2bf02751ae6",
+    "skills/tracer/references/confirm.md": "d3d1a83199620595894be113e65acd35bbe477c6e8245cbdbfd0ff9fc3254bfb",
     "evaluations/run_routing_eval.py": "e1e35cad4a0ceb3a8aad2cf371224d3cb15e13c5c0fcd19f34e16dce9b30dbaa"
   },
   "tools": {

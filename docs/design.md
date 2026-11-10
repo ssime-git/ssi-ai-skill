@@ -1,10 +1,10 @@
-# SSI design reference
+# Tracer design reference
 
 The shared Codex/Claude Code entrypoint first decides whether tracking is useful.
-Clear, confined, low-risk tasks use normal agent tools without SSI state or phase guides.
+Clear, confined, low-risk tasks use normal agent tools without Tracer state or phase guides.
 Missing requirements get a targeted clarification, not automatic escalation.
 Substantial or risky work loads references/workflow.md and chooses a destination.
-An explicit SSI invocation still permits direct work; an active tracked task resumes without bypassing stops.
+An explicit Tracer invocation still permits direct work; an active tracked task resumes without bypassing stops.
 Escalation reuses observations and artifacts, while executed receipts still require actual execution.
 
 The model chooses an appropriate destination and investigates the task. A dependency-free Node engine
@@ -32,24 +32,39 @@ These commands are for work that has already selected tracking, not a prerequisi
 Run from the repository being changed and resolve the script from the installed skill folder:
 
 ```bash
-node /path/to/ssi/scripts/ssi.mjs start "Investigate failing checkout" --target answer
-node /path/to/ssi/scripts/ssi.mjs next --compact
-node /path/to/ssi/scripts/ssi.mjs check --phase 2 --expect-exit 1 -- npm test
+node /path/to/tracer/scripts/tracer.mjs start "Investigate failing checkout" --target answer
+node /path/to/tracer/scripts/tracer.mjs next --compact
+node /path/to/tracer/scripts/tracer.mjs check --phase 2 --expect-exit 1 -- npm test
 # For implementation verification: check --phase 5 -- npm test
 # Only when requested: start "..." --target pr
 ```
 
 The next action names the relevant guide. Read it once, perform the action, save real evidence and continue.
-State and receipts belong in ignored .ssi/. Use the actual user's answer for a stop; never manufacture approval.
-Read effective settings with config; repository settings are in ssi.config.json and personal overrides
-in .ssi/config.local.json. The optional cockpit displays tracked state, not direct tasks.
+State and receipts belong in ignored .tracer/. Use the actual user's answer for a stop; never manufacture approval.
+Read effective settings with config; repository settings are in tracer.config.json and personal overrides
+in .tracer/config.local.json. The optional cockpit displays tracked state, not direct tasks.
+
+## Routing, models and feedback (0.4)
+
+Deterministic routing lives in `scripts/lib/route.mjs`; the agent never picks reviewers or model tiers.
+- Risk is low, medium or high from the plan and the real diff (protected or risky paths, security and data surfaces, public API, diff size, UI).
+- Review roles: `ui` and `ux` for UI surfaces, `security`, `data`. Restrict them with `review.roles`.
+- Model tier per step: `models.steps` (defaults: analyze/confirm/visual/land fast, reproduce/plan/implement balanced, review deep).
+  High risk raises plan, implement and review by one tier; a failed attempt of a step raises that step by one tier.
+  `models.tiers` maps a tier to a concrete model name (for example fast=haiku, balanced=sonnet, deep=opus on Claude Code); it is empty by default.
+- Gate before reviewers: a review is only reachable after an executed phase 5 check on the current code snapshot. Out-of-order `record` calls are refused.
+- Frozen files: `frozenPaths` lists existing files the builder may not modify or delete without a per-file approval (STOP_FROZEN).
+- Triage: accept, clarify (gaps) or refuse (`tracer refuse`).
+- Feedback ledger: findings and decisions are stored in the state, rendered in the PR progress comment and resolved with `tracer feedback resolve`.
+
+Design ideas in this section were inspired by the software factory in zazencodes/zazencodes-season-3 (GPL-3.0). No code was copied.
 
 ## Upgrading from 0.2
 
-Replace the entire installed skills/ssi folder so the new workflow guide and engine remain together.
+Replace the entire installed skills/tracer folder so the new workflow guide and engine remain together.
 New runs default to local work; old states keep their original PR/required-Issue policy.
 Existing permissive free-text evidence is not a replacement for a real receipt: record actual artifacts,
-execute checks and inspect CI as requested by the current next action. Keep existing .ssi state when resuming.
+execute checks and inspect CI as requested by the current next action. Keep existing .tracer state when resuming.
 The new entrypoint does not erase instructions already loaded into an agent conversation.
 
 ## Evidence

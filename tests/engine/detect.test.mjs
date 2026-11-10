@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newState as createState } from '../../skills/ssi/scripts/lib/state.mjs';
-import { DEFAULTS } from '../../skills/ssi/scripts/lib/config.mjs';
-import { detectPhase } from '../../skills/ssi/scripts/lib/detect.mjs';
+import { newState as createState } from '../../skills/tracer/scripts/lib/state.mjs';
+import { DEFAULTS } from '../../skills/tracer/scripts/lib/config.mjs';
+import { detectPhase } from '../../skills/tracer/scripts/lib/detect.mjs';
 
 const newState = (goal) => createState(goal, { target: 'pr', scope: 'standard', issues: 'required' });
 
@@ -49,44 +49,44 @@ test('a queued issue satisfies the reproduce gate while offline', () => {
 const full = { analyze: ev(), confirm: ev(), plan: ev(), implement: ev('H2'), review: ev('H2'), land: ev('H2') };
 
 test('all evidence valid means done (phase 9) with visual skipped when there is no UI', () => {
-  const r = run(st({ evidence: full }), facts({ branch: 'ssi/x', onBase: false, commitsAhead: 1 }));
+  const r = run(st({ evidence: full }), facts({ branch: 'tracer/x', onBase: false, commitsAhead: 1 }));
   assert.deepEqual([r.phase, r.name], [9, 'done']);
 });
 
 test('a UI change makes visual proof required', () => {
-  const r = run(st({ evidence: full }), facts({ branch: 'ssi/x', onBase: false, commitsAhead: 1, uiChanged: true }));
+  const r = run(st({ evidence: full }), facts({ branch: 'tracer/x', onBase: false, commitsAhead: 1, uiChanged: true }));
   assert.deepEqual([r.phase, r.name], [7, 'visual']);
 });
 
 test('visual can be forced off or on by config', () => {
   const off = { ...DEFAULTS, visual: { enabled: 'off', tool: 'playwright' } };
   const on = { ...DEFAULTS, visual: { enabled: 'on', tool: 'playwright' } };
-  const f = facts({ branch: 'ssi/x', onBase: false, commitsAhead: 1, uiChanged: true });
+  const f = facts({ branch: 'tracer/x', onBase: false, commitsAhead: 1, uiChanged: true });
   assert.equal(run(st({ evidence: full }), f, off).phase, 9);
-  assert.equal(run(st({ evidence: full }), facts({ branch: 'ssi/x', onBase: false, commitsAhead: 1 }), on).phase, 7);
+  assert.equal(run(st({ evidence: full }), facts({ branch: 'tracer/x', onBase: false, commitsAhead: 1 }), on).phase, 7);
 });
 
 test('evidence is stale when files in its surface changed since its sha', () => {
   const state = st({ evidence: { ...full, implement: ev('H1', { surface: ['src'] }) } });
-  const f = facts({ branch: 'ssi/x', onBase: false, commitsAhead: 1, changedSince: () => ['src/a.js'] });
+  const f = facts({ branch: 'tracer/x', onBase: false, commitsAhead: 1, changedSince: () => ['src/a.js'] });
   const r = run(state, f);
   assert.deepEqual([r.phase, r.stale], [5, ['implement']]);
 });
 
 test('evidence stays valid when the change is outside its surface', () => {
   const state = st({ evidence: { ...full, implement: ev('H1', { surface: ['src'] }), review: ev('H1', { surface: ['src'] }), land: ev('H1', { surface: ['src'] }) } });
-  const f = facts({ branch: 'ssi/x', onBase: false, commitsAhead: 1, changedSince: () => ['docs/readme.md'] });
+  const f = facts({ branch: 'tracer/x', onBase: false, commitsAhead: 1, changedSince: () => ['docs/readme.md'] });
   assert.equal(run(state, f).phase, 9);
 });
 
 test('an unknown sha makes evidence stale', () => {
   const state = st({ evidence: { ...full, implement: ev('GONE') } });
-  const f = facts({ branch: 'ssi/x', onBase: false, commitsAhead: 1, changedSince: () => null });
+  const f = facts({ branch: 'tracer/x', onBase: false, commitsAhead: 1, changedSince: () => null });
   assert.equal(run(state, f).phase, 5);
 });
 
 test('commits made during the early phases never skip a phase: evidence decides', () => {
-  const f = facts({ branch: 'ssi/x', onBase: false, commitsSinceStart: 2, commitsAhead: 5, pr: { number: 3, state: 'OPEN', isDraft: true } });
+  const f = facts({ branch: 'tracer/x', onBase: false, commitsSinceStart: 2, commitsAhead: 5, pr: { number: 3, state: 'OPEN', isDraft: true } });
   assert.equal(run(st(), f).phase, 1);
   assert.equal(run(st({ evidence: { analyze: ev(), confirm: ev() } }), f).phase, 4);
 });

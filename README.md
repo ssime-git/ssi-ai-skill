@@ -1,7 +1,9 @@
-# SSI
+# Tracer
+
+Formerly SSI. The repository and npm package are still named ssi-ai-skill.
 
 Simple, reviewable code with the least necessary workflow. Works with Codex and Claude Code.
-SSI 0.3.0 handles small tasks directly and tracks substantial or risky work when tracking is useful.
+Tracer 0.4.0 handles small tasks directly and tracks substantial or risky work when tracking is useful.
 
 ## Quick install
 
@@ -12,14 +14,14 @@ git clone https://github.com/ssime-git/ssi-ai-skill
 cd ssi-ai-skill
 # Claude Code
 mkdir -p ~/.claude/skills
-cp -R skills/ssi ~/.claude/skills/
+cp -R skills/tracer ~/.claude/skills/
 # Codex
 mkdir -p ~/.agents/skills
-cp -R skills/ssi ~/.agents/skills/
+cp -R skills/tracer ~/.agents/skills/
 ```
 
-Choose either installation or both. Invoke `/ssi <request>` in Claude Code or `$ssi <request>` in Codex.
-Claude Code also supports `claude --plugin-dir .` from this checkout, using `/ssi:ssi`.
+Choose either installation or both. Invoke `/tracer <request>` in Claude Code or `$tracer <request>` in Codex.
+Claude Code also supports `claude --plugin-dir .` from this checkout, using `/tracer:tracer`.
 Tracked work requires Node 20+ and git. GitHub CLI is needed only for authorized remote work.
 Updating the checkout does not update a copied installation: repeat its copy command after `git pull --ff-only`.
 Project-local Codex installation and an optional routing reminder: [Codex guide](docs/codex/AGENTS.md).
@@ -30,19 +32,19 @@ Project-local Codex installation and an optional routing reminder: [Codex guide]
 flowchart LR
   A[Understand result and verification] --> B{Scope and risk}
   B --> C[Direct agent work]
-  B --> D[Tracked SSI workflow]
+  B --> D[Tracked Tracer workflow]
   C -->|Broader impact or unresolved failures| D
   D --> E[Answer, local change or authorized draft PR]
 ```
 
-- Clear, confined, low-risk work uses normal agent tools and relevant checks, without SSI state or phase guides.
+- Clear, confined, low-risk work uses normal agent tools and relevant checks, without Tracer state or phase guides.
 - Missing requirements get a targeted clarification. Ambiguity alone does not justify tracking.
 - Substantial or risky work loads the tracked guide; even a one-line permission change can be risky.
 - Direct work can escalate while reusing observations. An active tracked task resumes without bypassing stops.
 
-Explicitly invoking SSI still allows direct work. There is no session-start hook or extra routing model.
+Explicitly invoking Tracer still allows direct work. There is no session-start hook or extra routing model.
 The agent makes the routing decision; it is guidance, not a deterministic classifier.
-Previously loaded instructions remain in conversation context: SSI does not promise to unload them.
+Previously loaded instructions remain in conversation context: Tracer does not promise to unload them.
 
 For tracked work only:
 
@@ -63,24 +65,26 @@ sequenceDiagram
 - Reuse existing code; prefer explicit names, direct control flow and small interfaces over speculative abstractions.
 - Local work needs no commit, Issue or PR. Useful follow-ups can stay in a handoff or an authorized Issue.
 - Tracked work records progress and retry budgets. Small safe tracked changes skip a separate plan and review.
+- The engine routes by risk: UI and UX review for UI changes, security and data roles where relevant, a model tier per step (fast, balanced, deep), and a stop before existing tests are edited.
+- Review findings, UI/UX observations and your decisions are traced in a table in the PR progress comment.
 - `check` executes commands and ties receipts to the code snapshot. Manual evidence is labelled reported.
 - `ci` inspects the actual PR commit and check results; absent CI remains unverified. PRs stay draft.
-- The SSI engine never merges, closes Issues or deploys. Starting a run grants no extra authorization.
+- The Tracer engine never merges, closes Issues or deploys. Starting a run grants no extra authorization.
 
 Engine commands, configuration and evidence limits: [design](docs/design.md).
-Optional display: `mods/ssi-cockpit`; direct tasks do not appear as tracked runs.
+Optional display: `mods/tracer-cockpit`; direct tasks do not appear as tracked runs.
 
 ## Reliability and efficiency
 
-Validation passed 158 engine/package tests and 9 evaluation tests. Four direct implementations passed their
+Validation passed 167 engine/package tests and 9 evaluation tests. Four direct implementations passed their
 held-out assertions across Codex and Claude Code; each host passed eight routing decisions and completed
 one tracked answer workflow. These are small smoke tests, not proof of production readiness or perfect answers.
 The entrypoint is 52% shorter in bytes; equivalent token savings have not been established.
-An earlier engine-only comparison reduced tokens versus SSI 0.2 but cost more than plain Codex on short tasks.
+An earlier engine-only comparison reduced tokens versus Tracer 0.2 but cost more than plain Codex on short tasks.
 
 Read the [routing results and limits](docs/routing-evaluation.md), [historical model comparison](docs/model-evaluation.md),
 [workflow text benchmark](docs/efficiency.md) and [run history](docs/runs.md).
-The evidence supports using SSI with normal human review, not trusting every answer or route automatically.
+The evidence supports using Tracer with normal human review, not trusting every answer or route automatically.
 
 ## Contributing
 
@@ -95,4 +99,4 @@ Design principles: [philosophy](docs/philosophy.md). Changes: [changelog](CHANGE
 - [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc): optional read-only review.
 - [obra/superpowers](https://github.com/obra/superpowers): the original design process.
 
-Exact source versions and licences: [NOTICE.md](skills/ssi/NOTICE.md).
+Exact source versions and licences: [NOTICE.md](skills/tracer/NOTICE.md).

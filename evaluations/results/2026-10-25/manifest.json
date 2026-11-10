@@ -70,10 +70,10 @@
   },
   "arms": [
     "codex",
-    "ssi02",
-    "ssi03"
+    "tracer02",
+    "tracer03"
   ],
   "random_seed": 771,
   "timeout_seconds": 240,
-  "note": "Local-task SSI02 may stop at the publication boundary; report workflow_done separately. Reviews are included in usage. Cached input is not added twice. No dollar estimates."
+  "note": "Local-task Tracer02 may stop at the publication boundary; report workflow_done separately. Reviews are included in usage. Cached input is not added twice. No dollar estimates."
 }

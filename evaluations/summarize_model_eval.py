@@ -47,9 +47,9 @@ def summarize(trials):
         }
     pairs = []
     by_key = {(t['case'],t['repeat'],t['arm']):t for t in enriched}
-    for reference in ('codex','ssi02'):
+    for reference in ('codex','tracer02'):
         for case, repeat, arm in sorted(by_key):
-            if arm != 'ssi03':
+            if arm != 'tracer03':
                 continue
             current = by_key[(case,repeat,arm)]
             before = by_key.get((case,repeat,reference))
@@ -67,7 +67,7 @@ def summarize(trials):
             'limitations':['Two repetitions per cell are exploratory, not statistically conclusive.',
                            'Cached input is included in total input; reasoning is included in output.',
                            'The model and tool environment are fixed; cache hits and service latency still vary.',
-                           'Local SSI02 can stop before publication; workflow_done is not the same as task correctness.',
+                           'Local Tracer02 can stop before publication; workflow_done is not the same as task correctness.',
                            'GitHub and CI are simulated; acceptance tests and model reviews run for real.',
                            'No dollar-cost estimate or proof of universal readability improvement.']}
 

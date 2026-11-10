@@ -2,7 +2,7 @@
 
 For actual model token usage, elapsed time and accepted correctness, see [the real model evaluation](model-evaluation.md). The percentages below measure workflow text only.
 
-Recomputed for the final SSI 0.3.0 instructions on 2026-10-25, Node 26.8.1, against baseline commit 4f486cf (SSI 0.2).
+Recomputed for the final Tracer 0.3.0 instructions on 2026-10-25, Node 26.8.1, against baseline commit 4f486cf (Tracer 0.2).
 All rows explicitly start the tracked engine; they do not measure the direct path.
 The replay implements the same tiny discount helper and executes an assertion that total(100, 20) equals 80.
 It supplies a deterministic fixture review, not an LLM review, and stubs GitHub. No remote objects are created.
@@ -25,19 +25,19 @@ includes every command's returned JSON. Repeated identical replays may differ sl
 The tested routes produce less workflow text and local routes use fewer engine calls and no GitHub queries.
 This is a reproducible engineering measurement of coordination overhead. It is not an estimate of total
 model-token savings: tokenization, caching, source-code reads, generated patches, reasoning and model mistakes
-are excluded. It does not establish that the generated code is better, nor compare SSI with Codex alone.
+are excluded. It does not establish that the generated code is better, nor compare Tracer with Codex alone.
 
 The [historical model comparison](model-evaluation.md) measured a pre-router development snapshot.
 For a new paired comparison of the final router, pin the model, repository commit and acceptance tests; run paired sessions
-with no skill, a concise AGENTS.md, and SSI on small edits, bugs, multi-file features and investigations.
+with no skill, a concise AGENTS.md, and Tracer on small edits, bugs, multi-file features and investigations.
 Measure accepted correctness, human interventions, total tokens/cost and elapsed time; retain failed runs.
 Prefer a narrower routing correction over adding another universal rule when a case regresses.
 
 ## Reproduce
 
 ```bash
-git worktree add --detach /tmp/ssi-v02 4f486cf
-node scripts/benchmark.mjs /tmp/ssi-v02
+git worktree add --detach /tmp/tracer-v02 4f486cf
+node scripts/benchmark.mjs /tmp/tracer-v02
 ```
 
 Tests verify execution records, stale snapshots, pre-fix reproduction, CI states, optional follow-up tracking,

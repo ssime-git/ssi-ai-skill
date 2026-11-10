@@ -56,21 +56,21 @@ class SummaryTests(unittest.TestCase):
                 'usage_complete':metered,'usage':usage if metered else None,'elapsed_seconds':2}
 
     def test_missing_usage_cannot_be_a_zero_token_saving(self):
-        result=summary_module.summarize([self.row('codex'),self.row('ssi03',metered=False)])
+        result=summary_module.summarize([self.row('codex'),self.row('tracer03',metered=False)])
         self.assertFalse(result['pairs'][0]['valid_success_pair'])
-        self.assertEqual(result['arms']['ssi03']['unmetered_attempts'],1)
+        self.assertEqual(result['arms']['tracer03']['unmetered_attempts'],1)
 
     def test_reviewed_pr_needs_a_real_approving_review(self):
-        trial=self.row('ssi03',case='quote_pr')
+        trial=self.row('tracer03',case='quote_pr')
         self.assertFalse(summary_module.summarize([trial])['trials'][0]['task_success'])
         trial['reviews']=[{'report':json.dumps({'verdict':'approve','findings':[]})}]
         self.assertTrue(summary_module.summarize([trial])['trials'][0]['task_success'])
 
     def test_failure_is_reported_and_not_a_successful_pair(self):
-        result=summary_module.summarize([self.row('codex'),self.row('ssi03',accepted=False)])
+        result=summary_module.summarize([self.row('codex'),self.row('tracer03',accepted=False)])
         self.assertFalse(result['pairs'][0]['valid_success_pair'])
-        self.assertEqual(result['arms']['ssi03']['successful_tasks'],0)
-        self.assertEqual(result['arms']['ssi03']['total_tokens'],100)
+        self.assertEqual(result['arms']['tracer03']['successful_tasks'],0)
+        self.assertEqual(result['arms']['tracer03']['total_tokens'],100)
 
 
 if __name__ == '__main__':

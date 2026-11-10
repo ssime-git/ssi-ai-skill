@@ -4,13 +4,13 @@ import { mkdirSync, mkdtempSync, writeFileSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { makeRepo, commit, git } from '../helpers/repo.mjs';
-import { makeRunner, gitFacts, resolveBase } from '../../skills/ssi/scripts/lib/git.mjs';
+import { makeRunner, gitFacts, resolveBase } from '../../skills/tracer/scripts/lib/git.mjs';
 
 const facts = (dir) => gitFacts(makeRunner(dir));
 
 test('base resolves to main and a fresh branch has nothing ahead', () => {
   const dir = makeRepo();
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   const f = facts(dir);
   assert.equal(f.base, 'main');
   assert.equal(f.onBase, false);
@@ -25,7 +25,7 @@ test('on the base branch nothing counts as ahead', () => {
 
 test('counts commits, changed lines, files and UI surface', () => {
   const dir = makeRepo();
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   commit(dir, 'src/a.js', '1\n2\n3\n', 'a');
   commit(dir, 'src/components/B.tsx', 'x\n', 'b');
   const f = facts(dir);
@@ -39,7 +39,7 @@ test('counts commits, changed lines, files and UI surface', () => {
 test('a file renamed into a protected folder is reported by its real paths', () => {
   const dir = makeRepo();
   commit(dir, 'src/ordinary/login.js', 'line one\nline two\nline three\nline four\n', 'seed');
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   mkdirSync(join(dir, 'src/auth'), { recursive: true });
   git(dir, 'mv', 'src/ordinary/login.js', 'src/auth/login.js');
   git(dir, 'commit', '-q', '-am', 'move');
@@ -51,7 +51,7 @@ test('a file renamed into a protected folder is reported by its real paths', () 
 
 test('a non-UI change does not flag the UI', () => {
   const dir = makeRepo();
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   commit(dir, 'src/a.js', '1\n', 'a');
   assert.equal(facts(dir).uiChanged, false);
 });
@@ -65,7 +65,7 @@ test('base comes from origin/HEAD when it is set, never assumed', () => {
 
 test('isAncestor detects a rewritten history', () => {
   const dir = makeRepo();
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   const old = commit(dir, 'src/a.js', '1\n', 'a');
   git(dir, 'reset', '-q', '--hard', 'HEAD~1');
   commit(dir, 'src/c.js', 'z\n', 'c');
@@ -74,13 +74,13 @@ test('isAncestor detects a rewritten history', () => {
 
 test('changedSince lists files and gives null for an unknown sha', () => {
   const dir = makeRepo();
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   const first = commit(dir, 'src/a.js', '1\n', 'a');
   commit(dir, 'src/b.js', '2\n', 'b');
   const f = facts(dir);
   assert.deepEqual(f.changedSince(first), ['src/b.js']);
   assert.equal(f.changedSince('deadbeef'), null);
-  assert.equal(f.branchExists('ssi/x'), true);
+  assert.equal(f.branchExists('tracer/x'), true);
   assert.equal(f.branchExists('nope'), false);
 });
 
@@ -98,15 +98,15 @@ test('commitsSince counts from the start sha; an unknown start counts nothing', 
 
 test('remoteSha follows the remote-tracking ref of the current branch', () => {
   const dir = makeRepo();
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   assert.equal(facts(dir).remoteSha, null);
-  git(dir, 'update-ref', 'refs/remotes/origin/ssi/x', 'HEAD');
+  git(dir, 'update-ref', 'refs/remotes/origin/tracer/x', 'HEAD');
   assert.equal(facts(dir).remoteSha, git(dir, 'rev-parse', 'HEAD'));
 });
 
 test('non-ASCII file names are reported as they are, not as octal escapes', () => {
   const dir = makeRepo();
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   const first = commit(dir, 'src/a.js', '1\n', 'a');
   commit(dir, 'src/ж.js', '2\n', 'b');
   const f = facts(dir);
@@ -116,7 +116,7 @@ test('non-ASCII file names are reported as they are, not as octal escapes', () =
 
 test('a sha that is not hex is never passed to git', () => {
   const f = facts(makeRepo());
-  assert.equal(f.changedSince('--output=/tmp/ssi-pwn'), null);
+  assert.equal(f.changedSince('--output=/tmp/tracer-pwn'), null);
   assert.equal(f.isAncestor('--all'), false);
   assert.equal(f.commitsSince('--all'), 0);
 });
@@ -130,7 +130,7 @@ test('a detached HEAD does not throw', () => {
 });
 
 test('local snapshots support unborn repositories and include staged files', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'ssi-unborn-'));
+  const dir = mkdtempSync(join(tmpdir(), 'tracer-unborn-'));
   git(dir, 'init', '-q', '-b', 'main');
   writeFileSync(join(dir, 'a.js'), 'one\n');
   git(dir, 'add', 'a.js');
@@ -142,7 +142,7 @@ test('local snapshots support unborn repositories and include staged files', () 
 
 test('untracked symlinks are hashed as links without reading their target', () => {
   const dir = makeRepo();
-  symlinkSync('/ssi-does-not-exist', join(dir, 'external-link'));
+  symlinkSync('/tracer-does-not-exist', join(dir, 'external-link'));
   const f = gitFacts(makeRunner(dir), { local: true });
   assert.ok(f.changedFiles.includes('external-link'));
   assert.match(f.tree, /^[a-f0-9]{64}$/);

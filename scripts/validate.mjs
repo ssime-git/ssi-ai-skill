@@ -9,29 +9,29 @@ const failures = [];
 const check = (name, ok) => { if (!ok) failures.push(name); };
 const read = (p) => readFileSync(join(root, p), 'utf8');
 
-const skill = read('skills/ssi/SKILL.md');
-const front = /^---\nname: "?ssi"?\ndescription: .+\n---\n/.test(skill);
+const skill = read('skills/tracer/SKILL.md');
+const front = /^---\nname: "?tracer"?\ndescription: .+\n---\n/.test(skill);
 check('SKILL.md frontmatter is name + description', front);
 check('SKILL.md stays under 90 lines', skill.split('\n').length < 90);
 
-const refs = readdirSync(join(root, 'skills/ssi/references')).filter((f) => f.endsWith('.md'));
-const workflow = read('skills/ssi/references/workflow.md');
+const refs = readdirSync(join(root, 'skills/tracer/references')).filter((f) => f.endsWith('.md'));
+const workflow = read('skills/tracer/references/workflow.md');
 for (const f of refs) {
   check(`reference is discoverable: ${f}`, skill.includes(`references/${f}`) || workflow.includes(`](${f})`));
 }
-for (const [document, base] of [[skill, 'skills/ssi'], [workflow, 'skills/ssi/references']]) {
+for (const [document, base] of [[skill, 'skills/tracer'], [workflow, 'skills/tracer/references']]) {
   for (const m of document.matchAll(/\]\(([^)#]+)\)/g)) {
     if (/^https?:/.test(m[1])) continue;
     check(`link exists: ${m[1]}`, existsSync(join(root, base, m[1])));
   }
 }
-const notice = read('skills/ssi/NOTICE.md');
+const notice = read('skills/tracer/NOTICE.md');
 check('SKILL.md does not reach outside its folder', !/\.\.\/\.\.\//.test(skill));
 check('NOTICE has at least four MIT licences', (notice.match(/^MIT License$/gm) ?? []).length >= 4);
-for (const f of ['skills/ssi/scripts/ssi.mjs', 'skills/ssi/scripts/lib/next.mjs', 'mods/ssi-cockpit/hooks/register.tsx']) check(`${f} exists`, existsSync(join(root, f)));
+for (const f of ['skills/tracer/scripts/tracer.mjs', 'skills/tracer/scripts/lib/next.mjs', 'mods/tracer-cockpit/hooks/register.tsx']) check(`${f} exists`, existsSync(join(root, f)));
 
 if (failures.length) {
   console.error(failures.map((f) => `FAIL ${f}`).join('\n'));
   process.exit(1);
 }
-console.log('ssi package: structure ok');
+console.log('tracer package: structure ok');

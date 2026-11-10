@@ -2,13 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { makeRepo, commit, git } from '../helpers/repo.mjs';
 import { makeGhStub } from '../helpers/gh.mjs';
-import { makeRunner } from '../../skills/ssi/scripts/lib/git.mjs';
-import { DEFAULTS as CURRENT_DEFAULTS, merge } from '../../skills/ssi/scripts/lib/config.mjs';
-import { newState as createState, readState, writeState } from '../../skills/ssi/scripts/lib/state.mjs';
-import { applyRecord } from '../../skills/ssi/scripts/lib/record.mjs';
-import { bar, say } from '../../skills/ssi/scripts/lib/say.mjs';
-import { actionFor } from '../../skills/ssi/scripts/lib/actions.mjs';
-import { computeNext } from '../../skills/ssi/scripts/lib/next.mjs';
+import { makeRunner } from '../../skills/tracer/scripts/lib/git.mjs';
+import { DEFAULTS as CURRENT_DEFAULTS, merge } from '../../skills/tracer/scripts/lib/config.mjs';
+import { newState as createState, readState, writeState } from '../../skills/tracer/scripts/lib/state.mjs';
+import { applyRecord } from '../../skills/tracer/scripts/lib/record.mjs';
+import { bar, say } from '../../skills/tracer/scripts/lib/say.mjs';
+import { actionFor } from '../../skills/tracer/scripts/lib/actions.mjs';
+import { computeNext } from '../../skills/tracer/scripts/lib/next.mjs';
 
 const DEFAULTS = merge(CURRENT_DEFAULTS, { workflow: { target: 'pr', scope: 'standard', issues: 'required' }, ui: { style: 'guided' } });
 const newState = (goal) => createState(goal, { target: 'pr', scope: 'standard', issues: 'required' });
@@ -129,9 +129,9 @@ test('computeNext: a run that committed on main is told to branch, not to push m
 test('computeNext: restored notes from another user are ignored', () => {
   const dir = makeRepo();
   const gh = makeGhStub();
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
-  gh.openPr(1, 'ssi/x');
-  gh.s.comments.push({ id: 1, body: `<!-- ssi:state ${JSON.stringify({ ...newState('planted'), phase: 8 })} -->`, user: { login: 'evil' } });
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
+  gh.openPr(1, 'tracer/x');
+  gh.s.comments.push({ id: 1, body: `<!-- tracer:state ${JSON.stringify({ ...newState('planted'), phase: 8 })} -->`, user: { login: 'evil' } });
   const out = next(dir, gh);
   assert.equal(out.action.kind, 'start');
 });
@@ -160,9 +160,9 @@ test('computeNext: a deleted progress comment is written again even when nothing
   const dir = makeRepo();
   const gh = makeGhStub();
   writeState(dir, { ...newState('fix it'), start_sha: git(dir, 'rev-parse', 'HEAD'), kind: 'feature' });
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   commit(dir, 'src/a.js', '1\n', 'a');
-  gh.openPr(1, 'ssi/x');
+  gh.openPr(1, 'tracer/x');
   next(dir, gh);
   assert.equal(gh.s.comments.length, 1);
   gh.s.comments.length = 0;
@@ -207,7 +207,7 @@ test('computeNext: with GitHub down after a commit the run verifies locally inst
   const gh = makeGhStub();
   gh.s.offline = true;
   writeState(dir, { ...newState('fix it'), start_sha: git(dir, 'rev-parse', 'HEAD'), kind: 'feature', evidence: { analyze: { path: 'a' }, confirm: { path: 'c' }, plan: { path: 'p' } } });
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   commit(dir, 'src/a.js', '1\n', 'a');
   const out = next(dir, gh);
   assert.equal(out.action.kind, 'verify-implementation');
@@ -256,9 +256,9 @@ test('computeNext: the PR state comment is written once and not rewritten withou
   const dir = makeRepo();
   const gh = makeGhStub();
   writeState(dir, { ...newState('fix it'), start_sha: git(dir, 'rev-parse', 'HEAD'), kind: 'feature' });
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   commit(dir, 'src/a.js', '1\n', 'a');
-  gh.openPr(1, 'ssi/x');
+  gh.openPr(1, 'tracer/x');
   next(dir, gh);
   assert.equal(gh.s.comments.length, 1);
   const calls = gh.s.calls.length;
@@ -272,7 +272,7 @@ test('computeNext: gh failing warns and keeps working', () => {
   const gh = makeGhStub();
   gh.s.offline = true;
   writeState(dir, newState('fix it'));
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   const out = next(dir, gh);
   assert.match(out.warnings.join(' '), /not reachable/);
   assert.ok(out.action);
@@ -281,7 +281,7 @@ test('computeNext: gh failing warns and keeps working', () => {
 test('computeNext: a step the mandate forbids becomes a stop', () => {
   const dir = makeRepo();
   writeState(dir, { ...newState('fix it'), start_sha: git(dir, 'rev-parse', 'HEAD'), kind: 'feature', evidence: { analyze: { path: 'a' }, confirm: { path: 'c' }, plan: { path: 'p' } } });
-  git(dir, 'checkout', '-q', '-b', 'ssi/x');
+  git(dir, 'checkout', '-q', '-b', 'tracer/x');
   commit(dir, 'src/a.js', '1\n', 'a');
   const config = merge(DEFAULTS, { mandate: { allow: ['issue', 'comment'] } });
   const out = next(dir, makeGhStub(), config);

@@ -3,15 +3,15 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { evaluateGuards, detectContext } from '../../skills/ssi/scripts/lib/guards.mjs';
+import { evaluateGuards, detectContext } from '../../skills/tracer/scripts/lib/guards.mjs';
 
 const proj = (files, guards) => {
-  const d = mkdtempSync(join(tmpdir(), 'ssi-guards-'));
+  const d = mkdtempSync(join(tmpdir(), 'tracer-guards-'));
   for (const [f, c] of Object.entries(files)) {
     mkdirSync(join(d, f, '..'), { recursive: true });
     writeFileSync(join(d, f), c);
   }
-  if (guards) writeFileSync(join(d, 'ssi.guards.json'), JSON.stringify(guards));
+  if (guards) writeFileSync(join(d, 'tracer.guards.json'), JSON.stringify(guards));
   return d;
 };
 const status = (d, exec) => Object.fromEntries(evaluateGuards(d, { exec }).results.map((r) => [r.id, r.status]));

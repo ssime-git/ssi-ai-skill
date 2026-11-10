@@ -17,7 +17,7 @@ import sys
 import time
 
 REPO = Path(__file__).resolve().parents[1]
-ARMS = ['codex', 'ssi02', 'ssi03']
+ARMS = ['codex', 'tracer02', 'tracer03']
 CASES = {
     'mean_local': {
         'target': 'local', 'scope': 'small',
@@ -177,8 +177,8 @@ def prepare(options, case_name, arm, repeat):
         path = directory / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
-    (directory / 'package.json').write_text(json.dumps({'name': 'ssi-eval-fixture', 'private': True, 'scripts': {'test': 'node --test test/*.test.cjs'}}))
-    (directory / '.gitignore').write_text('.bench/\n.ssi/\nWORKFLOW.md\n')
+    (directory / 'package.json').write_text(json.dumps({'name': 'tracer-eval-fixture', 'private': True, 'scripts': {'test': 'node --test test/*.test.cjs'}}))
+    (directory / '.gitignore').write_text('.bench/\n.tracer/\nWORKFLOW.md\n')
     tools = directory / '.bench/bin'
     tools.mkdir(parents=True)
     for name, text in [('gh', GH_SIMULATOR), ('review', REVIEW_RENDEZVOUS)]:
@@ -186,28 +186,28 @@ def prepare(options, case_name, arm, repeat):
         path.write_text(text)
         path.chmod(0o755)
     (directory / 'AGENTS.md').write_text(f'''This is an isolated, fully specified benchmark task. Work only in this repository. Do not install packages, access secrets, change tests to weaken requirements, or contact external services.
-Read TASK.md. If WORKFLOW.md exists, apply it; its skill directory is {directory}/.bench/ssi. Use Node directly or npm test. Store workflow artifacts in ignored .ssi/.
+Read TASK.md. If WORKFLOW.md exists, apply it; its skill directory is {directory}/.bench/tracer. Use Node directly or npm test. Store workflow artifacts in ignored .tracer/.
 The user's named changes and local Git operations are authorized. Do not ask for approval again for that scope. Do not merge, deploy or mark ready.
-GitHub is simulated: for ALL gh commands use {tools}/gh, never a real service. The SSI engine is prewired to this same simulator. The local origin is a disposable bare repository.
-For a fresh review use {tools}/review. It runs the same model in a new read-only context, returns a JSON report and its tokens are included in the measurement. Label it independent: no under SSI's same-model convention. Do not launch any other models or agents. Review only when the task or workflow requires it.
+GitHub is simulated: for ALL gh commands use {tools}/gh, never a real service. The Tracer engine is prewired to this same simulator. The local origin is a disposable bare repository.
+For a fresh review use {tools}/review. It runs the same model in a new read-only context, returns a JSON report and its tokens are included in the measurement. Label it independent: no under Tracer's same-model convention. Do not launch any other models or agents. Review only when the task or workflow requires it.
 If the task requests a local result but the old workflow insists on a PR, respect the local destination: complete the code and tests, then stop at the publication boundary and explain it. Never create an unwanted PR or Issue merely to finish a workflow.
 ''')
     (directory / 'TASK.md').write_text(case['request'] + '\n')
     if arm != 'codex':
-        source = options.baseline / 'skills/ssi' if arm == 'ssi02' else REPO / 'skills/ssi'
-        dest = directory / '.bench/ssi'
+        source = options.baseline / 'skills/tracer' if arm == 'tracer02' else REPO / 'skills/tracer'
+        dest = directory / '.bench/tracer'
         shutil.copytree(source, dest)
         # Only the GitHub executable path is substituted; engine decisions are unchanged.
         github_module = dest / 'scripts/lib/github.mjs'
         github_module.write_text(github_module.read_text().replace("execFileSync('gh',", f'execFileSync({json.dumps(str(tools / "gh"))},'))
         (directory / 'WORKFLOW.md').write_text((source / 'SKILL.md').read_text())
         config = {'review': {'reviewers': ['benchmark-review']}}
-        if arm == 'ssi03':
+        if arm == 'tracer03':
             config['workflow'] = {'target': case['target'], 'scope': case['scope'], 'issues': 'optional'}
-        (directory / '.ssi').mkdir()
-        (directory / '.ssi/config.local.json').write_text(json.dumps(config))
-    for args in [['git','init','-q','-b','main'], ['git','config','user.name','SSI experiment'],
-                 ['git','config','user.email','ssi@example.invalid'], ['git','config','commit.gpgsign','false'],
+        (directory / '.tracer').mkdir()
+        (directory / '.tracer/config.local.json').write_text(json.dumps(config))
+    for args in [['git','init','-q','-b','main'], ['git','config','user.name','Tracer experiment'],
+                 ['git','config','user.email','tracer@example.invalid'], ['git','config','commit.gpgsign','false'],
                  ['git','add','.'], ['git','commit','-qm','fixture'],
                  ['git','init','--bare','-q',str(directory/'.bench/origin.git')],
                  ['git','remote','add','origin',str(directory/'.bench/origin.git')], ['git','push','-qu','origin','main'],
@@ -227,7 +227,7 @@ def grade(directory, case, seed):
     untracked = run(['git','ls-files','--others','--exclude-standard'],directory,check=True).stdout.splitlines()
     changed_paths = [line.split('\t')[-1] for line in changes.splitlines()] + untracked
     forbidden = [p for p in changed_paths if p in ('AGENTS.md','TASK.md','.gitignore','package.json')]
-    state_path = directory / '.ssi/state.json'
+    state_path = directory / '.tracer/state.json'
     state = json.loads(state_path.read_text()) if state_path.exists() else None
     gh_path = directory / '.bench/github.json'
     github = json.loads(gh_path.read_text()) if gh_path.exists() else {'pr':None,'issues':[],'calls':[]}
@@ -261,7 +261,7 @@ def execute(options, case_name, arm, repeat):
                 else:
                     child_events = logs / f'{stem}.review-{len(children)}.jsonl'
                     child_final = logs / f'{stem}.review-{len(children)}.final.txt'
-                    review_prompt = 'Review only the code changes from commit '+seed+'. Read the requirements in TASK.md, the changed src files and their tests. Do not run SSI, change files, invoke other agents or request another review. Return only JSON with verdict approve or needs-attention, summary, findings (severity critical/high/medium/low, title, body, file, line_start, line_end, confidence, recommendation), next_steps. Report concrete correctness or readability problems; do not invent findings.'
+                    review_prompt = 'Review only the code changes from commit '+seed+'. Read the requirements in TASK.md, the changed src files and their tests. Do not run Tracer, change files, invoke other agents or request another review. Return only JSON with verdict approve or needs-attention, summary, findings (severity critical/high/medium/low, title, body, file, line_start, line_end, confidence, recommendation), next_steps. Report concrete correctness or readability problems; do not invent findings.'
                     with child_events.open('w') as child_out, (logs/f'{stem}.review-{len(children)}.stderr').open('w') as child_err:
                         try:
                             child = subprocess.run(cli_command(options,directory,child_final,review=True)+[review_prompt],stdin=subprocess.DEVNULL,stdout=child_out,stderr=child_err,timeout=120)
@@ -305,9 +305,9 @@ def main():
     trials=json.loads(summary.read_text()) if summary.exists() else []
     completed={(r['case'],r['arm'],r['repeat']) for r in trials}
     manifest={'model':options.model,'effort':'medium','repeats':options.repeats,'baseline_commit':'4f486cf',
-              'current_skill_sha256':hashlib.sha256((REPO/'skills/ssi/SKILL.md').read_bytes()).hexdigest(),
+              'current_skill_sha256':hashlib.sha256((REPO/'skills/tracer/SKILL.md').read_bytes()).hexdigest(),
               'cases':CASES,'arms':ARMS,'random_seed':771,'timeout_seconds':options.timeout,
-              'note':'Local-task SSI02 may stop at the publication boundary; report workflow_done separately. Reviews are included in usage. Cached input is not added twice. No dollar estimates.'}
+              'note':'Local-task Tracer02 may stop at the publication boundary; report workflow_done separately. Reviews are included in usage. Cached input is not added twice. No dollar estimates.'}
     (options.output/'manifest.json').write_text(json.dumps(manifest,indent=2))
     for repeat in range(1,options.repeats+1):
         cells=[(case,arm,repeat) for case in options.case or CASES for arm in ARMS]

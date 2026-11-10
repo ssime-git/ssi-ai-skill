@@ -1,6 +1,6 @@
 # Philosophy
 
-SSI aims for correct, readable results with the least necessary coordination. A workflow earns its cost
+Tracer aims for correct, readable results with the least necessary coordination. A workflow earns its cost
 only when it prevents a concrete failure or saves later work.
 
 - Use normal agent work for clear, confined, low-risk tasks; tracking must earn its overhead.
@@ -19,6 +19,6 @@ only when it prevents a concrete failure or saves later work.
 The original inspirations remain: mattpocock/skills and jsmastery-pro/skills for engineering practices,
 DietrichGebert/ponytail for the smallest useful change, ayghri/i-have-adhd for clear communication,
 openai/codex-plugin-cc for optional read-only review, and obra/superpowers for early design work.
-Source versions and licences remain in skills/ssi/NOTICE.md.
+Source versions and licences remain in skills/tracer/NOTICE.md.
 
 See design.md for operational details and runs.md for the evidence and its limits.

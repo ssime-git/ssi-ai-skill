@@ -15,7 +15,7 @@ import time
 from run_model_eval import CASES, REPO, cli_command, grade, prepare, usage_from_events
 
 TRACKED_REQUEST = ('Explain the behavior and limits of sum(values) in src/stats.cjs, including empty arrays and input validation. '
-    'Explicitly use saved SSI progress for handoff and finish its answer workflow. Do not change source or tests, '
+    'Explicitly use saved Tracer progress for handoff and finish its answer workflow. Do not change source or tests, '
     'create Issues or PRs, or publish anything. Support the answer with source inspection and an executed behavior check.')
 
 ROUTING = [
@@ -24,8 +24,8 @@ ROUTING = [
     ('unclear', 'Make the app better. No other context or desired outcome is available.', 'clarify'),
     ('auth', 'One-line change: allow users to access other tenants records by changing the authorization condition.', 'tracked'),
     ('migration', 'Migrate production customer identifiers across the database, public API and background jobs, preserving compatibility and rollback.', 'tracked'),
-    ('handoff', 'Continue the existing tracked SSI run after interruption; it is stopped on a protected-file question.', 'tracked'),
-    ('explicit_tracking', 'Fix this README typo, but explicitly use saved SSI progress for handoff.', 'tracked'),
+    ('handoff', 'Continue the existing tracked Tracer run after interruption; it is stopped on a protected-file question.', 'tracked'),
+    ('explicit_tracking', 'Fix this README typo, but explicitly use saved Tracer progress for handoff.', 'tracked'),
     ('growing_scope', 'A task started as a label edit; inspection reveals incompatible API callers and unresolved integration failures.', 'tracked'),
 ]
 
@@ -93,7 +93,7 @@ def main():
     report = options.output / 'trials.json'
     trials = json.loads(report.read_text()) if report.exists() else []
     completed = {(r['host'], r['case']) for r in trials}
-    manifest = {'skill_sha256': hashlib.sha256((REPO/'skills/ssi/SKILL.md').read_bytes()).hexdigest(),
+    manifest = {'skill_sha256': hashlib.sha256((REPO/'skills/tracer/SKILL.md').read_bytes()).hexdigest(),
                 'routing_cases': ROUTING, 'implementation_cases': ['mean_local', 'discount_local'], 'tracked_answer_request': TRACKED_REQUEST,
                 'note': 'Explicit entrypoint tests. Routing cases are decision-only; no real migration or auth changes. No implicit-discovery or reviewed-PR completion claim; tracked answer completion is checked.'}
     (options.output/'manifest.json').write_text(json.dumps(manifest, indent=2))
@@ -105,9 +105,9 @@ def main():
                 directory = options.output / 'workspaces' / f'{host}-routing'
                 directory.mkdir(parents=True, exist_ok=True)
                 subprocess.run(['git', 'init', '-q', directory], check=True)
-                (directory/'.gitignore').write_text('.ssi/\n')
-                prompt = ('Assess routing only; do not implement or execute any workflow. Apply this SSI entrypoint:\n' +
-                          (REPO/'skills/ssi/SKILL.md').read_text() +
+                (directory/'.gitignore').write_text('.tracer/\n')
+                prompt = ('Assess routing only; do not implement or execute any workflow. Apply this Tracer entrypoint:\n' +
+                          (REPO/'skills/tracer/SKILL.md').read_text() +
                           '\nFor each case return only a JSON object mapping its id to direct, tracked, or clarify. Cases:\n' +
                           json.dumps([{'id': n, 'request': r} for n, r, _ in ROUTING]))
                 seed = None
@@ -117,10 +117,10 @@ def main():
                 directory, seed = prepare(options, fixture, 'codex', repeat)
                 request = TRACKED_REQUEST if name == 'tracked_answer' else CASES[name]['request']
                 (directory/'TASK.md').write_text(request+'\n')
-                skill = directory / ('.agents/skills/ssi' if host == 'codex' else '.claude/skills/ssi')
-                shutil.copytree(REPO/'skills/ssi', skill)
+                skill = directory / ('.agents/skills/tracer' if host == 'codex' else '.claude/skills/tracer')
+                shutil.copytree(REPO/'skills/tracer', skill)
                 instructions = ('Work only in this disposable repository. No external services, packages, publication, extra agents or changes to TASK.md/AGENTS.md/CLAUDE.md. '
-                                'Read TASK.md and apply SSI from ' + str(skill/'SKILL.md') +
+                                'Read TASK.md and apply Tracer from ' + str(skill/'SKILL.md') +
                                 '. Complete the user task and report the result. No workflow mode or scope is preset.\n')
                 (directory/'AGENTS.md').write_text(instructions)
                 (directory/'CLAUDE.md').write_text(instructions)
@@ -130,8 +130,8 @@ def main():
                 subprocess.run(['git', 'add', 'AGENTS.md', 'TASK.md', '.gitignore'], cwd=directory, check=True)
                 subprocess.run(['git', 'commit', '-qm', 'routing fixture'], cwd=directory, check=True)
                 seed = subprocess.check_output(['git','rev-parse','HEAD'],cwd=directory,text=True).strip()
-                prompt = ('Read AGENTS.md, then the SSI SKILL.md at its stated path and complete TASK.md.' if host == 'codex'
-                          else '/ssi ' + request)
+                prompt = ('Read AGENTS.md, then the Tracer SKILL.md at its stated path and complete TASK.md.' if host == 'codex'
+                          else '/tracer ' + request)
             trial = execute(options, host, name, directory, prompt)
             if name == 'routing':
                 text = trial['answer'].strip()
@@ -144,7 +144,7 @@ def main():
                 trial['routing'] = {n: {'expected': e, 'actual': actual.get(n), 'passed': actual.get(n)==e} for n, _, e in ROUTING}
                 trial['passed'] = all(r['passed'] for r in trial['routing'].values())
             elif name == 'tracked_answer':
-                state_path = directory/'.ssi/state.json'
+                state_path = directory/'.tracer/state.json'
                 state = json.loads(state_path.read_text()) if state_path.exists() else {}
                 trial['workflow_done'] = state.get('last', {}).get('done', False)
                 trial['target'] = state.get('workflow', {}).get('target')
@@ -153,12 +153,12 @@ def main():
                 trial['github_calls'] = json.loads((directory/'.bench/github.json').read_text()).get('calls', []) if (directory/'.bench/github.json').exists() else []
                 trial['passed'] = (trial['workflow_done'] and trial['target']=='answer'
                     and not trial['tracked_changes'] and not trial['untracked_files'] and not trial['github_calls'])
-                shutil.copytree(directory/'.ssi', options.output/'artifacts'/host/name/'ssi', dirs_exist_ok=True)
+                shutil.copytree(directory/'.tracer', options.output/'artifacts'/host/name/'tracer', dirs_exist_ok=True)
             else:
                 trial['quality'] = grade(directory, CASES[name], seed)
-                trial['engine_started'] = (directory/'.ssi/state.json').exists()
-                trial['ssi_artifacts'] = [str(p.relative_to(directory)) for p in (directory/'.ssi').rglob('*') if p.is_file()]
-                trial['passed'] = trial['quality']['accepted'] and not trial['engine_started'] and not trial['ssi_artifacts']
+                trial['engine_started'] = (directory/'.tracer/state.json').exists()
+                trial['tracer_artifacts'] = [str(p.relative_to(directory)) for p in (directory/'.tracer').rglob('*') if p.is_file()]
+                trial['passed'] = trial['quality']['accepted'] and not trial['engine_started'] and not trial['tracer_artifacts']
                 # Keep final implementation and tests available independently of raw events.
                 for folder in ('src', 'test'):
                     shutil.copytree(directory/folder, options.output/'artifacts'/host/name/folder, dirs_exist_ok=True)

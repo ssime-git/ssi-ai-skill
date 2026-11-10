@@ -36,7 +36,7 @@
     "engine_started": false,
     "passed": true,
     "model": "gpt-6.1-sol",
-    "ssi_artifacts": []
+    "tracer_artifacts": []
   },
   {
     "host": "codex",
@@ -75,7 +75,7 @@
     "engine_started": false,
     "passed": true,
     "model": "gpt-6.1-sol",
-    "ssi_artifacts": []
+    "tracer_artifacts": []
   },
   {
     "host": "codex",
@@ -197,7 +197,7 @@
         "id": "toolu_01Mw7eMSSA6hEEmvNt2eW7xt",
         "name": "Read",
         "input": {
-          "file_path": "/tmp/ssi-routing-eval-retry/workspaces/mean_local-codex-2/test/stats.test.cjs"
+          "file_path": "/tmp/tracer-routing-eval-retry/workspaces/mean_local-codex-2/test/stats.test.cjs"
         },
         "caller": {
           "type": "direct"
@@ -208,7 +208,7 @@
         "id": "toolu_01HiLCsUC66w2LYDaVT7oQFZ",
         "name": "Write",
         "input": {
-          "file_path": "/tmp/ssi-routing-eval-retry/workspaces/mean_local-codex-2/src/stats.cjs",
+          "file_path": "/tmp/tracer-routing-eval-retry/workspaces/mean_local-codex-2/src/stats.cjs",
           "content": "function sum(values) { return values.reduce((a, b) => a + b, 0); }\nfunction mean(values) {\n  if (!Array.isArray(values) || !values.every((v) => typeof v === 'number' && Number.isFinite(v))) {\n    throw new TypeError('mean expects an array of finite numbers');\n  }\n  return values.length === 0 ? null : sum(values) / values.length;\n}\nmodule.exports = { sum, mean };\n"
         },
         "caller": {
@@ -220,7 +220,7 @@
         "id": "toolu_01A9WsTj4zfMBkSC1vgLGTA8",
         "name": "Write",
         "input": {
-          "file_path": "/tmp/ssi-routing-eval-retry/workspaces/mean_local-codex-2/test/stats.test.cjs",
+          "file_path": "/tmp/tracer-routing-eval-retry/workspaces/mean_local-codex-2/test/stats.test.cjs",
           "content": "const test=require('node:test'); const assert=require('node:assert/strict'); const {sum,mean}=require('../src/stats.cjs');\ntest('sum',()=>assert.equal(sum([1,2,3]),6));\ntest('sum of empty array is 0',()=>assert.equal(sum([]),0));\ntest('mean of empty array is null',()=>assert.equal(mean([]),null));\ntest('mean returns arithmetic mean',()=>{\n  assert.equal(mean([1,2,3,4]),2.5);\n  assert.equal(mean([5]),5);\n  assert.equal(mean([-2,2,-4]),-4/3);\n});\ntest('mean does not mutate input',()=>{\n  const values=[3,1,2]; const frozen=Object.freeze([3,1,2]);\n  assert.equal(mean(values),2); assert.deepEqual(values,[3,1,2]);\n  assert.equal(mean(frozen),2);\n});\ntest('mean rejects non-arrays with TypeError',()=>{\n  for (const bad of [undefined,null,1,'123',{length:1,0:1},new Set([1])]) assert.throws(()=>mean(bad),TypeError);\n});\ntest('mean rejects non-finite or non-number elements with TypeError',()=>{\n  for (const bad of [[1,NaN],[Infinity],[-Infinity,1],['1'],[1,null],[undefined],[1n],[new Number(1)],[1,,3]]) assert.throws(()=>mean(bad),TypeError);\n});\n"
         },
         "caller": {
@@ -233,7 +233,7 @@
         "name": "Edit",
         "input": {
           "replace_all": false,
-          "file_path": "/tmp/ssi-routing-eval-retry/workspaces/mean_local-codex-2/src/stats.cjs",
+          "file_path": "/tmp/tracer-routing-eval-retry/workspaces/mean_local-codex-2/src/stats.cjs",
           "old_string": "  if (!Array.isArray(values) || !values.every((v) => typeof v === 'number' && Number.isFinite(v))) {\n    throw new TypeError('mean expects an array of finite numbers');\n  }",
           "new_string": "  if (!Array.isArray(values)) throw new TypeError('mean expects an array of finite numbers');\n  // Index loop (not every()) so sparse-array holes are rejected too.\n  for (let i = 0; i < values.length; i++) {\n    if (!Number.isFinite(values[i])) throw new TypeError('mean expects an array of finite numbers');\n  }"
         },
@@ -254,7 +254,7 @@
         }
       }
     ],
-    "answer": "I added `mean(values)` to `src/stats.cjs`. `npm test` passes all 7 tests. The change is local and uncommitted, with no PR, Issue or publication. I treated this as a small, low-risk task, so I didn't create any SSI tracking state.\n\n**What `mean` does** (`src/stats.cjs:2`):\n- It throws a `TypeError` for anything that isn't an array, and for any array element that isn't a finite number. That covers `NaN`, `\u00b1Infinity`, numeric strings, `null`, `undefined`, BigInt, `new Number(1)` and gaps in an array like `[1,,3]`.\n- It returns `null` for an empty array. Otherwise it returns `sum(values) / values.length`, reusing `sum`.\n- It only reads the input and never changes it.\n- `sum` is unchanged.\n\n**Tests** (`test/stats.test.cjs`):\n- The existing `sum` test, plus a new test that `sum([])` returns 0.\n- `mean([])` returns `null`.\n- Correct averages for several values, a single value, and negative or fractional values.\n- The input array is left unchanged, and a frozen array is accepted.\n- Bad inputs throw a `TypeError`: non-arrays and array-like objects, and arrays containing any of the invalid element types listed above.\n\n**Limitation:** because it uses the plain `sum`, very large finite inputs can overflow during addition. For example, `mean([Number.MAX_VALUE, Number.MAX_VALUE])` returns `Infinity` instead of `MAX_VALUE`. I left it this way because the task asked to reuse `sum`.",
+    "answer": "I added `mean(values)` to `src/stats.cjs`. `npm test` passes all 7 tests. The change is local and uncommitted, with no PR, Issue or publication. I treated this as a small, low-risk task, so I didn't create any Tracer tracking state.\n\n**What `mean` does** (`src/stats.cjs:2`):\n- It throws a `TypeError` for anything that isn't an array, and for any array element that isn't a finite number. That covers `NaN`, `\u00b1Infinity`, numeric strings, `null`, `undefined`, BigInt, `new Number(1)` and gaps in an array like `[1,,3]`.\n- It returns `null` for an empty array. Otherwise it returns `sum(values) / values.length`, reusing `sum`.\n- It only reads the input and never changes it.\n- `sum` is unchanged.\n\n**Tests** (`test/stats.test.cjs`):\n- The existing `sum` test, plus a new test that `sum([])` returns 0.\n- `mean([])` returns `null`.\n- Correct averages for several values, a single value, and negative or fractional values.\n- The input array is left unchanged, and a frozen array is accepted.\n- Bad inputs throw a `TypeError`: non-arrays and array-like objects, and arrays containing any of the invalid element types listed above.\n\n**Limitation:** because it uses the plain `sum`, very large finite inputs can overflow during addition. For example, `mean([Number.MAX_VALUE, Number.MAX_VALUE])` returns `Infinity` instead of `MAX_VALUE`. I left it this way because the task asked to reuse `sum`.",
     "quality": {
       "accepted": true,
       "acceptance": {
@@ -277,7 +277,7 @@
     "passed": true,
     "model": "claude-opus-5-5",
     "native_skill_discovered": true,
-    "ssi_artifacts": []
+    "tracer_artifacts": []
   },
   {
     "host": "claude",
@@ -348,7 +348,7 @@
         "id": "toolu_01GZaXpHpw2e3Tgtoj7AUKLU",
         "name": "Read",
         "input": {
-          "file_path": "/tmp/ssi-routing-eval-retry/workspaces/discount_local-codex-2/test/pricing.test.cjs"
+          "file_path": "/tmp/tracer-routing-eval-retry/workspaces/discount_local-codex-2/test/pricing.test.cjs"
         },
         "caller": {
           "type": "direct"
@@ -359,7 +359,7 @@
         "id": "toolu_011pxqSFQkX8xtjseMdGZWxN",
         "name": "Read",
         "input": {
-          "file_path": "/tmp/ssi-routing-eval-retry/workspaces/discount_local-codex-2/src/pricing.cjs"
+          "file_path": "/tmp/tracer-routing-eval-retry/workspaces/discount_local-codex-2/src/pricing.cjs"
         },
         "caller": {
           "type": "direct"
@@ -371,7 +371,7 @@
         "name": "Edit",
         "input": {
           "replace_all": false,
-          "file_path": "/tmp/ssi-routing-eval-retry/workspaces/discount_local-codex-2/test/pricing.test.cjs",
+          "file_path": "/tmp/tracer-routing-eval-retry/workspaces/discount_local-codex-2/test/pricing.test.cjs",
           "old_string": "200));\n",
           "new_string": "200));\ntest('discount is a percentage of the subtotal',()=>{ const items=[{unitCents:1000,quantity:2},{unitCents:333,quantity:1}]; const copy=structuredClone(items); assert.equal(totalCents(items,10),Math.round(2333*0.9)); assert.equal(totalCents(items,100),0); assert.equal(totalCents(items,0),2333); assert.deepEqual(items,copy); });\ntest('rejects invalid discounts',()=>{ for (const d of [-1,100.01,NaN,Infinity,-Infinity,'10',null]) assert.throws(()=>totalCents([{unitCents:100,quantity:1}],d),RangeError); });\ntest('keeps item validation',()=>{ assert.throws(()=>totalCents('x'),TypeError); assert.throws(()=>totalCents([{unitCents:-1,quantity:1}]),RangeError); });\n"
         },
@@ -429,7 +429,7 @@
         "name": "Edit",
         "input": {
           "replace_all": false,
-          "file_path": "/tmp/ssi-routing-eval-retry/workspaces/discount_local-codex-2/src/pricing.cjs",
+          "file_path": "/tmp/tracer-routing-eval-retry/workspaces/discount_local-codex-2/src/pricing.cjs",
           "old_string": "function totalCents(items, discountPercent=0) { return Math.round(subtotalCents(items) - discountPercent); }",
           "new_string": "function totalCents(items, discountPercent=0) { const subtotal = subtotalCents(items); if (typeof discountPercent !== 'number' || !Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent > 100) throw new RangeError('discountPercent'); return Math.round(subtotal * (1 - discountPercent / 100)); }"
         },
@@ -471,7 +471,7 @@
         }
       }
     ],
-    "answer": "I fixed `totalCents` so the discount is now a percentage of the whole subtotal instead of a flat number of cents. All 4 tests pass with `npm test`, and the new tests failed before the fix.\n\n**Fix** (`src/pricing.cjs:2`): `totalCents` still uses `subtotalCents(items)`, so the item validation is unchanged. It now throws `RangeError('discountPercent')` unless the discount is a number, finite, and between 0 and 100 inclusive. Otherwise it returns `Math.round(subtotal * (1 - discountPercent / 100))`. Exports are unchanged and `items` is never written to.\n\n**Regression tests** (`test/pricing.test.cjs`):\n- **Percentage discount:** subtotal 2333 gives 2100 at 10%, 0 at 100% and 2333 at 0%. The test also checks that `items` is unchanged afterwards.\n- **Invalid discounts:** `-1`, `100.01`, `NaN`, `\u00b1Infinity`, the string `'10'` and `null` all throw `RangeError`.\n- **Item validation still works:** a non-array still throws `TypeError` and a negative item still throws `RangeError`.\n\n**Before / after:** before the fix, the percentage and invalid-discount tests failed (2 pass, 2 fail). After it, all 4 pass.\n\nIf both the items and the discount are invalid, the item error is thrown first, because the subtotal is calculated before the discount is checked.\n\nThe changes are uncommitted in the working tree. I didn't create an Issue or PR, and I used the direct approach rather than SSI's tracked workflow because the change was small and easy to check.",
+    "answer": "I fixed `totalCents` so the discount is now a percentage of the whole subtotal instead of a flat number of cents. All 4 tests pass with `npm test`, and the new tests failed before the fix.\n\n**Fix** (`src/pricing.cjs:2`): `totalCents` still uses `subtotalCents(items)`, so the item validation is unchanged. It now throws `RangeError('discountPercent')` unless the discount is a number, finite, and between 0 and 100 inclusive. Otherwise it returns `Math.round(subtotal * (1 - discountPercent / 100))`. Exports are unchanged and `items` is never written to.\n\n**Regression tests** (`test/pricing.test.cjs`):\n- **Percentage discount:** subtotal 2333 gives 2100 at 10%, 0 at 100% and 2333 at 0%. The test also checks that `items` is unchanged afterwards.\n- **Invalid discounts:** `-1`, `100.01`, `NaN`, `\u00b1Infinity`, the string `'10'` and `null` all throw `RangeError`.\n- **Item validation still works:** a non-array still throws `TypeError` and a negative item still throws `RangeError`.\n\n**Before / after:** before the fix, the percentage and invalid-discount tests failed (2 pass, 2 fail). After it, all 4 pass.\n\nIf both the items and the discount are invalid, the item error is thrown first, because the subtotal is calculated before the discount is checked.\n\nThe changes are uncommitted in the working tree. I didn't create an Issue or PR, and I used the direct approach rather than Tracer's tracked workflow because the change was small and easy to check.",
     "quality": {
       "accepted": true,
       "acceptance": {
@@ -494,7 +494,7 @@
     "passed": true,
     "model": "claude-opus-5-5",
     "native_skill_discovered": true,
-    "ssi_artifacts": []
+    "tracer_artifacts": []
   },
   {
     "host": "claude",

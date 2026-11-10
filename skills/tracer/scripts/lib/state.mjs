@@ -1,0 +1,90 @@
+import { readFileSync, writeFileSync, renameSync, mkdirSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { randomBytes } from 'node:crypto';
+import { progressHash } from './remote.mjs';
+
+export const PHASES = ['analyze', 'confirm', 'reproduce', 'plan', 'implement', 'review', 'visual', 'land'];
+
+export const statePath = (cwd) => join(cwd, '.tracer', 'state.json');
+
+export function newState(goal, workflow = { target: 'local', scope: 'standard', issues: 'optional' }) {
+  return {
+    run_id: `tracer-${randomBytes(3).toString('hex')}`,
+    goal,
+    workflow: { ...workflow },
+    kind: null,
+    branch: null,
+    head_sha: null,
+    start_sha: null,
+    work_sha: null,
+    issue: null,
+    followups: [],
+    issue_skipped: null,
+    last_failure: null,
+    last: null,
+    pr: null,
+    phase: 1,
+    evidence: {},
+    attempts: {},
+    analysis: { blockingGaps: 0 },
+    plan: { touches: [], publicApi: false },
+    approvals: { protectedFiles: [], frozenFiles: [], publicApi: false, bigDiff: null },
+    feedback: [],
+    stop: null,
+    pending: [],
+    synced: null,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+export function normalize(state) {
+  // Runs created by v0.2 still end at a PR; never change their destination on resume.
+  const base = newState(state.goal ?? '', state.workflow ?? { target: 'pr', scope: 'standard', issues: 'required' });
+  const approvals = { ...base.approvals, ...(state.approvals ?? {}) };
+  if (!Array.isArray(approvals.protectedFiles)) approvals.protectedFiles = [];
+  if (!Array.isArray(approvals.frozenFiles)) approvals.frozenFiles = [];
+  if (typeof approvals.bigDiff !== 'object') approvals.bigDiff = null;
+  return {
+    ...base,
+    ...state,
+    evidence: state.evidence ?? {},
+    attempts: state.attempts ?? {},
+    analysis: { ...base.analysis, ...state.analysis },
+    plan: { ...base.plan, ...state.plan },
+    approvals,
+    pending: state.pending ?? [],
+    feedback: Array.isArray(state.feedback) ? state.feedback : [],
+  };
+}
+
+export function readState(cwd) {
+  let text;
+  try {
+    text = readFileSync(statePath(cwd), 'utf8');
+  } catch (e) {
+    if (e.code === 'ENOENT') return { state: null };
+    throw e;
+  }
+  try {
+    return { state: normalize(JSON.parse(text)) };
+  } catch {
+    return { state: null, warning: 'My local notes were unreadable, so I am rebuilding them from git and the PR.' };
+  }
+}
+
+export function writeState(cwd, state) {
+  const dir = join(cwd, '.tracer');
+  mkdirSync(dir, { recursive: true });
+  // The folder must ignore everything in it, including the state file: an existing ignore
+  // file that does not say so is repaired, never trusted.
+  const ignore = join(dir, '.gitignore');
+  const rules = existsSync(ignore) ? readFileSync(ignore, 'utf8') : '';
+  if (!rules.split('\n').some((l) => l.trim() === '*')) writeFileSync(ignore, rules ? `${rules.trimEnd()}\n*\n` : '*\n');
+  // The timestamp orders progress between machines: it moves only when progress changes.
+  const before = readState(cwd).state;
+  if (!before || progressHash(before) !== progressHash(state)) state.updated_at = new Date().toISOString();
+  else state.updated_at = before.updated_at;
+  const tmp = join(dir, `state.json.${process.pid}.tmp`);
+  writeFileSync(tmp, JSON.stringify(state, null, 2) + '\n');
+  renameSync(tmp, statePath(cwd));
+}

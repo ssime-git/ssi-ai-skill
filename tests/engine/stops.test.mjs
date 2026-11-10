@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { newState } from '../../skills/ssi/scripts/lib/state.mjs';
-import { DEFAULTS } from '../../skills/ssi/scripts/lib/config.mjs';
-import { globToRegExp, evaluateStops, mandateStop, applyAnswer } from '../../skills/ssi/scripts/lib/stops.mjs';
+import { newState } from '../../skills/tracer/scripts/lib/state.mjs';
+import { DEFAULTS } from '../../skills/tracer/scripts/lib/config.mjs';
+import { globToRegExp, evaluateStops, mandateStop, applyAnswer } from '../../skills/tracer/scripts/lib/stops.mjs';
 
-const facts = (o = {}) => ({ branch: 'ssi/x', headSha: 'H', changedFiles: [], diff: { lines: 10, files: 1 }, pr: null, branchExists: () => true, isAncestor: () => true, ...o });
-const base = (o = {}) => ({ ...newState('g'), kind: 'bug', branch: 'ssi/x', head_sha: 'H', ...o });
+const facts = (o = {}) => ({ branch: 'tracer/x', headSha: 'H', changedFiles: [], diff: { lines: 10, files: 1 }, pr: null, branchExists: () => true, isAncestor: () => true, ...o });
+const base = (o = {}) => ({ ...newState('g'), kind: 'bug', branch: 'tracer/x', head_sha: 'H', ...o });
 const stops = (state, f = facts(), phase = 5) => evaluateStops({ state, facts: f, config: DEFAULTS, phase });
 
 test('globs match the protected defaults', () => {
@@ -117,9 +117,9 @@ test('answers reset budgets and re-anchor reality', () => {
   applyAnswer(u, facts(), 'A. Use Postgres');
   assert.equal(u.analysis.blockingGaps, 0);
   assert.ok(u.evidence.analyze);
-  const y = base({ branch: 'ssi/old', pr: 5, evidence: { land: { path: 'l' }, visual: { path: 'v' }, review: { path: 'r' } }, stop: { code: 'STOP_REALITY' } });
-  applyAnswer(y, facts({ branch: 'ssi/new', headSha: 'N', pr: { state: 'CLOSED' } }), 'A');
-  assert.deepEqual([y.branch, y.head_sha, y.pr], ['ssi/new', 'N', null]);
+  const y = base({ branch: 'tracer/old', pr: 5, evidence: { land: { path: 'l' }, visual: { path: 'v' }, review: { path: 'r' } }, stop: { code: 'STOP_REALITY' } });
+  applyAnswer(y, facts({ branch: 'tracer/new', headSha: 'N', pr: { state: 'CLOSED' } }), 'A');
+  assert.deepEqual([y.branch, y.head_sha, y.pr], ['tracer/new', 'N', null]);
   assert.deepEqual(Object.keys(y.evidence), ['review']);
 });
 

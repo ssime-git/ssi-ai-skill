@@ -4,4 +4,4 @@ node_modules/
 *.pem
 *.key
 *.tgz
-.ssi/
+.tracer/

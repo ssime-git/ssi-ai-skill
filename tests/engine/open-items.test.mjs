@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseOpenItems } from '../../skills/ssi/scripts/lib/open-items.mjs';
-import { actionFor } from '../../skills/ssi/scripts/lib/actions.mjs';
+import { parseOpenItems } from '../../skills/tracer/scripts/lib/open-items.mjs';
+import { actionFor } from '../../skills/tracer/scripts/lib/actions.mjs';
 
 test('parseOpenItems: reads only unchecked lines under the Open items heading', () => {
   const b = [

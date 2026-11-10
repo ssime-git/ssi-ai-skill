@@ -1,6 +1,6 @@
 # Direct and tracked routing: Codex and Claude Code
 
-SSI now has a shared 1,692-byte entrypoint, down from 3,528 bytes (52.0% less UTF-8 text).
+Tracer now has a shared 1,692-byte entrypoint, down from 3,528 bytes (52.0% less UTF-8 text).
 This is an instruction-size reduction, not a measured task-token saving.
 The tracked instructions live in references/workflow.md and load only when useful.
 A tracked task loads both files, so this change is intended to avoid unnecessary workflow overhead
@@ -10,7 +10,7 @@ on simple tasks; it does not establish a saving on substantial tasks.
 
 Real authenticated CLI runs on 2026-10-25, one repetition per cell:
 
-| Host | Task | Held-out assertions | SSI artifacts | Seconds | Reported total tokens |
+| Host | Task | Held-out assertions | Tracer artifacts | Seconds | Reported total tokens |
 | --- | --- | --- | --- | --- | --- |
 | Codex 0.163.0 | Add mean using sum | 7/7 | None | 29.520 | 102,259 |
 | Codex 0.163.0 | Fix percentage discount | 8/8 | None | 35.731 | 141,252 |
@@ -24,10 +24,10 @@ These models and provider usage conventions differ; do not treat this as a compa
 Codex total is input plus output, with cache reads already included in input.
 Claude total adds input, output, cache reads and cache creation because those fields are disjoint.
 
-Claude loaded the project-local skill through native `/ssi` invocation; its initialization event
-listed `ssi` among available skills and commands. Codex explicitly read the installed skill from its
+Claude loaded the project-local skill through native `/tracer` invocation; its initialization event
+listed `tracer` among available skills and commands. Codex explicitly read the installed skill from its
 fixture instructions, with unrelated host skill discovery disabled for isolation.
-Neither host had a preset SSI scope or destination. The agents selected direct execution themselves.
+Neither host had a preset Tracer scope or destination. The agents selected direct execution themselves.
 
 A separate decision-only batch passed 8/8 cases on each host: typo, confined bug, unclear goal,
 one-line authorization change, coupled migration, interrupted tracked work, explicit tracking request,
@@ -37,7 +37,7 @@ work selected tracking. These are routing decisions, not executed migrations or 
 ## Final tracked-work checks
 
 The remaining compatibility check was completed on both hosts: explain the existing sum implementation
-with saved SSI progress, source inspection and an executed behavior probe. No target or scope was preset.
+with saved Tracer progress, source inspection and an executed behavior probe. No target or scope was preset.
 
 | Host | Engine target | Engine completion | Source/test changes | GitHub calls | Seconds | Reported total tokens |
 | --- | --- | --- | --- | --- | --- | --- |
