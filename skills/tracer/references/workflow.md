@@ -45,6 +45,7 @@ Each action from `tracer next` may carry a `model` (tier fast, balanced or deep,
 Load only the current guide: [analyze](analyze.md), [confirm](confirm.md),
 [reproduce](reproduce.md), [plan](plan.md), [implement](implement.md),
 [review](review.md), [visual](visual.md), [land](land.md), [guards](guards.md).
+Keep plans, review reports and notes in the ignored .tracer/ folder (e.g. .tracer/notes/): untracked files elsewhere change the tree and make earlier check receipts stale. When the proof is a command expected to fail, use: tracer check --phase 2 --expect-exit 1 -- <cmd>.
 Manual artifacts are reported; check receipts are executed. Neither guarantees semantic correctness.
 Review files must exist and have no blocking findings. `tracer ci` reads actual PR checks; a note cannot replace it.
 Follow [communication](communication.md). Keep useful deferred work in the handoff or an optional,
